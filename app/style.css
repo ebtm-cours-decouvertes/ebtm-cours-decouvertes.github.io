@@ -225,8 +225,10 @@ button {
   color: var(--violet);
 }
 
-.bouton-retour:hover {
-  background: var(--teinte);
+@media (hover: hover) {
+  .bouton-retour:hover {
+    background: var(--teinte);
+  }
 }
 
 .marque__lien {
@@ -249,10 +251,18 @@ button {
   margin: 0;
   color: var(--violet);
   font-weight: 700;
+  font-size: 1.2rem;
   letter-spacing: 0.01em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* Sous 360 pixels, « Cours découvertes » déborderait : mesuré, 176 px pour 158 disponibles. */
+@media (max-width: 359px) {
+  .marque__titre {
+    font-size: 1.05rem;
+  }
 }
 
 .bouton-reglages {
@@ -271,9 +281,11 @@ button {
   display: block;
 }
 
-.bouton-reglages:hover {
-  background: var(--teinte);
-  color: var(--violet);
+@media (hover: hover) {
+  .bouton-reglages:hover {
+    background: var(--teinte);
+    color: var(--violet);
+  }
 }
 
 /* ---------- Structure des pages ---------- */
@@ -385,8 +397,10 @@ main {
   box-shadow: var(--ombre);
 }
 
-.carte-lecon:hover {
-  border-color: var(--violet);
+@media (hover: hover) {
+  .carte-lecon:hover {
+    border-color: var(--violet);
+  }
 }
 
 /* Le numéro porte le mot « Leçon » : le titre à côté n'a plus à le répéter. */
@@ -781,8 +795,10 @@ main {
   box-sizing: content-box;
 }
 
-.figure__bouton:hover .figure__loupe {
-  color: var(--violet);
+@media (hover: hover) {
+  .figure__bouton:hover .figure__loupe {
+    color: var(--violet);
+  }
 }
 
 .loupe[hidden],
@@ -1007,8 +1023,10 @@ main {
   margin-top: 0.5rem;
 }
 
-.bouton-principal:hover {
-  background: var(--violet-fonce);
+@media (hover: hover) {
+  .bouton-principal:hover {
+    background: var(--violet-fonce);
+  }
 }
 
 .bouton-principal--secondaire {
@@ -1017,8 +1035,10 @@ main {
   border: 1px solid var(--violet);
 }
 
-.bouton-principal--secondaire:hover {
-  background: var(--teinte);
+@media (hover: hover) {
+  .bouton-principal--secondaire:hover {
+    background: var(--teinte);
+  }
 }
 
 .bouton-danger {
@@ -1042,8 +1062,10 @@ main {
   text-underline-offset: 3px;
 }
 
-.bouton-danger:hover {
-  background: var(--danger-doux);
+@media (hover: hover) {
+  .bouton-danger:hover {
+    background: var(--danger-doux);
+  }
 }
 
 .fin-lecon {
@@ -1087,8 +1109,10 @@ main {
   text-underline-offset: 2px;
 }
 
-.ref:hover {
-  background: var(--teinte);
+@media (hover: hover) {
+  .ref:hover {
+    background: var(--teinte);
+  }
 }
 
 .lecture a[target="_blank"] {
@@ -1149,9 +1173,11 @@ main {
      le minimum tactile ; seul le dessin s'efface. */
 }
 
-.feuille__fermer:hover {
-  background: var(--teinte);
-  color: var(--violet);
+@media (hover: hover) {
+  .feuille__fermer:hover {
+    background: var(--teinte);
+    color: var(--violet);
+  }
 }
 
 .feuille__corps {
@@ -1237,8 +1263,10 @@ main {
   color: var(--violet);
 }
 
-.bouton-taille:hover:not(:disabled) {
-  background: var(--teinte);
+@media (hover: hover) {
+  .bouton-taille:hover:not(:disabled) {
+    background: var(--teinte);
+  }
 }
 
 .bouton-taille:disabled {

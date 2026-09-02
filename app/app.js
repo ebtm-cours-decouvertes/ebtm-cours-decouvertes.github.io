@@ -475,8 +475,14 @@
       stroke-width="2" stroke-linecap="round" /></svg>`;
 
   // La barre est fixée en haut : le contenu doit commencer juste en dessous.
+  // Mesurer un élément force le navigateur à recalculer la mise en page. Fait à chaque pixel
+  // de défilement, cela suffit à hacher le mouvement : la hauteur est donc retenue ici, et
+  // recalculée seulement quand la barre change vraiment.
+  let hauteurBarre = 0;
+
   function ajusterHauteurBarre() {
-    document.body.style.paddingTop = `${barre.offsetHeight}px`;
+    hauteurBarre = barre.offsetHeight;
+    document.body.style.paddingTop = `${hauteurBarre}px`;
   }
   window.addEventListener("resize", ajusterHauteurBarre);
 
@@ -562,8 +568,14 @@
   // « snap » : au relâchement, la barre finit sa course, elle ne reste jamais à mi-chemin.
   // Elle finit dans le sens du dernier geste, et non vers le bord le plus proche : remonter
   // même un peu doit ramener la barre entière, c'est ce que Material appelle « enterAlways ».
+  // Appelé une fois que le doigt s'est arrêté : c'est là qu'on a le droit de mesurer.
+  function auRepos() {
+    memoriserLecture();
+    alignerBarre();
+  }
+
   function alignerBarre() {
-    const hauteur = barre.offsetHeight;
+    const hauteur = hauteurBarre;
     if (decalage <= 0 || decalage >= hauteur) return;
     poserDecalage(dernierSens > 0 ? hauteur : 0, true);
   }
@@ -592,7 +604,7 @@
   }
 
   function blocEnHautDeLEcran(blocs) {
-    const limite = barre.offsetHeight + 8;
+    const limite = hauteurBarre + 8;
     for (let i = 0; i < blocs.length; i++) {
       if (blocs[i].getBoundingClientRect().bottom > limite) return i;
     }
@@ -623,7 +635,7 @@
     const blocs = blocsDuPanneau();
     const cible = blocs[index];
     if (!cible) return; // le contenu a changé depuis : on repart du haut, sans bruit
-    const y = cible.getBoundingClientRect().top + window.scrollY - barre.offsetHeight - 8;
+    const y = cible.getBoundingClientRect().top + window.scrollY - hauteurBarre - 8;
     window.scrollTo(0, Math.max(0, y));
     derniereY = Math.max(0, window.scrollY);
   }
@@ -632,7 +644,11 @@
     const y = Math.max(0, window.scrollY);
     // Avant même de s'effacer, la barre cesse d'être un bandeau posé sur le texte.
     barre.classList.toggle("barre--flottante", y > SEUIL_FLOTTANT);
-    memoriserLecture();
+
+    // Posé avant toute sortie : même quand la barre n'a plus à bouger, la lecture avance.
+    clearTimeout(minuterieAlignement);
+    minuterieAlignement = setTimeout(auRepos, ALIGNEMENT_MS);
+
     if (!barreEffacable) return;
 
     const delta = y - derniereY;
@@ -642,7 +658,7 @@
 
     // Tout en haut, la barre est toujours entière : on ne peut pas la retenir effacée là où
     // il n'y a rien à cacher.
-    const vise = y <= 0 ? 0 : Math.min(Math.max(decalage + delta, 0), barre.offsetHeight);
+    const vise = y <= 0 ? 0 : Math.min(Math.max(decalage + delta, 0), hauteurBarre);
     if (vise === decalage) return;
 
     // Une seule écriture par image affichée : suivre le doigt ne doit pas saccader la page.
@@ -654,8 +670,6 @@
       });
     }
 
-    clearTimeout(minuterieAlignement);
-    minuterieAlignement = setTimeout(alignerBarre, ALIGNEMENT_MS);
   }
 
   window.addEventListener("scroll", surDefilement, { passive: true });
