@@ -1,0 +1,4 @@
+# Le cours n'a pas à se trouver dans les moteurs de recherche : il se transmet
+# par QR code et par lien, à des participants inscrits au cours.
+User-agent: *
+Disallow: /

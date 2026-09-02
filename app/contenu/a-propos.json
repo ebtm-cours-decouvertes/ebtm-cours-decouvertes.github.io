@@ -1,0 +1,34 @@
+{
+  "eglise": "Église Baptiste Toulouse Métropole",
+  "edition": "Toulouse — Quatrième édition, révisée 2025",
+  "droits": "© 2026 Église Baptiste Toulouse Métropole. Tous droits réservés.",
+  "versionApplication": "1.0",
+  "paragraphes": [
+    "Les cours découvertes sont un outil mis en place dans notre église au fil des années. Chaque pasteur de l’EBTM y a travaillé, soucieux de transmettre l’enseignement de la Parole de Dieu aux nouveaux chrétiens selon l’ordre donné par notre Seigneur en Matthieu 28.19-20 : *« Allez, faites de toutes les nations des disciples, les baptisant au nom du Père, du Fils et du Saint-Esprit, et enseignez-leur à observer tout ce que je vous ai prescrit. Et voici, je suis avec vous tous les jours, jusqu’à la fin du monde. »*",
+    "Au cours des dernières années, ces études ont encore été améliorées, et nous voyons l’impact de cet enseignement dans les vies des personnes qui les suivent ainsi que sur l’ensemble de notre communauté. Nous avons pris l’habitude de faire plusieurs sessions par année avec de petits groupes et parfois de manière individuelle.",
+    {
+      "type": "verset",
+      "texte": "Allez, faites de toutes les nations des **disciples**, les baptisant au nom du Père, du Fils et du Saint-Esprit, et enseignez-leur à observer tout ce que je vous ai prescrit.",
+      "reference": "Jésus"
+    },
+    "Un cours par semaine nous semble être un bon rythme. Les études sont présentées dans l’ordre suivant :",
+    {
+      "type": "liste",
+      "elements": [
+        "1. Le plan du salut",
+        "2. Suivre le maître",
+        "3. Une vie transformée",
+        "4. Le baptême",
+        "5. Les épreuves",
+        "6. Lire la Bible",
+        "7. La prière",
+        "8. Le témoignage chrétien",
+        "9. Se joindre à une église",
+        "10. L’EBTM et moi"
+      ]
+    },
+    "Une dernière rencontre est parfois organisée durant laquelle chacun donne son témoignage de conversion ; cela devient un moment précieux et utile pour affermir la foi et pour donner gloire à Dieu !",
+    "Chaque cours contient une série de questions auxquelles les participants doivent répondre chez eux. La leçon suivante commence par une correction des questions qui nous permet d’évaluer la compréhension et au besoin de réexpliquer. Dans chaque leçon, deux versets sont à apprendre par cœur, ce qui représente un véritable défi pour certains. Chaque rencontre commence par la prière et se termine par la prière de chacun. C’est bien souvent l’occasion pour les jeunes chrétiens de prier pour la première fois en public.",
+    "Il est fréquent que des personnes déjà affermies suivent ces études dans le but d’être elles-mêmes capables de les enseigner à d’autres."
+  ]
+}

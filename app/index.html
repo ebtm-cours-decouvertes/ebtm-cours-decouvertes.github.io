@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Cours découvertes</title>
+    <meta name="description" content="Suivre le cours découvertes de l’Église Baptiste Toulouse Métropole sur son téléphone : leçons, versets à apprendre, questions de révision." />
+    <!-- Le cours se transmet par QR code, pas par les moteurs de recherche. -->
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" content="#982898" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Cours découvertes" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="icones/icone.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" sizes="180x180" href="icones/icone-180.png" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <a class="saut" href="#principal">Aller au contenu</a>
+    <div class="barre" id="barre">
+      <header class="entete">
+        <div class="entete__contenu">
+          <div id="zone-navigation"></div>
+          <p class="marque__titre" id="titre-barre"></p>
+          <button class="bouton-reglages" id="ouvrir-reglages" type="button" aria-label="Réglages">
+            <svg class="icone" viewBox="0 0 24 24" width="21" height="21" aria-hidden="true" focusable="false">
+              <path
+                fill="currentColor"
+                fill-rule="evenodd"
+                d="M9.26 1.76 L14.74 1.76 L14.12 4.08 L16.1 4.9 L17.3 2.82 L21.18 6.7 L19.1 7.9 L19.92 9.88 L22.24 9.26 L22.24 14.74 L19.92 14.12 L19.1 16.1 L21.18 17.3 L17.3 21.18 L16.1 19.1 L14.12 19.92 L14.74 22.24 L9.26 22.24 L9.88 19.92 L7.9 19.1 L6.7 21.18 L2.82 17.3 L4.9 16.1 L4.08 14.12 L1.76 14.74 L1.76 9.26 L4.08 9.88 L4.9 7.9 L2.82 6.7 L6.7 2.82 L7.9 4.9 L9.88 4.08 Z M8.5 12 A3.5 3.5 0 1 0 15.5 12 A3.5 3.5 0 1 0 8.5 12 Z"
+              />
+            </svg>
+          </button>
+        </div>
+      </header>
+      <div id="zone-onglets"></div>
+    </div>
+
+    <main id="principal" tabindex="-1">
+      <p class="texte-doux" style="text-align: center; padding: 3rem 0">Chargement…</p>
+    </main>
+
+    <noscript>
+      <p class="message" style="max-width: 720px; margin: 1rem auto">
+        Cette application a besoin de JavaScript pour fonctionner. Activez-le dans votre navigateur.
+      </p>
+    </noscript>
+
+    <script src="app.js"></script>
+  </body>
+</html>

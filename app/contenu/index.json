@@ -1,0 +1,71 @@
+{
+  "lecons": [
+    {
+      "numero": 1,
+      "titre": "Le plan du salut",
+      "fichier": "01-plan-du-salut.json",
+      "nbQuestions": 9
+    },
+    {
+      "numero": 2,
+      "titre": "Suivre le maître",
+      "fichier": "02-suivre-le-maitre.json",
+      "nbQuestions": 8
+    },
+    {
+      "numero": 3,
+      "titre": "Une vie transformée",
+      "fichier": "03-une-vie-transformee.json",
+      "nbQuestions": 9
+    },
+    {
+      "numero": 4,
+      "titre": "Le baptême",
+      "fichier": "04-le-bapteme.json",
+      "nbQuestions": 8
+    },
+    {
+      "numero": 5,
+      "titre": "Et les épreuves ?",
+      "fichier": "05-et-les-epreuves.json",
+      "nbQuestions": 8
+    },
+    {
+      "numero": 6,
+      "titre": "Lire la Bible",
+      "fichier": "06-lire-la-bible.json",
+      "nbQuestions": 8
+    },
+    {
+      "numero": 7,
+      "titre": "La prière",
+      "fichier": "07-la-priere.json",
+      "nbQuestions": 9
+    },
+    {
+      "numero": 8,
+      "titre": "Le témoignage chrétien",
+      "fichier": "08-le-temoignage-chretien.json",
+      "nbQuestions": 7
+    },
+    {
+      "numero": 9,
+      "titre": "Se joindre à une église",
+      "fichier": "09-se-joindre-a-une-eglise.json",
+      "nbQuestions": 9
+    },
+    {
+      "numero": 10,
+      "titre": "L’EBTM et moi",
+      "fichier": "10-l-ebtm-et-moi.json",
+      "nbQuestions": 0
+    }
+  ],
+  "figures": [
+    "logo-association-baptiste.png",
+    "logo-ebtm.png",
+    "origine-autres-religions.png",
+    "origine-christianisme.png",
+    "trinite.png"
+  ]
+}

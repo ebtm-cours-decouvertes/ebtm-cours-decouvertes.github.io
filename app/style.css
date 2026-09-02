@@ -1,0 +1,1332 @@
+/* Cours découvertes — feuille de style. Mobile d'abord, sans dépendance. */
+
+:root {
+  --violet: #982898;
+  --violet-fonce: #6e1c70;
+  --magenta: #d40775;
+  --encre: #2b1f2e;
+  --texte-doux: #5f5363;
+  --fond: #faf7fb;
+  --carte: #ffffff;
+  --bord: #e6dce8;
+  /* Bordure des éléments avec lesquels on interagit : 3 pour 1, exigé pour être repérable. */
+  --bord-actif: #8a838c;
+  --teinte: #f3e8f4;
+  --ok: #2b7449;
+  --ok-fond: #e6f4ec;
+  --danger: #b3261e;
+  --danger-doux: #f7e3e1;
+  /* Fond de la barre pendant la lecture. L'opacité est le plus bas que le contraste
+     permette : verifier-contrastes.mjs compose ce fond avec le texte qui passe dessous. */
+  --barre-flottante: rgba(255, 255, 255, 0.86);
+  --echelle: 1;
+  --rayon: 14px;
+  --ombre: 0 1px 2px rgba(43, 31, 46, 0.06), 0 4px 14px rgba(43, 31, 46, 0.06);
+  /* L'application reste claire quel que soit le réglage du téléphone. Le mode sombre est un
+     choix explicite du lecteur, jamais une conséquence du réglage de son appareil. */
+  color-scheme: light;
+}
+
+/* L'attribut est « apparence » et non « theme » : le lecteur d'aperçu pose son propre
+   data-theme sur la racine, les deux ne doivent pas se marcher dessus. */
+:root[data-apparence="sombre"] {
+  color-scheme: dark;
+  --violet: #c56cc5;
+  --violet-fonce: #d99bd9;
+  --magenta: #ff5fb4;
+  --encre: #f1e9f2;
+  --texte-doux: #b9adbc;
+  --fond: #171219;
+  --carte: #221a25;
+  --bord: #3a2e3d;
+  --bord-actif: #7b7280;
+  --teinte: #2c2130;
+  --ok: #7fd39f;
+  --ok-fond: #1f3527;
+  --danger: #f28b82;
+  --danger-doux: #3a2422;
+  /* En sombre, le violet clair des titres n'a pas de marge de contraste : la barre y reste
+     presque opaque, et c'est le flou seul qui donne la profondeur. Mesuré, pas supposé. */
+  --barre-flottante: rgba(34, 26, 37, 0.96);
+  --ombre: none;
+}
+
+/* Le logo et les figures du livret sont imprimés sur blanc : on leur laisse leur papier
+   plutôt que de les afficher en bloc blanc au milieu du sombre. */
+:root[data-apparence="sombre"] .marque__logo {
+  background: #ffffff;
+  border-radius: 6px;
+  padding: 2px 5px;
+  box-sizing: content-box;
+}
+
+:root[data-apparence="sombre"] .figure {
+  background: #ffffff;
+  border-color: transparent;
+}
+
+:root[data-apparence="sombre"] .figure figcaption,
+:root[data-apparence="sombre"] .figure__aide {
+  color: #5f5363;
+}
+
+:root[data-apparence="sombre"] .message--erreur {
+  background: #3d1b18;
+  color: #ffb4ab;
+}
+
+:root[data-apparence="sombre"] .bouton-danger {
+  color: #ffb4ab;
+  border-color: #ffb4ab;
+}
+
+:root[data-apparence="sombre"] .bouton-danger:hover {
+  background: rgba(255, 180, 171, 0.12);
+}
+
+:root[data-apparence="sombre"] .question__etat {
+  color: #ffb4ab;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: calc(100% * var(--echelle));
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--fond);
+  color: var(--encre);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--violet);
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 3px solid var(--magenta);
+  outline-offset: 2px;
+}
+
+/* Lien d'évitement : invisible tant qu'on ne l'atteint pas au clavier. */
+.saut {
+  position: absolute;
+  top: -100%;
+  left: 0.5rem;
+  z-index: 200;
+  padding: 0.7rem 1rem;
+  background: var(--carte);
+  color: var(--violet);
+  font-weight: 700;
+  border-radius: 0 0 10px 10px;
+  box-shadow: var(--ombre);
+}
+
+.saut:focus {
+  top: 0;
+}
+
+#principal:focus {
+  outline: none;
+}
+
+.visuellement-cache {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ---------- En-tête ---------- */
+
+.barre {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  background: var(--carte);
+  border-bottom: 1px solid var(--bord);
+  padding-top: env(safe-area-inset-top);
+  will-change: transform;
+  /* Retour : assez vif pour répondre au doigt. */
+  transition: transform 0.3s cubic-bezier(0.22, 0.61, 0.36, 1), opacity 0.24s ease-out,
+    background-color 0.25s ease-out;
+}
+
+/* Dès que la lecture commence, la barre cesse d'être un bandeau opaque et se pose au-dessus
+   du texte : fond translucide et flou. Le flou vient en plus de l'opacité, jamais à sa place :
+   c'est l'opacité seule qui garantit le contraste, un navigateur qui ignore le flou reste bon. */
+.barre--flottante {
+  background: var(--barre-flottante);
+  -webkit-backdrop-filter: blur(18px) saturate(1.6);
+  backdrop-filter: blur(18px) saturate(1.6);
+  /* La profondeur vient de l'ombre, pas d'une transparence plus poussée : baisser l'opacité
+     mangerait le contraste du titre sans rien montrer de plus, le contenu qui passe dessous
+     étant lui-même clair. L'ombre ne coûte rien à la lisibilité. */
+  border-bottom-color: transparent;
+  box-shadow: 0 1px 3px rgba(43, 31, 46, 0.05), 0 6px 20px rgba(43, 31, 46, 0.09);
+}
+
+/* En sombre, une ombre ne se voit pas : c'est le filet qui marque la limite. */
+:root[data-apparence="sombre"] .barre--flottante {
+  border-bottom-color: var(--bord);
+  box-shadow: none;
+}
+
+.barre--flottante .entete {
+  background: transparent;
+}
+
+/* Pendant la lecture, la barre s'efface vers le haut pour laisser toute la place au texte.
+   Elle part vite et revient un peu plus posément : sous le doigt qui descend, l'attente se
+   remarque, alors qu'au retour c'est la brusquerie qui se remarquerait. */
+.barre--masquee {
+  transform: translateY(-100%);
+  opacity: 0;
+  transition: transform 0.26s cubic-bezier(0.4, 0, 0.7, 1), opacity 0.2s ease-in;
+}
+
+.entete {
+  background: var(--carte);
+}
+
+.entete__contenu {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0.6rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 3.25rem;
+}
+
+.bouton-retour {
+  flex: none;
+  width: 2.75rem;
+  height: 2.75rem;
+  display: grid;
+  place-items: center;
+  margin-left: -0.5rem;
+  border-radius: 10px;
+  font-size: 1.3rem;
+  line-height: 1;
+  text-decoration: none;
+  color: var(--violet);
+}
+
+.bouton-retour:hover {
+  background: var(--teinte);
+}
+
+.marque__lien {
+  flex: none;
+  display: flex;
+  line-height: 0;
+  border-radius: 50%;
+}
+
+.marque__logo {
+  height: 34px;
+  width: auto;
+  flex: none;
+  display: block;
+}
+
+.marque__titre {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  color: var(--violet);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bouton-reglages {
+  flex: none;
+  border: none;
+  background: none;
+  border-radius: 10px;
+  width: 2.75rem;
+  height: 2.75rem;
+  display: grid;
+  place-items: center;
+  color: var(--texte-doux);
+}
+
+.bouton-reglages .icone {
+  display: block;
+}
+
+.bouton-reglages:hover {
+  background: var(--teinte);
+  color: var(--violet);
+}
+
+/* ---------- Structure des pages ---------- */
+
+main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 1rem 1rem calc(3rem + env(safe-area-inset-bottom));
+}
+
+/* Assez de hauteur pour que la barre puisse s'effacer même sur une page courte. */
+.panneau {
+  min-height: 60vh;
+}
+
+.retour {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  text-decoration: none;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+/* Le titre reçoit le focus à chaque changement de page (lecteurs d'écran) : pas de cadre visuel. */
+.page-titre:focus {
+  outline: none;
+}
+
+.page-titre {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.85rem;
+  line-height: 1.2;
+  margin: 0.25rem 0 0.5rem;
+  color: var(--violet);
+}
+
+.surtitre {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--texte-doux);
+  margin: 0;
+}
+
+.texte-doux {
+  color: var(--texte-doux);
+}
+
+/* ---------- Accueil ---------- */
+
+.accueil__intro {
+  margin: 0 0 1rem;
+  color: var(--texte-doux);
+}
+
+.progression {
+  background: var(--carte);
+  border: 1px solid var(--bord);
+  border-radius: var(--rayon);
+  padding: 0.9rem 1rem;
+  margin-bottom: 1rem;
+  box-shadow: var(--ombre);
+}
+
+.progression__libelle {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.progression__barre {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--teinte);
+  overflow: hidden;
+}
+
+.progression__remplissage {
+  height: 100%;
+  background: linear-gradient(90deg, var(--violet), var(--magenta));
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+.liste-lecons {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.carte-lecon {
+  display: grid;
+  grid-template-columns: 3.3rem 1fr auto;
+  /* L'avancement occupe une ligne à lui, sur toute la largeur : il tient alors d'un trait. */
+  grid-template-areas:
+    "numero titre marque"
+    "numero detail detail";
+  align-items: center;
+  column-gap: 0.8rem;
+  background: var(--carte);
+  border: 1px solid var(--bord);
+  border-radius: var(--rayon);
+  padding: 0.85rem 1rem;
+  text-decoration: none;
+  color: inherit;
+  box-shadow: var(--ombre);
+}
+
+.carte-lecon:hover {
+  border-color: var(--violet);
+}
+
+/* Le numéro porte le mot « Leçon » : le titre à côté n'a plus à le répéter. */
+.carte-lecon__numero {
+  grid-area: numero;
+  width: 3.3rem;
+  min-height: 2.9rem;
+  border-radius: 9px;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 0.05rem;
+  padding: 0.3rem 0;
+  background: var(--teinte);
+  color: var(--violet);
+}
+
+.carte-lecon__mot {
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  line-height: 1;
+}
+
+.carte-lecon__chiffre {
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 700;
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.carte-lecon--terminee .carte-lecon__numero {
+  background: var(--violet);
+  color: #fff;
+}
+
+.carte-lecon__titre {
+  grid-area: titre;
+  font-weight: 600;
+  margin: 0;
+}
+
+.carte-lecon__detail {
+  grid-area: detail;
+  margin: 0.25rem 0 0;
+  font-size: 0.85rem;
+  color: var(--texte-doux);
+}
+
+.carte-lecon__marque {
+  grid-area: marque;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.carte-lecon__coche {
+  display: block;
+  color: var(--ok);
+}
+
+.carte-lecon__chevron {
+  display: block;
+  color: var(--texte-doux);
+}
+
+.pied {
+  margin-top: 2rem;
+  font-size: 0.85rem;
+  color: var(--texte-doux);
+  text-align: center;
+}
+
+/* ---------- Leçon : onglets ---------- */
+
+.onglets {
+  max-width: 720px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.25rem;
+  padding: 0 1rem 0.6rem;
+}
+
+.onglet {
+  border: 1px solid var(--bord-actif);
+  background: var(--carte);
+  border-radius: 10px;
+  padding: 0.55rem 0.25rem;
+  font-weight: 600;
+  font-size: 0.92rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+}
+
+.onglet__compte {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--texte-doux);
+}
+
+.onglet[aria-selected="true"] {
+  background: var(--violet);
+  border-color: var(--violet);
+  color: #fff;
+}
+
+.onglet[aria-selected="true"] .onglet__compte {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.panneau[hidden] {
+  display: none;
+}
+
+/* Invite d'installation. Volontairement lisible plutôt que discrète : elle s'adresse à des
+   personnes qui n'ont pas l'habitude d'installer une application, et elle ne s'affiche qu'une
+   fois. Elle disparaît définitivement dès qu'on la referme ou que l'installation est faite. */
+.invite {
+  background: var(--teinte);
+  border-radius: var(--rayon);
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.invite__titre {
+  margin: 0 0 0.4rem;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--violet-fonce);
+}
+
+.invite__texte {
+  margin: 0 0 0.85rem;
+  font-size: 0.95rem;
+}
+
+.invite__etapes {
+  margin: 0 0 0.85rem;
+  padding-left: 1.3rem;
+  font-size: 0.95rem;
+  line-height: 1.9;
+}
+
+.invite__icone {
+  display: inline-flex;
+  vertical-align: -0.35em;
+  color: var(--violet-fonce);
+}
+
+.invite__plus-tard {
+  display: block;
+  width: 100%;
+  min-height: 2.75rem;
+  margin-top: 0.5rem;
+  border: none;
+  background: none;
+  color: var(--texte-doux);
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Écran d'orientation et écran d'installation : deux pages qui ne montrent qu'une chose. */
+.orientation {
+  max-width: 26rem;
+  margin: 2rem auto 0;
+  text-align: center;
+}
+
+.orientation .page-titre {
+  margin-bottom: 0.8rem;
+}
+
+.orientation__texte {
+  margin: 0 auto 1.5rem;
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+.orientation__qr {
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  height: auto;
+  margin: 0 auto 1rem;
+  background: #fff;
+  border: 1px solid var(--bord);
+  border-radius: var(--rayon);
+  padding: 0.75rem;
+  box-sizing: border-box;
+}
+
+.orientation__adresse {
+  margin: 0 0 1.5rem;
+  font-size: 0.95rem;
+  color: var(--texte-doux);
+  word-break: break-all;
+}
+
+.orientation__bouton {
+  margin-bottom: 0.5rem;
+}
+
+.orientation__etapes {
+  margin-bottom: 1rem;
+  text-align: left;
+}
+
+/* ---------- Leçon : lecture ---------- */
+
+.lecture {
+  font-size: 1.05rem;
+  line-height: 1.65;
+}
+
+.lecture h2 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.4rem;
+  color: var(--violet);
+  margin: 2rem 0 0.75rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--bord);
+}
+
+.lecture h3 {
+  font-size: 1.1rem;
+  color: var(--magenta);
+  margin: 1.4rem 0 0.35rem;
+}
+
+.lecture p {
+  margin: 0 0 1rem;
+}
+
+.lecture ul {
+  margin: 0 0 1rem;
+  padding-left: 1.3rem;
+}
+
+.lecture li {
+  margin-bottom: 0.35rem;
+}
+
+.encart {
+  margin: 1.2rem 0;
+  padding: 0.9rem 1rem;
+  border-radius: var(--rayon);
+  background: var(--carte);
+  border: 1px solid var(--bord);
+  box-shadow: var(--ombre);
+}
+
+.encart--citation {
+  border-left: 4px solid var(--violet);
+  font-family: Georgia, "Times New Roman", serif;
+  font-style: italic;
+  font-size: 1.05rem;
+}
+
+.encart--verset {
+  border-left: 4px solid var(--magenta);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.05rem;
+}
+
+.encart--encadre {
+  background: var(--teinte);
+  border-color: transparent;
+  font-size: 0.95rem;
+}
+
+.encart__titre {
+  margin: 0 0 0.4rem;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  color: var(--violet);
+}
+
+.encart p:last-child {
+  margin-bottom: 0;
+}
+
+.encart__source {
+  display: block;
+  margin-top: 0.5rem;
+  font-style: normal;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--texte-doux);
+  text-align: right;
+}
+
+.tableau {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background: var(--teinte);
+  border-radius: var(--rayon);
+}
+
+.tableau__titre {
+  margin: 0 0 0.8rem;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  color: var(--violet);
+}
+
+.tableau__ligne {
+  display: grid;
+  gap: 0.6rem;
+  padding: 0.8rem 0;
+  border-top: 1px solid var(--bord);
+}
+
+.tableau__ligne:first-of-type {
+  border-top: none;
+  padding-top: 0;
+}
+
+.tableau__cellule p:last-child {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.tableau__entete {
+  margin: 0 0 0.2rem;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--violet);
+}
+
+/* Sur un écran large, les deux colonnes se remettent côte à côte. */
+@media (min-width: 600px) {
+  .tableau__ligne {
+    grid-template-columns: 1fr 1fr;
+    gap: 1.2rem;
+  }
+}
+
+.figure {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background: var(--carte);
+  border: 1px solid var(--bord);
+  border-radius: var(--rayon);
+  box-shadow: var(--ombre);
+  text-align: center;
+}
+
+.figure img {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  height: auto;
+  margin: 0 auto;
+  /* Les figures du livret sont des dessins au trait sur fond blanc. */
+  background: #fff;
+  border-radius: 6px;
+}
+
+.figure__bouton {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+}
+
+.figure__loupe {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+  color: var(--texte-doux);
+}
+
+.figure__loupe svg {
+  border: 1px solid var(--bord-actif);
+  border-radius: 999px;
+  padding: 0.3rem;
+  box-sizing: content-box;
+}
+
+.figure__bouton:hover .figure__loupe {
+  color: var(--violet);
+}
+
+.loupe[hidden],
+.feuille[hidden] {
+  display: none;
+}
+
+.loupe {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(28, 18, 30, 0.92);
+}
+
+.loupe img {
+  max-width: 100%;
+  max-height: 100%;
+  background: #fff;
+  border-radius: 8px;
+}
+
+.loupe__fermer {
+  position: absolute;
+  top: calc(0.75rem + env(safe-area-inset-top));
+  right: 0.75rem;
+  width: 2.75rem;
+  height: 2.75rem;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border-radius: 999px;
+}
+
+.figure figcaption {
+  margin-top: 0.7rem;
+  font-size: 0.88rem;
+  color: var(--texte-doux);
+  text-align: center;
+}
+
+.note {
+  font-size: 0.88rem;
+  color: var(--texte-doux);
+  border-top: 1px dashed var(--bord);
+  padding-top: 0.5rem;
+  margin-top: 1rem;
+}
+
+.lecture__fin {
+  margin-top: 2rem;
+  padding: 1rem;
+  border-radius: var(--rayon);
+  background: var(--teinte);
+  text-align: center;
+}
+
+/* ---------- Leçon : versets ---------- */
+
+.aide {
+  color: var(--texte-doux);
+  margin: 0 0 1rem;
+}
+
+.verset-carte {
+  background: var(--carte);
+  border: 1px solid var(--bord);
+  border-radius: var(--rayon);
+  padding: 1rem;
+  margin-bottom: 1rem;
+  box-shadow: var(--ombre);
+}
+
+.verset-carte__reference {
+  margin: 0 0 0.5rem;
+  font-weight: 700;
+  color: var(--magenta);
+}
+
+.verset-carte__texte {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.2rem;
+  line-height: 1.5;
+  margin: 0 0 0.9rem;
+  min-height: 3rem;
+}
+
+.verset-carte__texte--cache {
+  color: transparent;
+  text-shadow: 0 0 14px var(--encre);
+  user-select: none;
+}
+
+.verset-carte__texte--lettres {
+  letter-spacing: 0.08em;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 1.05rem;
+}
+
+.verset-carte__source {
+  margin: 0 0 0.6rem;
+  font-size: 0.78rem;
+  color: var(--texte-doux);
+}
+
+.groupe-boutons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.4rem;
+}
+
+.bouton-choix {
+  min-height: 2.75rem;
+  border: 1px solid var(--bord-actif);
+  background: var(--carte);
+  border-radius: 10px;
+  padding: 0.4rem 0.4rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.bouton-choix[aria-pressed="true"] {
+  background: var(--violet);
+  border-color: var(--violet);
+  color: #fff;
+}
+
+/* ---------- Leçon : questions ---------- */
+
+.question {
+  background: var(--carte);
+  border: 1px solid var(--bord);
+  border-radius: var(--rayon);
+  padding: 1rem;
+  margin-bottom: 1rem;
+  box-shadow: var(--ombre);
+}
+
+.question__intitule {
+  display: block;
+  margin: 0 0 0.6rem;
+  font-weight: 600;
+}
+
+.question__numero {
+  display: inline-grid;
+  place-items: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 50%;
+  background: var(--teinte);
+  color: var(--violet);
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin-right: 0.45rem;
+  vertical-align: middle;
+}
+
+.question textarea {
+  width: 100%;
+  min-height: 5.5rem;
+  resize: vertical;
+  border: 1px solid var(--bord-actif);
+  border-radius: 10px;
+  padding: 0.7rem 0.8rem;
+  font: inherit;
+  line-height: 1.5;
+  background: var(--fond);
+  color: var(--encre);
+}
+
+.question textarea:focus {
+  border-color: var(--violet);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(152, 40, 152, 0.18);
+}
+
+/* Vide tant que tout va bien : ne réserve alors aucune place. */
+.question__etat {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--danger);
+}
+
+.question__etat:not(:empty) {
+  margin-top: 0.5rem;
+}
+
+.case {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  padding: 0.6rem 0;
+  min-height: 2.75rem;
+}
+
+.case input {
+  width: 1.5rem;
+  height: 1.5rem;
+  margin: 0.1rem 0 0;
+  accent-color: var(--violet);
+  flex: none;
+}
+
+.bouton-principal {
+  display: block;
+  width: 100%;
+  border: none;
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+  font-weight: 700;
+  font-size: 1rem;
+  background: var(--violet);
+  color: #fff;
+  margin-top: 0.5rem;
+}
+
+.bouton-principal:hover {
+  background: var(--violet-fonce);
+}
+
+.bouton-principal--secondaire {
+  background: var(--carte);
+  color: var(--violet);
+  border: 1px solid var(--violet);
+}
+
+.bouton-principal--secondaire:hover {
+  background: var(--teinte);
+}
+
+.bouton-danger {
+  background: transparent;
+  color: var(--danger);
+  border: 1px solid var(--danger);
+}
+
+/* L'action la plus dangereuse et la plus rare ne doit pas être la plus voyante de la fenêtre.
+   Elle reste haute de 44 px pour rester atteignable au doigt. */
+.lien-danger {
+  min-height: 2.75rem;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--danger);
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.bouton-danger:hover {
+  background: var(--danger-doux);
+}
+
+.fin-lecon {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border-radius: var(--rayon);
+  background: var(--teinte);
+}
+
+.fin-lecon--terminee {
+  background: var(--ok-fond);
+}
+
+.fin-lecon p {
+  margin: 0 0 0.75rem;
+}
+
+.lien-suivant {
+  display: block;
+  text-align: center;
+  margin-top: 0.75rem;
+  font-weight: 600;
+}
+
+/* ---------- Références bibliques et liens ---------- */
+
+/* Chrome refuse « display: inline » sur un bouton : c'est le groupe qui reste insécable,
+   pour que la ponctuation qui suit une référence ne tombe pas seule à la ligne. */
+.ref-groupe {
+  white-space: nowrap;
+}
+
+.ref {
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  color: var(--violet);
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 2px;
+}
+
+.ref:hover {
+  background: var(--teinte);
+}
+
+.lecture a[target="_blank"] {
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  overflow-wrap: anywhere;
+}
+
+.feuille {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(28, 18, 30, 0.55);
+}
+
+.feuille__carte {
+  width: 100%;
+  max-width: 720px;
+  max-height: 82vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--carte);
+  border-radius: 18px 18px 0 0;
+  padding: 1rem 1rem calc(1rem + env(safe-area-inset-bottom));
+  box-shadow: 0 -6px 30px rgba(43, 31, 46, 0.25);
+}
+
+.feuille__entete {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--bord);
+}
+
+.feuille__titre {
+  flex: 1;
+  margin: 0;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--magenta);
+}
+
+.feuille__fermer {
+  flex: none;
+  width: 2.75rem;
+  height: 2.75rem;
+  display: grid;
+  place-items: center;
+  border: none;
+  background: none;
+  border-radius: 999px;
+  color: var(--texte-doux);
+  /* Le pavé « Fermer » pesait plus lourd que les réglages eux-mêmes. La cible reste à 44 px,
+     le minimum tactile ; seul le dessin s'efface. */
+}
+
+.feuille__fermer:hover {
+  background: var(--teinte);
+  color: var(--violet);
+}
+
+.feuille__corps {
+  overflow-y: auto;
+  /* Dans une colonne flex, un enfant défilant garde `min-height: auto` et déborde au lieu de
+     défiler. Sans ces deux lignes, la fenêtre est tronquée en paysage : le bas devient
+     inatteignable. */
+  flex: 1;
+  min-height: 0;
+  padding: 0.9rem 0 0.2rem;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+.passage {
+  margin: 0 0 0.7rem;
+}
+
+.passage__numero {
+  display: inline-block;
+  min-width: 1.4em;
+  margin-right: 0.2em;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 0.72em;
+  font-weight: 700;
+  color: var(--violet);
+  vertical-align: 0.35em;
+}
+
+.feuille__source {
+  margin: 0.6rem 0 0;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--bord);
+  font-size: 0.8rem;
+  color: var(--texte-doux);
+  text-align: center;
+}
+
+@media (min-width: 600px) {
+  .feuille {
+    align-items: center;
+  }
+
+  .feuille__carte {
+    border-radius: 18px;
+    max-height: 78vh;
+  }
+}
+
+.reglage {
+  padding: 0.9rem 0 0.7rem;
+  border-top: 1px solid var(--bord);
+}
+
+.reglage:first-of-type {
+  border-top: none;
+}
+
+.reglage__libelle {
+  margin: 0 0 0.55rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.reglage__commandes {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+/* 2,75 rem font 44 pixels : la plus petite cible tactile confortable. */
+.bouton-taille {
+  flex: none;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid var(--bord-actif);
+  background: var(--carte);
+  border-radius: 10px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--violet);
+}
+
+.bouton-taille:hover:not(:disabled) {
+  background: var(--teinte);
+}
+
+.bouton-taille:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.feuille__corps--reglages {
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+.reglage__note {
+  margin: 0.75rem 0 0;
+  font-size: 0.82rem;
+  color: var(--texte-doux);
+}
+
+.reglage__avertissement {
+  margin: 0 0 0.9rem;
+  font-size: 0.95rem;
+}
+
+.reglage__confirmation {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+}
+
+.reglage__confirmation .bouton-principal {
+  margin-top: 0;
+}
+
+#zone-effacement .bouton-principal {
+  padding: 0.7rem 1rem;
+  font-size: 0.95rem;
+  margin-top: 0;
+}
+
+.reglage__valeur {
+  flex: 1;
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--texte-doux);
+}
+
+/* ---------- Messages ---------- */
+
+.message {
+  padding: 1rem;
+  border-radius: var(--rayon);
+  background: var(--teinte);
+  margin: 1rem 0;
+}
+
+.message--erreur {
+  background: #fdecea;
+  color: #7a1c14;
+}
+
+.a-propos p {
+  margin: 0 0 1rem;
+}
+
+.a-propos ol {
+  padding-left: 1.4rem;
+}
+
+@media (min-width: 600px) {
+  .page-titre {
+    font-size: 2.2rem;
+  }
+
+  .lecture {
+    font-size: 1.1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "name": "Cours découvertes",
+  "short_name": "Cours déc.",
+  "description": "Le cours découvertes de l’Église Baptiste Toulouse Métropole sur votre téléphone : leçons, versets, questions de révision.",
+  "lang": "fr",
+  "dir": "ltr",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#faf7fb",
+  "theme_color": "#982898",
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "icones/icone-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icones/icone-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icones/icone-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "captures/accueil.png",
+      "sizes": "412x824",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "La liste des dix leçons et l’avancement"
+    },
+    {
+      "src": "captures/lecon.png",
+      "sizes": "412x824",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Le texte d’une leçon, avec ses références bibliques"
+    },
+    {
+      "src": "captures/versets.png",
+      "sizes": "412x824",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Les versets à apprendre et leurs trois modes d’affichage"
+    }
+  ]
+}
