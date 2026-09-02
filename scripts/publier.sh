@@ -17,6 +17,26 @@ node "$racine/scripts/verifier-contenu.mjs"
 node "$racine/scripts/verifier-versets.mjs"
 node "$racine/scripts/verifier-contrastes.mjs" > /dev/null
 
+# Le numéro de version du service worker est ce qui dit aux téléphones déjà équipés de tout
+# recharger. L'oublier, c'est publier dans le vide : ils garderaient l'ancienne version sans
+# que personne s'en aperçoive. Il est donc avancé ici, jamais à la main.
+python3 - "$racine/app/service-worker.js" <<'FIN'
+import datetime, re, sys
+
+chemin = sys.argv[1]
+source = open(chemin, encoding="utf-8").read()
+motif = re.compile(r'const VERSION = "(\d{4}-\d{2}-\d{2})-(\d+)";')
+trouve = motif.search(source)
+if not trouve:
+    sys.exit("VERSION introuvable dans le service worker.")
+
+aujourdhui = datetime.date.today().isoformat()
+rang = int(trouve.group(2)) + 1 if trouve.group(1) == aujourdhui else 1
+nouvelle = f"{aujourdhui}-{rang}"
+open(chemin, "w", encoding="utf-8").write(motif.sub(f'const VERSION = "{nouvelle}";', source, count=1))
+print(f"  version du service worker : {trouve.group(1)}-{trouve.group(2)} → {nouvelle}")
+FIN
+
 if [ ! -d "$travail/.git" ]; then
   git clone "$depot" "$travail"
 fi
@@ -48,3 +68,9 @@ git add -A
 git commit -q -m "$message"
 git push --quiet origin main
 echo "Mis en ligne : https://ebtm-cours-decouvertes.github.io/"
+echo
+echo "  Le dépôt de travail a été modifié : app/service-worker.js porte une nouvelle version."
+echo "  Pensez à l’enregistrer ici aussi : git add -A && git commit"
+echo
+echo "  Sur un téléphone où l’application est installée, la nouvelle version apparaît à la"
+echo "  deuxième ouverture : la première sert encore la copie locale pendant le téléchargement."
