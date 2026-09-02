@@ -341,8 +341,8 @@
       <section class="orientation">
         <h1 class="page-titre">Cours découvertes</h1>
         <p class="orientation__texte">
-          Ce cours s’utilise sur téléphone ou sur tablette. Scannez ce code avec l’appareil photo
-          de votre téléphone.
+          Ce cours s’utilise sur téléphone ou sur tablette. Scannez ce code avec l’appareil
+          photo de l’un ou de l’autre.
         </p>
         <img class="orientation__qr" src="qr-cours-decouvertes.png" alt="Code à scanner menant à ${echapper(adresse)}" width="320" height="320" />
         <p class="orientation__adresse">${echapper(adresse)}</p>
