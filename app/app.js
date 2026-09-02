@@ -263,13 +263,6 @@
     return /iPhone|iPod|iPad/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
   }
 
-  // Sur iOS, tous les navigateurs sont bâtis sur WebKit et savent ajouter à l'écran d'accueil,
-  // mais le bouton de partage n'est pas au même endroit : en bas chez Safari, ailleurs chez
-  // Chrome, Brave ou Firefox. On ne précise donc l'endroit que si l'on est sûr.
-  function safariIOS() {
-    return !/CriOS|FxiOS|EdgiOS|OPiOS|Brave/i.test(navigator.userAgent);
-  }
-
   // Un appareil qu'on touche : sur un ordinateur sans installation possible, mieux vaut ne
   // rien dire du tout.
   function appareilTactile() {
@@ -364,7 +357,7 @@
       ? html`<button type="button" class="bouton-principal orientation__bouton" data-invite="installer">Installer</button>`
       : surIPhone()
         ? html`<ol class="invite__etapes orientation__etapes">
-            <li>Touchez <span class="invite__icone">${PARTAGE_IOS}</span>${safariIOS() ? " en bas de l’écran" : " dans votre navigateur"}.</li>
+            <li>Touchez <span class="invite__icone">${PARTAGE_IOS}</span> en bas de l’écran. Si vous ne la voyez pas, touchez <strong>•••</strong> puis « Partager ».</li>
             <li>Faites défiler, puis touchez « Sur l’écran d’accueil ».</li>
             <li>Touchez « Ajouter ».</li>
           </ol>`
@@ -402,7 +395,6 @@
     }
 
     if (surIPhone()) {
-      const ou = safariIOS() ? " en bas de l’écran" : " dans votre navigateur";
       return html`<section class="invite" id="invite-installation">
         <p class="invite__titre">Installer le cours sur votre iPhone</p>
         <p class="invite__texte">
@@ -410,7 +402,7 @@
           réponses seront conservées.
         </p>
         <ol class="invite__etapes">
-          <li>Touchez <span class="invite__icone">${PARTAGE_IOS}</span>${ou}.</li>
+          <li>Touchez <span class="invite__icone">${PARTAGE_IOS}</span> en bas de l’écran. Si vous ne la voyez pas, touchez <strong>•••</strong> puis « Partager ».</li>
           <li>Faites défiler, puis touchez « Sur l’écran d’accueil ».</li>
           <li>Touchez « Ajouter ».</li>
         </ol>
