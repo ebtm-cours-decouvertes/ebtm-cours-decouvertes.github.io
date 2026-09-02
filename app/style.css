@@ -167,9 +167,10 @@ button {
   border-bottom: 1px solid var(--bord);
   padding-top: env(safe-area-inset-top);
   will-change: transform;
-  /* Retour : assez vif pour répondre au doigt. */
-  transition: transform 0.3s cubic-bezier(0.22, 0.61, 0.36, 1), opacity 0.24s ease-out,
-    background-color 0.25s ease-out;
+  /* Le déplacement de la barre est piloté image par image depuis le script : elle suit le
+     doigt, sans transition. Seul l'alignement final en pose une, en ligne. Ne pas remettre
+     « transform » ici, cela remettrait un décalage entre le geste et l'écran. */
+  transition: background-color 0.25s ease-out;
 }
 
 /* Dès que la lecture commence, la barre cesse d'être un bandeau opaque et se pose au-dessus
@@ -194,15 +195,6 @@ button {
 
 .barre--flottante .entete {
   background: transparent;
-}
-
-/* Pendant la lecture, la barre s'efface vers le haut pour laisser toute la place au texte.
-   Elle part vite et revient un peu plus posément : sous le doigt qui descend, l'attente se
-   remarque, alors qu'au retour c'est la brusquerie qui se remarquerait. */
-.barre--masquee {
-  transform: translateY(-100%);
-  opacity: 0;
-  transition: transform 0.26s cubic-bezier(0.4, 0, 0.7, 1), opacity 0.2s ease-in;
 }
 
 .entete {
@@ -339,7 +331,13 @@ main {
   color: var(--texte-doux);
 }
 
+/* Deux informations, une ligne : le libellé à gauche, le compte à droite. Un dessin qui
+   répéterait ce compte n'apprendrait rien de plus. */
 .progression {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
   background: var(--carte);
   border: 1px solid var(--bord);
   border-radius: var(--rayon);
@@ -348,25 +346,17 @@ main {
   box-shadow: var(--ombre);
 }
 
-.progression__libelle {
-  display: flex;
-  justify-content: space-between;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
+.progression__titre {
+  margin: 0;
+  font-weight: 700;
+  font-size: 1.05rem;
 }
 
-.progression__barre {
-  height: 8px;
-  border-radius: 999px;
-  background: var(--teinte);
-  overflow: hidden;
-}
-
-.progression__remplissage {
-  height: 100%;
-  background: linear-gradient(90deg, var(--violet), var(--magenta));
-  border-radius: 999px;
-  transition: width 0.4s ease;
+.progression__detail {
+  margin: 0;
+  color: var(--texte-doux);
+  font-size: 0.95rem;
+  white-space: nowrap;
 }
 
 .liste-lecons {
@@ -422,11 +412,15 @@ main {
   line-height: 1;
 }
 
+/* Le numéro relève de l'interface, pas du livret : il suit donc la police du téléphone, comme
+   le mot « LEÇON » au-dessus. Le serif est réservé au texte du cours, où il évoque le livre.
+   Les chiffres tabulaires gardent la même largeur, pour que « 1 » et « 10 » s'alignent. */
 .carte-lecon__chiffre {
-  font-family: Georgia, "Times New Roman", serif;
   font-weight: 700;
-  font-size: 1.15rem;
+  font-size: 1.25rem;
   line-height: 1;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
 }
 
 .carte-lecon--terminee .carte-lecon__numero {
