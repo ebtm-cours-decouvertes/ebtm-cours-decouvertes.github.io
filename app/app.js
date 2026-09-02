@@ -374,12 +374,12 @@
           </ol>`;
     return html`
       <section class="orientation">
-        <h1 class="page-titre">Installer le cours sur votre téléphone</h1>
+        <h1 class="page-titre">Cours découvertes</h1>
         <p class="orientation__texte">
-          Vous l’aurez toujours sur vous, même sans connexion, et vos réponses y seront conservées.
+          Installez l’application sur votre téléphone : vous l’aurez toujours sur vous, même sans
+          connexion, et vos réponses y seront conservées.
         </p>
         ${etapes}
-        <button type="button" class="invite__plus-tard" data-invite="plus-tard">Lire sans installer</button>
       </section>
     `;
   }
@@ -450,6 +450,17 @@
   document.addEventListener("click", async (evenement) => {
     const bouton = evenement.target.closest("[data-invite]");
     if (!bouton) return;
+    if (bouton.dataset.invite === "revoir") {
+      try {
+        localStorage.removeItem(CLE_INVITE);
+      } catch {
+        /* sans stockage, rien à effacer */
+      }
+      fermerReglages();
+      history.replaceState(null, "", location.pathname + "?installer" + location.hash);
+      afficherAccueil();
+      return;
+    }
     if (bouton.dataset.invite === "plus-tard") {
       refuserInvite();
       if (arriveeParQrCode()) afficherAccueil();
@@ -725,6 +736,16 @@
             <button type="button" class="bouton-choix" data-apparence="sombre">Sombre</button>
           </div>
         </div>
+        <div class="reglage" id="reglage-installation" hidden>
+          <p class="reglage__libelle">Installation</p>
+          <button type="button" class="bouton-principal bouton-principal--secondaire" data-invite="revoir">
+            Installer l’application
+          </button>
+          <p class="reglage__note">
+            Le cours reste sur votre appareil, fonctionne sans connexion, et vos réponses sont à
+            l’abri du ménage que fait le navigateur.
+          </p>
+        </div>
         <div class="reglage">
           <p class="reglage__libelle">Mes réponses</p>
           <div id="zone-effacement"></div>
@@ -762,6 +783,8 @@
   }
 
   function ouvrirReglages() {
+    const bloc = reglages.querySelector("#reglage-installation");
+    if (bloc) bloc.hidden = dejaInstallee();
     rafraichirReglages();
     reglages.hidden = false;
     neutraliserArrierePlan(true);
@@ -1303,6 +1326,10 @@
           Vos réponses, les versets cochés et les leçons terminées sont sauvegardés localement sur
           votre appareil. Ni l’église ni l’enseignant n’y ont accès. Si vous effacez les données de
           votre navigateur ou changez de téléphone, ils seront perdus.
+        </p>
+        <p>
+          Installer le cours sur votre écran d’accueil les met à l’abri : sans installation, le
+          navigateur peut faire le ménage de lui-même au bout de quelques jours sans visite.
         </p>
         <p class="pied">
           Version ${echapper(apropos.versionApplication)}<br />
