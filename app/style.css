@@ -166,11 +166,19 @@ button {
   background: var(--carte);
   border-bottom: 1px solid var(--bord);
   padding-top: env(safe-area-inset-top);
+  /* translate3d, même à zéro, place la barre sur sa propre couche graphique : sans cela,
+     WebKit la redessine à chaque image et elle scintille. */
+  transform: translate3d(0, 0, 0);
   will-change: transform;
-  /* Le déplacement de la barre est piloté image par image depuis le script : elle suit le
-     doigt, sans transition. Seul l'alignement final en pose une, en ligne. Ne pas remettre
-     « transform » ici, cela remettrait un décalage entre le geste et l'écran. */
-  transition: background-color 0.25s ease-out;
+  /* Le mouvement est confié à cette transition, donc au compositeur, et non au script. C'est
+     ce qui le rend fluide sur iOS, où le défilement est piloté hors du fil principal.
+     Durées et courbes des jetons Material 3 : ce qui sort part vite, ce qui entre se pose. */
+  transition: transform 250ms cubic-bezier(0.05, 0.7, 0.1, 1), background-color 0.25s ease-out;
+}
+
+.barre--masquee {
+  transform: translate3d(0, -100%, 0);
+  transition: transform 100ms cubic-bezier(0.3, 0, 0.8, 0.15), background-color 0.25s ease-out;
 }
 
 /* Dès que la lecture commence, la barre cesse d'être un bandeau opaque et se pose au-dessus

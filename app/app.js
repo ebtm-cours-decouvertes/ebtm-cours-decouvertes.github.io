@@ -534,50 +534,39 @@
   const SEUIL_FLOTTANT = 4; // au premier pixel de lecture, la barre passe en translucide
 
   let derniereY = 0;
-  let decalage = 0; // de 0 (barre entière) à sa hauteur (barre effacée)
-  let imageDemandee = false;
   let minuterieAlignement = null;
-  let dernierSens = 1; // 1 : on descend, -1 : on remonte
   // On efface la barre sur un écran de lecture, jamais sur un écran de navigation : dans une
   // leçon la place rendue au texte se ressent, sur l'accueil on perdrait le logo et l'accès aux
   // réglages sans rien gagner. Le fond translucide, lui, s'applique partout.
   let barreEffacable = false;
 
-  function poserDecalage(valeur, aligner) {
-    decalage = valeur;
-    barre.style.transition = aligner
-      ? `transform ${valeur === 0 ? 250 : 100}ms ${valeur === 0 ? "cubic-bezier(0.05, 0.7, 0.1, 1)" : "cubic-bezier(0.3, 0, 0.8, 0.15)"}`
-      : "none";
-    barre.style.transform = valeur ? `translateY(${-valeur}px)` : "";
-  }
+  // Sur iOS, le défilement est piloté par un processus séparé du script. Déplacer la barre à
+  // chaque événement de défilement la laisse toujours en retard d'une image sur le contenu :
+  // c'est la saccade que voyait Sébastien. On bascule donc entre deux états, et c'est une
+  // transition CSS — confiée au compositeur, donc indépendante du script — qui fait le
+  // mouvement. Le geste perd en fidélité ce qu'il gagne en fluidité, et sur un téléphone la
+  // fluidité prime.
+  const COURSE_MASQUER = 16; // descente franche avant d'effacer
+  const COURSE_MONTRER = 10; // il en faut moins pour rappeler la barre
+
+  let course = 0; // distance parcourue depuis le dernier changement de sens
 
   function montrerBarre() {
-    poserDecalage(0, true);
+    barre.classList.remove("barre--masquee");
   }
 
   function reposerBarre() {
-    barre.style.transition = "none";
-    barre.style.transform = "";
-    decalage = 0;
+    montrerBarre();
     barre.classList.remove("barre--flottante");
     derniereY = 0;
+    course = 0;
     barreEffacable = false;
     lectureEnCours = null;
   }
 
-  // « snap » : au relâchement, la barre finit sa course, elle ne reste jamais à mi-chemin.
-  // Elle finit dans le sens du dernier geste, et non vers le bord le plus proche : remonter
-  // même un peu doit ramener la barre entière, c'est ce que Material appelle « enterAlways ».
   // Appelé une fois que le doigt s'est arrêté : c'est là qu'on a le droit de mesurer.
   function auRepos() {
     memoriserLecture();
-    alignerBarre();
-  }
-
-  function alignerBarre() {
-    const hauteur = hauteurBarre;
-    if (decalage <= 0 || decalage >= hauteur) return;
-    poserDecalage(dernierSens > 0 ? hauteur : 0, true);
   }
 
   // ---------------------------------------------------------------------------
@@ -642,7 +631,6 @@
 
   function surDefilement() {
     const y = Math.max(0, window.scrollY);
-    // Avant même de s'effacer, la barre cesse d'être un bandeau posé sur le texte.
     barre.classList.toggle("barre--flottante", y > SEUIL_FLOTTANT);
 
     // Posé avant toute sortie : même quand la barre n'a plus à bouger, la lecture avance.
@@ -654,23 +642,26 @@
     const delta = y - derniereY;
     derniereY = y;
     if (delta === 0) return;
-    dernierSens = delta > 0 ? 1 : -1;
 
-    // Tout en haut, la barre est toujours entière : on ne peut pas la retenir effacée là où
-    // il n'y a rien à cacher.
-    const vise = y <= 0 ? 0 : Math.min(Math.max(decalage + delta, 0), hauteurBarre);
-    if (vise === decalage) return;
-
-    // Une seule écriture par image affichée : suivre le doigt ne doit pas saccader la page.
-    if (!imageDemandee) {
-      imageDemandee = true;
-      requestAnimationFrame(() => {
-        imageDemandee = false;
-        poserDecalage(vise, false);
-      });
+    if (y <= 0) {
+      course = 0;
+      montrerBarre();
+      return;
     }
 
+    // Changer de sens remet le compteur à zéro : la barre répond aussitôt au geste inverse.
+    if (delta > 0 !== course > 0) course = 0;
+    course += delta;
+
+    if (course > COURSE_MASQUER) {
+      barre.classList.add("barre--masquee");
+      course = 0;
+    } else if (course < -COURSE_MONTRER) {
+      montrerBarre();
+      course = 0;
+    }
   }
+
 
   window.addEventListener("scroll", surDefilement, { passive: true });
 
