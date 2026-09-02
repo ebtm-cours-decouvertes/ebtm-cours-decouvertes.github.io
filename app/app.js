@@ -908,7 +908,7 @@
       titreBarre.textContent = "";
       return;
     }
-    if (arriveeParQrCode() && !dejaInstallee() && !inviteRefusee()) {
+    if (arriveeParQrCode() && !dejaInstallee()) {
       afficherDans(ecranInstallation(), "Installer");
       titreBarre.textContent = "";
       return;

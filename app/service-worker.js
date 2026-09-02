@@ -7,7 +7,7 @@
  * ci-dessous force le renouvellement complet du cache à la prochaine visite.
  */
 
-const VERSION = "2026-09-02-31";
+const VERSION = "2026-09-02-32";
 const CACHE = `cours-decouvertes-${VERSION}`;
 
 const FICHIERS = [
