@@ -597,7 +597,8 @@ main {
   line-height: 1.6;
 }
 
-.orientation__qr {
+.orientation__qr,
+.partage__qr {
   display: block;
   width: 100%;
   max-width: 320px;
@@ -610,7 +611,8 @@ main {
   box-sizing: border-box;
 }
 
-.orientation__adresse {
+.orientation__adresse,
+.partage__adresse {
   margin: 0 0 1.5rem;
   font-size: 0.95rem;
   color: var(--texte-doux);
@@ -1343,6 +1345,28 @@ main {
 
 .a-propos ol {
   padding-left: 1.4rem;
+}
+
+/* ---------- À propos : partager le cours ---------- */
+
+/* Le QR code garde son fond blanc en apparence sombre : un appareil photo lit mal un code clair
+   sur fond foncé. Il est plus petit que sur l'écran d'ordinateur, scanné ici de téléphone à
+   téléphone, à courte distance. */
+.partage__qr {
+  max-width: 240px;
+}
+
+.partage__adresse {
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+/* La hauteur est réservée pour que la page ne saute pas quand « Lien copié. » apparaît. */
+.partage__etat {
+  min-height: 1.5em;
+  margin: 0.5rem 0 0;
+  color: var(--texte-doux);
+  text-align: center;
 }
 
 @media (min-width: 600px) {

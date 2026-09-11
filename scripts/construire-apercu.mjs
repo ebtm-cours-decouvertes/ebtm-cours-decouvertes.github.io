@@ -37,10 +37,12 @@ function enBase64(chemin) {
   return `data:${type};base64,${readFileSync(join(app, chemin)).toString("base64")}`;
 }
 
-// Le logo de l'en-tête est posé par le code, pas écrit dans la page : il faut l'embarquer aussi.
+// Le logo de l'en-tête et le QR code sont posés par le code, pas écrits dans la page : il faut
+// les embarquer aussi.
 const figures = {
   "icones/logo-ebtm.png": enBase64("icones/logo-ebtm.png"),
   "icones/logo-ebtm-mot.png": enBase64("icones/logo-ebtm-mot.png"),
+  "qr-cours-decouvertes.png": enBase64("qr-cours-decouvertes.png"),
 };
 const dossierFigures = join(app, "contenu", "figures");
 if (existsSync(dossierFigures)) {

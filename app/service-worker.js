@@ -7,7 +7,7 @@
  * ci-dessous force le renouvellement complet du cache à la prochaine visite.
  */
 
-const VERSION = "2026-09-02-33";
+const VERSION = "2026-09-11-1";
 const CACHE = `cours-decouvertes-${VERSION}`;
 
 const FICHIERS = [
@@ -23,6 +23,7 @@ const FICHIERS = [
   "./icones/icone-512.png",
   "./icones/icone-maskable-512.png",
   "./icones/icone-180.png",
+  "./qr-cours-decouvertes.png",
   "./contenu/index.json",
   "./contenu/a-propos.json",
   "./contenu/versets.json",

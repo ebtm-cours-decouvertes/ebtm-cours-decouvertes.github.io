@@ -197,6 +197,10 @@
     return (window.FIGURES_EMBARQUEES || {})["icones/logo-ebtm-mot.png"] || "icones/logo-ebtm-mot.png";
   }
 
+  function sourceQrCode() {
+    return (window.FIGURES_EMBARQUEES || {})["qr-cours-decouvertes.png"] || "qr-cours-decouvertes.png";
+  }
+
   // En aperçu, les images sont embarquées dans la page ; sinon ce sont de vrais fichiers.
   function sourceFigure(fichier) {
     const chemin = `contenu/figures/${fichier}`;
@@ -1303,6 +1307,10 @@
 
   async function afficherAPropos() {
     const apropos = await chargerJson("contenu/a-propos.json");
+    // Le lien partagé porte « ?installer », comme le QR code : qui le reçoit arrive sur
+    // l'écran d'installation. L'adresse affichée reste sans ce marqueur, plus lisible.
+    const adresse = location.origin + location.pathname;
+    const lien = adresse + "?installer";
     const paragraphes = apropos.paragraphes
       .map((element) => (typeof element === "string" ? html`<p>${enrichir(element)}</p>` : rendreBloc(element)))
       .join("");
@@ -1323,6 +1331,13 @@
           Installer le cours sur votre écran d’accueil les met à l’abri : sans installation, le
           navigateur peut faire le ménage de lui-même au bout de quelques jours sans visite.
         </p>
+        <h2>Partager ce cours</h2>
+        <img class="partage__qr" src="${sourceQrCode()}" alt="Code à scanner menant à ${echapper(adresse)}" width="240" height="240" />
+        <p class="partage__adresse">${echapper(adresse)}</p>
+        <button type="button" class="bouton-principal" data-partage="${echapper(lien)}">
+          ${navigator.share ? "Partager le lien" : "Copier le lien"}
+        </button>
+        <p class="partage__etat" aria-live="polite"></p>
         <p class="pied">
           Version ${echapper(apropos.versionApplication)}<br />
           ${echapper(apropos.droits)}
@@ -1336,6 +1351,29 @@
     titreBarre.textContent = "À propos du cours";
 
   }
+
+  // Seule l'adresse du cours est partagée, jamais les réponses. Le menu de partage du téléphone
+  // s'ouvre là où il existe ; ailleurs, le lien est copié.
+  document.addEventListener("click", async (evenement) => {
+    const bouton = evenement.target.closest("[data-partage]");
+    if (!bouton) return;
+    const lien = bouton.dataset.partage;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: "Cours découvertes", url: lien });
+      } catch {
+        /* partage annulé par la personne : rien à signaler */
+      }
+      return;
+    }
+    const etatPartage = document.querySelector(".partage__etat");
+    try {
+      await navigator.clipboard.writeText(lien);
+      etatPartage.textContent = "Lien copié.";
+    } catch {
+      etatPartage.textContent = "Copie impossible : recopiez l’adresse ci-dessus.";
+    }
+  });
 
   // ---------------------------------------------------------------------------
   // Agrandissement des figures
