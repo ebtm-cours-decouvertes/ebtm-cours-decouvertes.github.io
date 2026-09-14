@@ -24,29 +24,75 @@
     lectures: {}, // { "6/lecture": 12 } — le bloc qui était en haut de l'écran
   });
 
-  let etat = lireEtat();
+  // L'enregistrement tel que cette copie de l'application l'a lu ou écrit en dernier.
+  let enregistrementConnu = lireEnregistrement();
+  let etat = etatDepuis(enregistrementConnu);
   let stockageIndisponible = false;
 
-  function lireEtat() {
+  function lireEnregistrement() {
     try {
-      const brut = localStorage.getItem(CLE_STOCKAGE);
+      return localStorage.getItem(CLE_STOCKAGE);
+    } catch {
+      return null;
+    }
+  }
+
+  function etatDepuis(brut) {
+    try {
       if (!brut) return ETAT_PAR_DEFAUT();
-      const lu = JSON.parse(brut);
-      return { ...ETAT_PAR_DEFAUT(), ...lu };
+      return { ...ETAT_PAR_DEFAUT(), ...JSON.parse(brut) };
     } catch {
       return ETAT_PAR_DEFAUT();
     }
   }
 
-  function enregistrerEtat() {
+  // Deux copies de l'application peuvent être ouvertes en même temps sur un téléphone, par
+  // exemple un onglet du navigateur resté ouvert à côté de l'application installée. Chacune garde
+  // l'état en mémoire : réécrire le sien en entier effacerait ce que l'autre a enregistré
+  // entre-temps. On relit donc le stockage juste avant d'écrire, et on n'y reporte que ce que
+  // cette copie a changé depuis sa dernière lecture ou écriture.
+  function enregistrerEtat(toutRemplacer) {
     try {
-      localStorage.setItem(CLE_STOCKAGE, JSON.stringify(etat));
+      const actuel = localStorage.getItem(CLE_STOCKAGE);
+      const aEcrire =
+        toutRemplacer === true || actuel === enregistrementConnu
+          ? etat
+          : reporterChangements(etatDepuis(actuel), etatDepuis(enregistrementConnu), etat);
+      const brut = JSON.stringify(aEcrire);
+      localStorage.setItem(CLE_STOCKAGE, brut);
+      etat = aEcrire;
+      enregistrementConnu = brut;
       stockageIndisponible = false;
       return true;
     } catch {
       stockageIndisponible = true;
       return false;
     }
+  }
+
+  // Reporte sur « base » ce qui diffère entre « avant » et « apres », clé par clé et à chaque
+  // niveau : une réponse modifiée ou vidée ici remplace celle de base, les autres restent.
+  function reporterChangements(base, avant, apres) {
+    const cles = new Set([...Object.keys(avant), ...Object.keys(apres)]);
+    for (const cle of cles) {
+      const a = avant[cle];
+      const b = apres[cle];
+      if (estObjet(a) || estObjet(b)) {
+        base[cle] = reporterChangements(
+          estObjet(base[cle]) ? base[cle] : {},
+          estObjet(a) ? a : {},
+          estObjet(b) ? b : {}
+        );
+      } else if (a !== b) {
+        if (b === undefined) delete base[cle];
+        else base[cle] = b;
+      }
+    }
+    return base;
+  }
+
+  function estObjet(valeur) {
+    return valeur !== null && typeof valeur === "object" && !Array.isArray(valeur);
   }
 
   function reponse(numLecon, numQuestion) {
@@ -58,6 +104,17 @@
     if (texte.trim()) etat.reponses[numLecon][numQuestion] = texte;
     else delete etat.reponses[numLecon][numQuestion];
     return enregistrerEtat();
+  }
+
+  // Réponse tapée mais pas encore enregistrée : l'enregistrement attend une courte pause dans la
+  // frappe. On l'enregistre sans attendre quand on quitte le champ, change d'écran ou passe en
+  // arrière-plan, car le téléphone peut alors fermer l'application à tout moment.
+  let reponseEnAttente = null;
+
+  function enregistrerReponseEnAttente() {
+    const enregistrer = reponseEnAttente;
+    reponseEnAttente = null;
+    if (enregistrer) enregistrer();
   }
 
   function nbReponses(lecon) {
@@ -831,7 +888,8 @@
       // Les réglages d'affichage ne sont pas des réponses : ils survivent à l'effacement.
       const conserves = { taillePolice: etat.taillePolice, apparence: etat.apparence };
       etat = { ...ETAT_PAR_DEFAUT(), ...conserves };
-      enregistrerEtat();
+      // Tout remplacer : l'effacement vaut aussi pour ce qu'une autre copie ouverte aurait écrit.
+      enregistrerEtat(true);
       fermerReglages();
       location.hash = "#/";
       router();
@@ -1255,16 +1313,21 @@
       // Seul un échec mérite d'être signalé, sinon les réponses seraient perdues sans le dire.
       const etatZone = zone.parentElement.querySelector(".question__etat");
       let minuterie = null;
+      const enregistrer = () => {
+        clearTimeout(minuterie);
+        if (reponseEnAttente === enregistrer) reponseEnAttente = null;
+        const ok = definirReponse(numero, Number(zone.dataset.question), zone.value);
+        etatZone.textContent = ok ? "" : "Attention : cet appareil refuse d’enregistrer. Votre réponse sera perdue.";
+        mettreAJourCompteur(lecon);
+      };
       ajusterHauteur(zone);
       zone.addEventListener("input", () => {
         ajusterHauteur(zone);
         clearTimeout(minuterie);
-        minuterie = setTimeout(() => {
-          const ok = definirReponse(numero, Number(zone.dataset.question), zone.value);
-          etatZone.textContent = ok ? "" : "Attention : cet appareil refuse d’enregistrer. Votre réponse sera perdue.";
-          mettreAJourCompteur(lecon);
-        }, 400);
+        reponseEnAttente = enregistrer;
+        minuterie = setTimeout(enregistrer, 400);
       });
+      zone.addEventListener("blur", enregistrerReponseEnAttente);
     });
 
     const caseRecitation = racine.querySelector("input[data-recitation]");
@@ -1482,6 +1545,8 @@
   // ---------------------------------------------------------------------------
 
   async function router() {
+    // Avant de reconstruire l'écran, dont les champs seront remplis depuis l'enregistrement.
+    enregistrerReponseEnAttente();
     const chemin = location.hash.replace(/^#/, "") || "/";
     try {
       await chargerVersets();
@@ -1520,6 +1585,14 @@
 
   window.addEventListener("hashchange", router);
   router();
+
+  // Passer en arrière-plan est le dernier moment que la page peut observer de façon fiable
+  // (MDN, « visibilitychange ») : le téléphone peut ensuite fermer l'application sans prévenir.
+  // « pagehide » double la précaution quand la page se ferme.
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") enregistrerReponseEnAttente();
+  });
+  window.addEventListener("pagehide", enregistrerReponseEnAttente);
 
   // ---------------------------------------------------------------------------
   // Fonctionnement hors connexion
