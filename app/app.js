@@ -312,6 +312,12 @@
       d="M7.5 10.5 L5.5 10.5 L5.5 20.5 L18.5 20.5 L18.5 10.5 L16.5 10.5" fill="none"
       stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>`;
 
+  // Le bouton de menu de Safari depuis iOS 27, dans la barre d'adresse : trois traits alignés à
+  // gauche, le dernier plus court. C'est lui qui mène à « Partager ».
+  const MENU_IOS = `<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"
+      focusable="false"><path d="M4 7 H20 M4 12 H20 M4 17 H14" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" /></svg>`;
+
   let installationDifferee = null;
 
   function dejaInstallee() {
@@ -322,6 +328,39 @@
     const ua = navigator.userAgent;
     // iPadOS se présente comme un Mac : on le reconnaît à son écran tactile.
     return /iPhone|iPod|iPad/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  }
+
+  // Version de Safari (« Version/27.0 » dans l'identité du navigateur), 0 pour un autre navigateur
+  // ou une identité illisible. Le numéro d'iOS qui y figure est figé (18_7 sous iOS 26 comme sous
+  // iOS 27) : seule la version de Safari suit le système.
+  function versionSafari() {
+    const ua = navigator.userAgent;
+    if (/CriOS|FxiOS|EdgiOS|OPiOS/.test(ua)) return 0;
+    const trouve = /Version\/(\d+)/.exec(ua);
+    return trouve ? Number(trouve[1]) : 0;
+  }
+
+  // Les gestes d'installation sur iPhone, tels que Safari les présente, vérifiés le 18 septembre
+  // 2026 dans les simulateurs d'iOS 26.5 et 27 :
+  // - iOS 26 : « ••• » en bas à droite, puis « Partager » ; iOS 27 : le bouton de menu dans la
+  //   barre d'adresse, puis « Partager ». Avant iOS 26, l'icône Partager est dans la barre du bas.
+  // - Depuis iOS 26, « Sur l'écran d'accueil » n'apparaît qu'après « En voir plus ».
+  // Autres navigateurs et versions plus anciennes : les indications d'origine.
+  // Espaces insécables dans les guillemets : un « seul en fin de ligne gênait la lecture.
+  function etapesIPhone(classe) {
+    const version = versionSafari();
+    const partager = `<span class="invite__icone">${PARTAGE_IOS}<span class="visuellement-cache">Partager</span></span>`;
+    const premiere = version >= 27
+      ? html`Touchez <span class="invite__icone">${MENU_IOS}<span class="visuellement-cache">le bouton de menu</span></span> dans la barre d’adresse, puis « Partager ».`
+      : html`Touchez ${partager} en bas de l’écran. Si vous ne la voyez pas, touchez <strong>•••</strong> puis « Partager ».`;
+    const deuxieme = version >= 26
+      ? html`Touchez « En voir plus », puis « Sur l’écran d’accueil ».`
+      : html`Faites défiler, puis touchez « Sur l’écran d’accueil ».`;
+    return html`<ol class="${classe}">
+            <li>${premiere}</li>
+            <li>${deuxieme}</li>
+            <li>Touchez « Ajouter ».</li>
+          </ol>`;
   }
 
   // Un appareil qu'on touche : sur un ordinateur sans installation possible, mieux vaut ne
@@ -417,11 +456,7 @@
     const etapes = installationDifferee
       ? html`<button type="button" class="bouton-principal orientation__bouton" data-invite="installer">Installer</button>`
       : surIPhone()
-        ? html`<ol class="invite__etapes orientation__etapes">
-            <li>Touchez <span class="invite__icone">${PARTAGE_IOS}</span> en bas de l’écran. Si vous ne la voyez pas, touchez <strong>•••</strong> puis « Partager ».</li>
-            <li>Faites défiler, puis touchez « Sur l’écran d’accueil ».</li>
-            <li>Touchez « Ajouter ».</li>
-          </ol>`
+        ? etapesIPhone("invite__etapes orientation__etapes")
         : html`<ol class="invite__etapes orientation__etapes">
             <li>Ouvrez le menu de votre navigateur.</li>
             <li>Touchez « Installer » ou « Ajouter à l’écran d’accueil ».</li>
@@ -462,11 +497,7 @@
           Vous le retrouverez avec vos autres applications, il fonctionnera sans connexion, et vos
           réponses seront conservées.
         </p>
-        <ol class="invite__etapes">
-          <li>Touchez <span class="invite__icone">${PARTAGE_IOS}</span> en bas de l’écran. Si vous ne la voyez pas, touchez <strong>•••</strong> puis « Partager ».</li>
-          <li>Faites défiler, puis touchez « Sur l’écran d’accueil ».</li>
-          <li>Touchez « Ajouter ».</li>
-        </ol>
+        ${etapesIPhone("invite__etapes")}
         <button type="button" class="invite__plus-tard" data-invite="plus-tard">Plus tard</button>
       </section>`;
     }
