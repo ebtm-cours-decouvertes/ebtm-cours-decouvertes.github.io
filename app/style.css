@@ -593,10 +593,21 @@ main {
 /* La pastille est une copie décorative de la rangée, en violet et texte blanc, posée par
    app.js par-dessus les vrais boutons. On n'en laisse voir que la part située sous le choix
    actif : fond et texte changent ainsi exactement ensemble pendant le trajet.
-   Mouvement choisi sur un essai à trois variantes, « bulle qui s'étire » : le
-   bord de devant met 200 ms, celui de derrière 360 ms. Le réglage « réduire les animations »
-   du téléphone le supprime, par la règle générale en fin de feuille. */
+
+   Le mouvement est celui d'un ressort sans rebond, de réponse 0,35 s : il part doucement,
+   accélère, puis se pose. Apple décrit ce réglage pour un élément qui change de place
+   (amortissement 1, réponse 0,3 à 0,4 s, « Designing Fluid Interfaces », WWDC 2018). La courbe
+   est calculée, pas dessinée à l'œil : x(t) = 1 − (1 + ωt)·e^(−ωt), avec ω = 2π / 0,35.
+
+   Une première version, mise en ligne le 16 novembre 2026, étirait la pastille avec une courbe
+   de sortie franche. Mesuré sur un enregistrement d'iPhone : les deux tiers du trajet en trois
+   images, puis un long rattrapage. L'œil y voyait un saut. À ne pas refaire : une courbe de
+   sortie convient à ce qui apparaît, pas à ce qui se déplace.
+
+   Le réglage « réduire les animations » du téléphone supprime le trajet, par la règle générale
+   en fin de feuille. */
 .bandeau-copie {
+  --ressort: linear(0, 0.0345, 0.1147, 0.2154, 0.3213, 0.4235, 0.5171, 0.6, 0.6717, 0.7327, 0.7837, 0.8259, 0.8606, 0.8888, 0.9116, 0.93, 0.9447, 0.9565, 0.9658, 0.9732, 0.979, 0.9836, 0.9872, 0.9901, 0.9923, 0.994, 0.9953, 0.9964, 0.9972, 0.9978, 0.9983, 0.9987, 1);
   position: absolute;
   inset: 0;
   z-index: 2;
@@ -605,15 +616,19 @@ main {
   border-radius: 13px;
   pointer-events: none;
   clip-path: inset(3px var(--pastille-droite) 3px var(--pastille-gauche) round 10px);
+  /* Pour un navigateur qui ne connaît pas linear() (avant Safari 17.2, décembre 2023) : un
+     déplacement plus court, qui part et se pose en douceur lui aussi. */
   transition:
-    --pastille-gauche 360ms cubic-bezier(0.23, 1, 0.32, 1),
-    --pastille-droite 200ms cubic-bezier(0.23, 1, 0.32, 1);
+    --pastille-gauche 300ms cubic-bezier(0.77, 0, 0.175, 1),
+    --pastille-droite 300ms cubic-bezier(0.77, 0, 0.175, 1);
 }
 
-.bandeau-copie[data-sens="gauche"] {
-  transition:
-    --pastille-gauche 200ms cubic-bezier(0.23, 1, 0.32, 1),
-    --pastille-droite 360ms cubic-bezier(0.23, 1, 0.32, 1);
+@supports (transition-timing-function: linear(0, 1)) {
+  .bandeau-copie {
+    transition:
+      --pastille-gauche 515ms var(--ressort),
+      --pastille-droite 515ms var(--ressort);
+  }
 }
 
 /* Posée sans voyage : à l'ouverture d'un écran, ou comme point de départ d'un trajet. */
@@ -636,6 +651,24 @@ main {
 
 .bandeau-copie .onglet__compte {
   color: rgba(255, 255, 255, 0.85);
+}
+
+/* Sur un téléphone, le navigateur pose un voile gris sur ce qu'on touche : il passait sur
+   l'onglet juste avant la pastille. Il est retiré ici, et remplacé par une teinte légère tant
+   que le doigt appuie. Le toucher n'attend plus un éventuel second toucher, et un appui long
+   ne sélectionne plus le libellé : ce sont des commandes, pas du texte à copier. */
+.onglet,
+.bouton-choix {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.onglet:active,
+.bouton-choix:active {
+  background: rgba(152, 40, 152, 0.12);
+  background: color-mix(in srgb, var(--violet) 12%, transparent);
 }
 
 /* Sous la pastille, le vrai bouton n'a plus à porter le violet lui-même. */

@@ -292,14 +292,15 @@
   // ---------------------------------------------------------------------------
   //
   // Un bandeau (onglets d'une leçon, modes d'un verset, apparence) montre son choix par une
-  // pastille violette qui s'étire vers sa nouvelle place puis se rassemble. La pastille est une
-  // copie décorative de la rangée, en violet et texte blanc, dont la feuille de style ne laisse
-  // voir que la part située sous le choix actif : fond et texte changent exactement ensemble.
-  // Les vrais boutons restent dessous, seuls à être lus et touchés.
+  // pastille violette qui glisse vers sa nouvelle place. La pastille est une copie décorative
+  // de la rangée, en violet et texte blanc, dont la feuille de style ne laisse voir que la part
+  // située sous le choix actif : fond et texte changent exactement ensemble. Les vrais boutons
+  // restent dessous, seuls à être lus et touchés.
   //
-  // « depuis » est la place d'où la pastille part quand la rangée vient d'être reconstruite,
-  // ce qui arrive à chaque changement d'onglet. Sans lui, elle est posée sans voyager.
-  function equiperBandeau(rangee, depuis) {
+  // La pastille suit les attributs des boutons : il suffit de changer « aria-selected » ou
+  // « aria-pressed » pour qu'elle parte. Elle ne voyage que si la rangée reste en place : une
+  // rangée reconstruite repart de zéro, pastille posée sans mouvement.
+  function equiperBandeau(rangee) {
     const boutons = Array.from(rangee.querySelectorAll(":scope > button"));
     if (boutons.length < 2) return;
     const copie = document.createElement("div");
@@ -331,8 +332,6 @@
       return { gauche: bouton.left - bandeau.left, droite: bandeau.right - bouton.right };
     };
     const poser = (index, voyage) => {
-      // Le sens décide quel bord part le premier.
-      copie.dataset.sens = index < place ? "gauche" : "droite";
       copie.classList.toggle("bandeau-copie--posee", !voyage);
       // La place est mesurée sur le vrai bouton, et non déduite par tiers de la largeur : en
       // texte très grand sur un écran étroit, les colonnes n'ont plus la même largeur. Une
@@ -348,12 +347,29 @@
       }
       place = index;
     };
+    // Un trajet ne part qu'une fois le nouvel écran dessiné, deux images plus tard. Parti tout de
+    // suite, il se jouait pendant que le téléphone reconstruisait la page : ses premières images
+    // n'étaient pas dessinées, et la pastille apparaissait déjà au quart du chemin (mesuré image
+    // par image dans le Safari d'un iPhone virtuel, le 16 novembre 2026).
+    let attente = 0;
+    const partir = (index) => {
+      attente = requestAnimationFrame(() => {
+        attente = requestAnimationFrame(() => {
+          attente = 0;
+          poser(index, true);
+        });
+      });
+    };
     const suivre = () => {
       const index = choisi();
+      cancelAnimationFrame(attente);
+      attente = 0;
       copie.hidden = index < 0;
       if (index < 0) place = -1;
-      else if (index !== place) poser(index, place >= 0);
-      else {
+      else if (index !== place) {
+        if (place >= 0) partir(index);
+        else poser(index, false);
+      } else {
         // Même choix, mais un libellé a pu changer de largeur (compte d'un onglet). On ne recale
         // que si la place a réellement bougé : sinon on couperait un trajet en cours.
         const mesure = mesurer(index);
@@ -362,15 +378,7 @@
     };
 
     recopier();
-    const actuel = choisi();
-    if (Number.isInteger(depuis) && depuis >= 0 && depuis < boutons.length && actuel >= 0 && depuis !== actuel) {
-      copie.hidden = false;
-      poser(depuis, false);
-      // À l'image suivante seulement : la pastille est d'abord dessinée à son point de départ.
-      requestAnimationFrame(suivre);
-    } else {
-      suivre();
-    }
+    suivre();
 
     // La rangée change de largeur (téléphone tourné, taille du texte, fenêtre qui s'ouvre) :
     // la pastille est reposée à sa place, sans voyage.
@@ -397,9 +405,6 @@
       });
     }
   }
-
-  // D'où part la pastille des onglets au prochain affichage d'une leçon : { lecon, index }.
-  let departPastille = null;
 
   const barre = document.getElementById("barre");
   const zoneOnglets = document.getElementById("zone-onglets");
@@ -711,8 +716,10 @@
   // Le logo porte le nom de l'église, le titre celui du cours : les deux vont de pair.
   const NOM_APPLICATION = "Cours découvertes";
 
-  function afficherDans(contenuHtml, titreDocument) {
-    zoneOnglets.innerHTML = "";
+  // « garderOnglets » laisse la barre d'onglets en place : d'un onglet à l'autre de la même
+  // leçon, c'est la même rangée, et sa pastille peut donc glisser sans interruption.
+  function afficherDans(contenuHtml, titreDocument, { garderOnglets = false } = {}) {
+    if (!garderOnglets) zoneOnglets.innerHTML = "";
     zoneNavigation.innerHTML = LOGO.replace("__SRC__", sourceLogo()).replace("__SRC_SOMBRE__", sourceLogoSombre());
     titreBarre.textContent = NOM_APPLICATION;
     // Le partage n'appartient qu'à la liste des leçons : chaque écran l'éteint, elle le rallume.
@@ -1189,6 +1196,9 @@
             Leçon ${lecon.numero} · ${echapper(lecon.titre)} — ${NOMS_ONGLETS[onglet]}
           </h1>`;
 
+    // La barre d'onglets de cette leçon est-elle déjà à l'écran ? Alors on la garde.
+    const rangeeEnPlace = zoneOnglets.querySelector(`.onglets[data-lecon="${numero}"]`);
+
     afficherDans(
       html`
         ${enTete}
@@ -1211,7 +1221,8 @@
             : ""
         }
       `,
-      `Leçon ${lecon.numero} · ${lecon.titre}`
+      `Leçon ${lecon.numero} · ${lecon.titre}`,
+      { garderOnglets: Boolean(rangeeEnPlace) }
     );
 
     barreEffacable = true;
@@ -1220,22 +1231,24 @@
     zoneNavigation.innerHTML = RETOUR;
     titreBarre.textContent = lecon.titre;
 
-    // Un seul onglet disponible : autant ne pas afficher de barre d'onglets.
-    zoneOnglets.innerHTML =
-      disponibles.length > 1
-        ? html`<div class="onglets" role="tablist" aria-label="Parties de la leçon"
-              style="grid-template-columns: repeat(${disponibles.length}, 1fr)">
-            ${boutonOnglet(numero, "lecture", "Lecture", "", onglet)}
-            ${disponibles.includes("versets") ? boutonOnglet(numero, "versets", "Versets", `${lecon.versets_a_apprendre.length} à apprendre`, onglet) : ""}
-            ${disponibles.includes("questions") ? boutonOnglet(numero, "questions", "Questions", `${nbReponses(lecon)} / ${lecon.questions.length}`, onglet) : ""}
-          </div>`
-        : "";
-    // La barre d'onglets est reconstruite à chaque changement d'onglet : la pastille repart de
-    // l'onglet qu'on quitte, si c'est la même leçon.
-    const rangeeOnglets = zoneOnglets.querySelector(".onglets");
-    if (rangeeOnglets) {
-      equiperBandeau(rangeeOnglets, departPastille && departPastille.lecon === numero ? departPastille.index : undefined);
-      departPastille = { lecon: numero, index: disponibles.indexOf(onglet) };
+    if (rangeeEnPlace) {
+      // Même leçon : la rangée reste, seuls le choix et le compte des questions sont mis à jour.
+      marquerOnglet(onglet);
+      const compte = rangeeEnPlace.querySelector("#onglet-questions .onglet__compte");
+      if (compte) compte.textContent = `${nbReponses(lecon)} / ${lecon.questions.length}`;
+    } else {
+      // Un seul onglet disponible : autant ne pas afficher de barre d'onglets.
+      zoneOnglets.innerHTML =
+        disponibles.length > 1
+          ? html`<div class="onglets" role="tablist" aria-label="Parties de la leçon" data-lecon="${numero}"
+                style="grid-template-columns: repeat(${disponibles.length}, 1fr)">
+              ${boutonOnglet(numero, "lecture", "Lecture", "", onglet)}
+              ${disponibles.includes("versets") ? boutonOnglet(numero, "versets", "Versets", `${lecon.versets_a_apprendre.length} à apprendre`, onglet) : ""}
+              ${disponibles.includes("questions") ? boutonOnglet(numero, "questions", "Questions", `${nbReponses(lecon)} / ${lecon.questions.length}`, onglet) : ""}
+            </div>`
+          : "";
+      const rangeeOnglets = zoneOnglets.querySelector(".onglets");
+      if (rangeeOnglets) equiperBandeau(rangeeOnglets);
     }
     ajusterHauteurBarre();
 
@@ -1769,8 +1782,6 @@
       await chargerVersets();
       const lecon = chemin.match(/^\/lecon\/(\d+)(?:\/(lecture|versets|questions))?\/?$/);
       if (lecon) return await afficherLecon(Number(lecon[1]), lecon[2]);
-      // Hors d'une leçon, la pastille des onglets n'a plus de point de départ à retenir.
-      departPastille = null;
       if (chemin === "/a-propos") return await afficherAPropos();
       return await afficherAccueil();
     } catch (erreur) {
@@ -1782,6 +1793,21 @@
   // L'application replace elle-même la lecture en haut de page à chaque écran :
   // laisser le navigateur restaurer une ancienne position donnerait un départ au milieu du texte.
   if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+
+  // Le choix d'un onglet est noté dès le toucher, pour les lecteurs d'écran comme pour la pastille
+  // (qui attend seulement que le nouvel écran soit dessiné, voir equiperBandeau).
+  function marquerOnglet(nom) {
+    for (const bouton of zoneOnglets.querySelectorAll('[role="tab"]')) {
+      const choisi = bouton.id === `onglet-${nom}`;
+      bouton.setAttribute("aria-selected", String(choisi));
+      bouton.tabIndex = choisi ? 0 : -1;
+    }
+  }
+
+  zoneOnglets.addEventListener("click", (evenement) => {
+    const bouton = evenement.target.closest('[role="tab"]');
+    if (bouton) marquerOnglet(bouton.id.replace("onglet-", ""));
+  });
 
   // Navigation au clavier dans la barre d'onglets.
   zoneOnglets.addEventListener("keydown", (evenement) => {
