@@ -288,100 +288,79 @@
     document.body.style.overflow = actif ? "hidden" : "";
   }
   // ---------------------------------------------------------------------------
-  // Bandeaux : la pastille du choix actif
+  // Bandeaux : la bulle du choix actif
   // ---------------------------------------------------------------------------
   //
   // Un bandeau (onglets d'une leçon, modes d'un verset, apparence) montre son choix par une
-  // pastille violette qui glisse vers sa nouvelle place. La pastille est une copie décorative
-  // de la rangée, en violet et texte blanc, dont la feuille de style ne laisse voir que la part
-  // située sous le choix actif : fond et texte changent exactement ensemble. Les vrais boutons
-  // restent dessous, seuls à être lus et touchés.
+  // bulle violette qui glisse vers sa nouvelle place et s'étire un instant en chemin. C'est la
+  // mécanique de la barre d'onglets de l'application du groupe de jeunes, reprise telle quelle
+  // (voir la feuille de style) : un seul élément, glissé sous les libellés. Les vrais boutons
+  // restent au-dessus, seuls à être lus et touchés.
   //
-  // La pastille suit les attributs des boutons : il suffit de changer « aria-selected » ou
+  // La bulle suit les attributs des boutons : il suffit de changer « aria-selected » ou
   // « aria-pressed » pour qu'elle parte. Elle ne voyage que si la rangée reste en place : une
-  // rangée reconstruite repart de zéro, pastille posée sans mouvement.
+  // rangée reconstruite repart de zéro, bulle posée sans mouvement.
   function equiperBandeau(rangee) {
     const boutons = Array.from(rangee.querySelectorAll(":scope > button"));
     if (boutons.length < 2) return;
-    const copie = document.createElement("div");
-    copie.className = "bandeau-copie";
-    copie.setAttribute("aria-hidden", "true");
-    copie.style.gridTemplateColumns = `repeat(${boutons.length}, 1fr)`;
-    // Cachée tant qu'aucun choix n'est posé : sans cela, toute la copie violette se verrait.
-    copie.hidden = true;
+    const bulle = document.createElement("span");
+    bulle.className = "bandeau-bulle";
+    bulle.setAttribute("aria-hidden", "true");
+    // Cachée tant qu'aucun choix n'est posé.
+    bulle.hidden = true;
     rangee.classList.add("bandeau--equipe");
-    rangee.append(copie);
+    // En tête de rangée : elle se dessine ainsi sous les boutons, sans réglage de plan.
+    rangee.prepend(bulle);
     let place = -1;
-    let bords = null;
+    let cadre = null;
     let largeurConnue = rangee.offsetWidth;
 
     const choisi = () => boutons.findIndex((b) => b.matches('[aria-selected="true"], [aria-pressed="true"]'));
-    // Les cases de la copie portent un nom à elles (« copie-onglet », « copie-bouton-choix »),
-    // mis en forme comme le bouton qu'elles doublent : le reste du code, qui cherche les vrais
-    // boutons par leur classe, ne peut pas les prendre pour eux.
-    const recopier = () => {
-      copie.innerHTML = boutons
-        .map((b) => `<span class="copie-${b.classList[0]}">${b.innerHTML}</span>`)
-        .join("");
-    };
-    // Positions lues avec leurs décimales : arrondies au pixel, la pastille déborderait d'un
-    // filet sur un écran dont la largeur ne se divise pas rond.
+    // La place est mesurée sur le vrai bouton, et non déduite par tiers de la largeur : en
+    // texte très grand sur un écran étroit, les colonnes n'ont plus la même largeur. Positions
+    // lues avec leurs décimales : arrondies, la bulle déborderait d'un filet.
     const mesurer = (index) => {
       const bouton = boutons[index].getBoundingClientRect();
-      const bandeau = copie.getBoundingClientRect();
-      return { gauche: bouton.left - bandeau.left, droite: bandeau.right - bouton.right };
+      const bandeau = rangee.getBoundingClientRect();
+      return {
+        x: bouton.left - bandeau.left,
+        y: bouton.top - bandeau.top,
+        largeur: bouton.width,
+        hauteur: bouton.height,
+      };
     };
     const poser = (index, voyage) => {
-      copie.classList.toggle("bandeau-copie--posee", !voyage);
-      // La place est mesurée sur le vrai bouton, et non déduite par tiers de la largeur : en
-      // texte très grand sur un écran étroit, les colonnes n'ont plus la même largeur. Une
-      // mesure par changement de choix, jamais pendant un défilement.
-      bords = mesurer(index);
-      // Posé sur la pastille elle-même, pas sur un parent : seul cet élément est recalculé.
-      copie.style.setProperty("--pastille-gauche", `${bords.gauche}px`);
-      copie.style.setProperty("--pastille-droite", `${bords.droite}px`);
-      if (!voyage) {
-        // Lire une mesure applique la pose tout de suite : le trajet suivant partira bien d'ici.
-        void copie.offsetWidth;
-        copie.classList.remove("bandeau-copie--posee");
-      }
+      bulle.classList.toggle("bandeau-bulle--posee", !voyage);
+      cadre = mesurer(index);
+      bulle.style.top = `${cadre.y}px`;
+      bulle.style.width = `${cadre.largeur}px`;
+      bulle.style.height = `${cadre.hauteur}px`;
+      bulle.style.setProperty("--bulle-x", `${cadre.x}px`);
+      bulle.classList.remove("bandeau-bulle--bouge");
+      // Lire une mesure applique la pose tout de suite, et relance l'étirement à chaque trajet.
+      void bulle.offsetWidth;
+      if (voyage) bulle.classList.add("bandeau-bulle--bouge");
+      else bulle.classList.remove("bandeau-bulle--posee");
       place = index;
-    };
-    // Un trajet ne part qu'une fois le nouvel écran dessiné, deux images plus tard. Parti tout de
-    // suite, il se jouait pendant que le téléphone reconstruisait la page : ses premières images
-    // n'étaient pas dessinées, et la pastille apparaissait déjà au quart du chemin (mesuré image
-    // par image dans le Safari d'un iPhone virtuel, le 16 novembre 2026).
-    let attente = 0;
-    const partir = (index) => {
-      attente = requestAnimationFrame(() => {
-        attente = requestAnimationFrame(() => {
-          attente = 0;
-          poser(index, true);
-        });
-      });
     };
     const suivre = () => {
       const index = choisi();
-      cancelAnimationFrame(attente);
-      attente = 0;
-      copie.hidden = index < 0;
+      bulle.hidden = index < 0;
       if (index < 0) place = -1;
-      else if (index !== place) {
-        if (place >= 0) partir(index);
-        else poser(index, false);
-      } else {
+      else if (index !== place) poser(index, place >= 0);
+      else {
         // Même choix, mais un libellé a pu changer de largeur (compte d'un onglet). On ne recale
         // que si la place a réellement bougé : sinon on couperait un trajet en cours.
         const mesure = mesurer(index);
-        if (mesure.gauche !== bords.gauche || mesure.droite !== bords.droite) poser(index, false);
+        const bouge = ["x", "y", "largeur", "hauteur"].some((cle) => mesure[cle] !== cadre[cle]);
+        if (bouge) poser(index, false);
       }
     };
 
-    recopier();
     suivre();
 
     // La rangée change de largeur (téléphone tourné, taille du texte, fenêtre qui s'ouvre) :
-    // la pastille est reposée à sa place, sans voyage.
+    // la bulle est reposée à sa place, sans voyage.
     if ("ResizeObserver" in window) {
       new ResizeObserver(() => {
         if (rangee.offsetWidth === largeurConnue) return;
@@ -390,11 +369,8 @@
       }).observe(rangee);
     }
 
-    // Le choix change, ou un compte est mis à jour dans un onglet : la copie suit.
-    const veille = new MutationObserver(() => {
-      recopier();
-      suivre();
-    });
+    // Le choix change, ou un compte est mis à jour dans un onglet : la bulle suit.
+    const veille = new MutationObserver(suivre);
     for (const bouton of boutons) {
       veille.observe(bouton, {
         attributes: true,
@@ -1794,8 +1770,8 @@
   // laisser le navigateur restaurer une ancienne position donnerait un départ au milieu du texte.
   if ("scrollRestoration" in history) history.scrollRestoration = "manual";
 
-  // Le choix d'un onglet est noté dès le toucher, pour les lecteurs d'écran comme pour la pastille
-  // (qui attend seulement que le nouvel écran soit dessiné, voir equiperBandeau).
+  // Le choix d'un onglet est noté dès le toucher : la bulle part tout de suite, sans attendre
+  // que la page soit reconstruite.
   function marquerOnglet(nom) {
     for (const bouton of zoneOnglets.querySelectorAll('[role="tab"]')) {
       const choisi = bouton.id === `onglet-${nom}`;

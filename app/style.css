@@ -533,10 +533,8 @@ main {
 }
 
 /* La marge de 3 px laisse voir le bandeau autour de l'onglet choisi ; la marge intérieure est
-   réduite d'autant, moins l'ancien filet : la barre garde exactement sa hauteur.
-   « copie-onglet » est la case décorative de la pastille : elle doit tomber pile dessus. */
-.onglet,
-.copie-onglet {
+   réduite d'autant, moins l'ancien filet : la barre garde exactement sa hauteur. */
+.onglet {
   position: relative;
   border: none;
   background: transparent;
@@ -571,90 +569,67 @@ main {
   color: rgba(255, 255, 255, 0.85);
 }
 
-/* ---------- Bandeaux : la pastille qui s'étire ---------- */
+/* ---------- Bandeaux : la bulle qui glisse ---------- */
 
-/* Les deux bords de la pastille violette sont deux valeurs animables séparément : c'est ce qui
-   permet de l'étirer, le bord de devant partant plus vite que celui de derrière. Ce sont les
-   distances, mesurées par app.js, entre les bords du bandeau et ceux du bouton choisi. Prise
-   en charge lue le 16 novembre 2026 (webstatus.dev, « Registered custom properties ») : Safari
-   16.4, Chrome 85, Firefox 128. Un navigateur plus ancien déplace la pastille sans mouvement. */
-@property --pastille-gauche {
-  syntax: "<length>";
-  inherits: false;
-  initial-value: 0px;
-}
+/* La bulle violette du choix actif : un seul élément, posé par app.js sous les libellés, qui
+   glisse d'un bouton à l'autre. Même mécanique et mêmes réglages que la barre d'onglets de
+   l'application du groupe de jeunes, demandés tels quels le 16 novembre 2026 (« il faut un
+   mouvement exactement comme ça ») : 0,4 s, un léger dépassement à l'arrivée, et la bulle qui
+   s'étire un instant en chemin, comme une goutte.
 
-@property --pastille-droite {
-  syntax: "<length>";
-  inherits: false;
-  initial-value: 0px;
-}
+   Elle se déplace par « translate » et s'étire par « scale » : le téléphone anime ces deux
+   propriétés sans repasser par la page, donc sans à-coup pendant que l'écran change. Deux
+   versions précédentes découpaient une copie violette de la rangée (« clip-path ») : ce
+   découpage se recalculait à chaque image, en même temps que la page, et le mouvement sautait
+   ou paraissait plat. À ne pas refaire.
 
-/* La pastille est une copie décorative de la rangée, en violet et texte blanc, posée par
-   app.js par-dessus les vrais boutons. On n'en laisse voir que la part située sous le choix
-   actif : fond et texte changent ainsi exactement ensemble pendant le trajet.
-
-   Le mouvement est celui d'un ressort sans rebond, de réponse 0,35 s : il part doucement,
-   accélère, puis se pose. Apple décrit ce réglage pour un élément qui change de place
-   (amortissement 1, réponse 0,3 à 0,4 s, « Designing Fluid Interfaces », WWDC 2018). La courbe
-   est calculée, pas dessinée à l'œil : x(t) = 1 − (1 + ωt)·e^(−ωt), avec ω = 2π / 0,35.
-
-   Une première version, mise en ligne le 16 novembre 2026, étirait la pastille avec une courbe
-   de sortie franche. Mesuré sur un enregistrement d'iPhone : les deux tiers du trajet en trois
-   images, puis un long rattrapage. L'œil y voyait un saut. À ne pas refaire : une courbe de
-   sortie convient à ce qui apparaît, pas à ce qui se déplace.
-
-   Le réglage « réduire les animations » du téléphone supprime le trajet, par la règle générale
-   en fin de feuille. */
-.bandeau-copie {
-  --ressort: linear(0, 0.0345, 0.1147, 0.2154, 0.3213, 0.4235, 0.5171, 0.6, 0.6717, 0.7327, 0.7837, 0.8259, 0.8606, 0.8888, 0.9116, 0.93, 0.9447, 0.9565, 0.9658, 0.9732, 0.979, 0.9836, 0.9872, 0.9901, 0.9923, 0.994, 0.9953, 0.9964, 0.9972, 0.9978, 0.9983, 0.9987, 1);
+   « --bulle-x » est la distance, mesurée par app.js, entre le bord du bandeau et le bouton
+   choisi ; la largeur et la hauteur sont celles du bouton. */
+.bandeau-bulle {
   position: absolute;
-  inset: 0;
-  z-index: 2;
-  display: grid;
+  top: 0;
+  left: 0;
+  border-radius: 10px;
   background: var(--violet);
-  border-radius: 13px;
+  translate: var(--bulle-x, 0) 0;
   pointer-events: none;
-  clip-path: inset(3px var(--pastille-droite) 3px var(--pastille-gauche) round 10px);
-  /* Pour un navigateur qui ne connaît pas linear() (avant Safari 17.2, décembre 2023) : un
-     déplacement plus court, qui part et se pose en douceur lui aussi. */
-  transition:
-    --pastille-gauche 300ms cubic-bezier(0.77, 0, 0.175, 1),
-    --pastille-droite 300ms cubic-bezier(0.77, 0, 0.175, 1);
 }
 
-@supports (transition-timing-function: linear(0, 1)) {
-  .bandeau-copie {
-    transition:
-      --pastille-gauche 515ms var(--ressort),
-      --pastille-droite 515ms var(--ressort);
-  }
-}
-
-/* Posée sans voyage : à l'ouverture d'un écran, ou comme point de départ d'un trajet. */
-.bandeau-copie--posee {
-  transition: none;
-}
-
-.bandeau-copie[hidden] {
+.bandeau-bulle[hidden] {
   display: none;
 }
 
-/* Dans la barre d'onglets, le bandeau s'arrête aux marges intérieures du conteneur. */
-.onglets > .bandeau-copie {
-  inset: 0 1rem 0.6rem;
+@media (prefers-reduced-motion: no-preference) {
+  .bandeau-bulle {
+    transition: translate 0.4s cubic-bezier(0.3, 1.3, 0.5, 1);
+  }
+
+  .bandeau-bulle--bouge {
+    animation: etirer 0.4s ease-out;
+  }
+
+  /* Le libellé change de couleur pendant que la bulle glisse. Plus vite que l'icône du groupe
+     de jeunes (0,25 s) : ici le libellé passe du blanc à l'encre, et resterait un instant
+     blanc sur fond clair si la bulle le quittait avant qu'il ait changé. */
+  .bandeau--equipe > button,
+  .bandeau--equipe > button .onglet__compte {
+    transition: color 0.15s ease-out;
+  }
 }
 
-.bandeau-copie > span {
-  color: #fff;
+@keyframes etirer {
+  35% {
+    scale: 1.16 0.88;
+  }
 }
 
-.bandeau-copie .onglet__compte {
-  color: rgba(255, 255, 255, 0.85);
+/* Posée sans voyage : à l'ouverture d'un écran, ou quand la rangée change de largeur. */
+.bandeau-bulle.bandeau-bulle--posee {
+  transition: none;
 }
 
 /* Sur un téléphone, le navigateur pose un voile gris sur ce qu'on touche : il passait sur
-   l'onglet juste avant la pastille. Il est retiré ici, et remplacé par une teinte légère tant
+   l'onglet juste avant la bulle. Il est retiré ici, et remplacé par une teinte légère tant
    que le doigt appuie. Le toucher n'attend plus un éventuel second toucher, et un appui long
    ne sélectionne plus le libellé : ce sont des commandes, pas du texte à copier. */
 .onglet,
@@ -671,15 +646,18 @@ main {
   background: color-mix(in srgb, var(--violet) 12%, transparent);
 }
 
-/* Sous la pastille, le vrai bouton n'a plus à porter le violet lui-même. */
+/* Chaque bouton est dessiné sur son propre calque, au-dessus de la bulle. Sans cela, Safari
+   glissait un instant le libellé de l'onglet quitté sous la bulle en mouvement (vu image par
+   image sur iPhone virtuel, le 16 novembre 2026). */
+.bandeau--equipe > button {
+  will-change: transform;
+}
+
+/* Au-dessus de la bulle, le vrai bouton n'a plus à porter le violet lui-même : il garde
+   seulement son libellé blanc. */
 .bandeau--equipe > .onglet[aria-selected="true"],
 .bandeau--equipe > .bouton-choix[aria-pressed="true"] {
   background: transparent;
-  color: inherit;
-}
-
-.bandeau--equipe > .onglet[aria-selected="true"] .onglet__compte {
-  color: var(--texte-doux);
 }
 
 .panneau[hidden] {
@@ -1076,9 +1054,7 @@ main {
 
 /* Un choix exclusif prend la forme du bandeau des onglets. Chaque bouton garde ses 44 px.
    Même géométrie que les onglets, une marge de 3 px autour de chaque bouton, pour que la
-   pastille ait la même forme dans les trois menus. Le contenu est centré à la main
-   pour que la copie de la pastille (« copie-bouton-choix »), faite de simples « span », tombe
-   exactement dessus. */
+   bulle ait la même forme dans les trois menus. */
 .groupe-boutons {
   position: relative;
   display: grid;
@@ -1087,8 +1063,7 @@ main {
   border-radius: 13px;
 }
 
-.bouton-choix,
-.copie-bouton-choix {
+.bouton-choix {
   position: relative;
   display: flex;
   align-items: center;
