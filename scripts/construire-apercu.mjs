@@ -42,6 +42,7 @@ function enBase64(chemin) {
 const figures = {
   "icones/logo-ebtm.png": enBase64("icones/logo-ebtm.png"),
   "icones/logo-ebtm-mot.png": enBase64("icones/logo-ebtm-mot.png"),
+  "icones/logo-ebtm-mot-sombre.png": enBase64("icones/logo-ebtm-mot-sombre.png"),
   "qr-cours-decouvertes.png": enBase64("qr-cours-decouvertes.png"),
 };
 const dossierFigures = join(app, "contenu", "figures");

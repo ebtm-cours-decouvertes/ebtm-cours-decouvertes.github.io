@@ -44,6 +44,10 @@ const PAIRES = [
   ["sous-titres magenta sur carte", "magenta", "carte", 4.5],
   ["texte sur teinte", "encre", "teinte", 4.5],
   ["violet sur teinte", "violet", "teinte", 4.5],
+  // Le bandeau des onglets et des choix est en teinte : le compte d'un onglet non choisi s'y
+  // lit en texte adouci, et l'onglet choisi (violet plein) doit s'en détacher à 3 pour 1.
+  ["compte d’un onglet sur bandeau", "texte-doux", "teinte", 4.5],
+  ["onglet choisi sur bandeau", "violet", "teinte", 3],
   ["pastille terminée", "ok", "ok-fond", 4.5],
   ["coche d’une leçon faite", "ok", "carte", 3],
   ["avertissement d’effacement", "danger", "carte", 4.5],

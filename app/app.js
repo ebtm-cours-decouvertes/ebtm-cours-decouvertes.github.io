@@ -254,6 +254,12 @@
     return (window.FIGURES_EMBARQUEES || {})["icones/logo-ebtm-mot.png"] || "icones/logo-ebtm-mot.png";
   }
 
+  function sourceLogoSombre() {
+    return (
+      (window.FIGURES_EMBARQUEES || {})["icones/logo-ebtm-mot-sombre.png"] || "icones/logo-ebtm-mot-sombre.png"
+    );
+  }
+
   function sourceQrCode() {
     return (window.FIGURES_EMBARQUEES || {})["qr-cours-decouvertes.png"] || "qr-cours-decouvertes.png";
   }
@@ -281,13 +287,131 @@
     }
     document.body.style.overflow = actif ? "hidden" : "";
   }
+  // ---------------------------------------------------------------------------
+  // Bandeaux : la pastille du choix actif
+  // ---------------------------------------------------------------------------
+  //
+  // Un bandeau (onglets d'une leçon, modes d'un verset, apparence) montre son choix par une
+  // pastille violette qui s'étire vers sa nouvelle place puis se rassemble. La pastille est une
+  // copie décorative de la rangée, en violet et texte blanc, dont la feuille de style ne laisse
+  // voir que la part située sous le choix actif : fond et texte changent exactement ensemble.
+  // Les vrais boutons restent dessous, seuls à être lus et touchés.
+  //
+  // « depuis » est la place d'où la pastille part quand la rangée vient d'être reconstruite,
+  // ce qui arrive à chaque changement d'onglet. Sans lui, elle est posée sans voyager.
+  function equiperBandeau(rangee, depuis) {
+    const boutons = Array.from(rangee.querySelectorAll(":scope > button"));
+    if (boutons.length < 2) return;
+    const copie = document.createElement("div");
+    copie.className = "bandeau-copie";
+    copie.setAttribute("aria-hidden", "true");
+    copie.style.gridTemplateColumns = `repeat(${boutons.length}, 1fr)`;
+    // Cachée tant qu'aucun choix n'est posé : sans cela, toute la copie violette se verrait.
+    copie.hidden = true;
+    rangee.classList.add("bandeau--equipe");
+    rangee.append(copie);
+    let place = -1;
+    let bords = null;
+    let largeurConnue = rangee.offsetWidth;
+
+    const choisi = () => boutons.findIndex((b) => b.matches('[aria-selected="true"], [aria-pressed="true"]'));
+    // Les cases de la copie portent un nom à elles (« copie-onglet », « copie-bouton-choix »),
+    // mis en forme comme le bouton qu'elles doublent : le reste du code, qui cherche les vrais
+    // boutons par leur classe, ne peut pas les prendre pour eux.
+    const recopier = () => {
+      copie.innerHTML = boutons
+        .map((b) => `<span class="copie-${b.classList[0]}">${b.innerHTML}</span>`)
+        .join("");
+    };
+    // Positions lues avec leurs décimales : arrondies au pixel, la pastille déborderait d'un
+    // filet sur un écran dont la largeur ne se divise pas rond.
+    const mesurer = (index) => {
+      const bouton = boutons[index].getBoundingClientRect();
+      const bandeau = copie.getBoundingClientRect();
+      return { gauche: bouton.left - bandeau.left, droite: bandeau.right - bouton.right };
+    };
+    const poser = (index, voyage) => {
+      // Le sens décide quel bord part le premier.
+      copie.dataset.sens = index < place ? "gauche" : "droite";
+      copie.classList.toggle("bandeau-copie--posee", !voyage);
+      // La place est mesurée sur le vrai bouton, et non déduite par tiers de la largeur : en
+      // texte très grand sur un écran étroit, les colonnes n'ont plus la même largeur. Une
+      // mesure par changement de choix, jamais pendant un défilement.
+      bords = mesurer(index);
+      // Posé sur la pastille elle-même, pas sur un parent : seul cet élément est recalculé.
+      copie.style.setProperty("--pastille-gauche", `${bords.gauche}px`);
+      copie.style.setProperty("--pastille-droite", `${bords.droite}px`);
+      if (!voyage) {
+        // Lire une mesure applique la pose tout de suite : le trajet suivant partira bien d'ici.
+        void copie.offsetWidth;
+        copie.classList.remove("bandeau-copie--posee");
+      }
+      place = index;
+    };
+    const suivre = () => {
+      const index = choisi();
+      copie.hidden = index < 0;
+      if (index < 0) place = -1;
+      else if (index !== place) poser(index, place >= 0);
+      else {
+        // Même choix, mais un libellé a pu changer de largeur (compte d'un onglet). On ne recale
+        // que si la place a réellement bougé : sinon on couperait un trajet en cours.
+        const mesure = mesurer(index);
+        if (mesure.gauche !== bords.gauche || mesure.droite !== bords.droite) poser(index, false);
+      }
+    };
+
+    recopier();
+    const actuel = choisi();
+    if (Number.isInteger(depuis) && depuis >= 0 && depuis < boutons.length && actuel >= 0 && depuis !== actuel) {
+      copie.hidden = false;
+      poser(depuis, false);
+      // À l'image suivante seulement : la pastille est d'abord dessinée à son point de départ.
+      requestAnimationFrame(suivre);
+    } else {
+      suivre();
+    }
+
+    // La rangée change de largeur (téléphone tourné, taille du texte, fenêtre qui s'ouvre) :
+    // la pastille est reposée à sa place, sans voyage.
+    if ("ResizeObserver" in window) {
+      new ResizeObserver(() => {
+        if (rangee.offsetWidth === largeurConnue) return;
+        largeurConnue = rangee.offsetWidth;
+        if (place >= 0) poser(place, false);
+      }).observe(rangee);
+    }
+
+    // Le choix change, ou un compte est mis à jour dans un onglet : la copie suit.
+    const veille = new MutationObserver(() => {
+      recopier();
+      suivre();
+    });
+    for (const bouton of boutons) {
+      veille.observe(bouton, {
+        attributes: true,
+        attributeFilter: ["aria-selected", "aria-pressed"],
+        childList: true,
+        characterData: true,
+        subtree: true,
+      });
+    }
+  }
+
+  // D'où part la pastille des onglets au prochain affichage d'une leçon : { lecon, index }.
+  let departPastille = null;
+
   const barre = document.getElementById("barre");
   const zoneOnglets = document.getElementById("zone-onglets");
   const titreBarre = document.getElementById("titre-barre");
   const zoneNavigation = document.getElementById("zone-navigation");
+  const boutonPartage = document.getElementById("ouvrir-partage");
 
+  // Deux images, une par apparence : la feuille de style n'en montre jamais qu'une. La version
+  // sombre est le même logo, détouré, aux lettres éclaircies (scripts/preparer-logo-sombre.py).
   const LOGO = `<a class="marque__lien" href="#/" aria-label="Accueil, toutes les leçons">
-    <img class="marque__logo" src="__SRC__" alt="EBTM" width="500" height="273" /></a>`;
+    <img class="marque__logo marque__logo--clair" src="__SRC__" alt="EBTM" width="500" height="273" />
+    <img class="marque__logo marque__logo--sombre" src="__SRC_SOMBRE__" alt="EBTM" width="500" height="273" /></a>`;
   const RETOUR = `<a class="bouton-retour" href="#/" aria-label="Retour à toutes les leçons">←</a>`;
 
   // ---------------------------------------------------------------------------
@@ -311,6 +435,9 @@
       stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /><path
       d="M7.5 10.5 L5.5 10.5 L5.5 20.5 L18.5 20.5 L18.5 10.5 L16.5 10.5" fill="none"
       stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>`;
+
+  // Le bouton de partage de la liste des leçons porte ce même dessin.
+  boutonPartage.innerHTML = PARTAGE_IOS;
 
   // Le bouton de menu de Safari depuis iOS 27, dans la barre d'adresse : trois traits alignés à
   // gauche, le dernier plus court. C'est lui qui mène à « Partager ».
@@ -586,8 +713,11 @@
 
   function afficherDans(contenuHtml, titreDocument) {
     zoneOnglets.innerHTML = "";
-    zoneNavigation.innerHTML = LOGO.replace("__SRC__", sourceLogo());
+    zoneNavigation.innerHTML = LOGO.replace("__SRC__", sourceLogo()).replace("__SRC_SOMBRE__", sourceLogoSombre());
     titreBarre.textContent = NOM_APPLICATION;
+    // Le partage n'appartient qu'à la liste des leçons : chaque écran l'éteint, elle le rallume.
+    boutonPartage.hidden = true;
+    barre.classList.remove("barre--accueil");
     reposerBarre();
     principal.innerHTML = contenuHtml;
     document.title = titreDocument ? `${titreDocument} — Cours découvertes` : "Cours découvertes";
@@ -637,7 +767,7 @@
 
   // Sur iOS, le défilement est piloté par un processus séparé du script. Déplacer la barre à
   // chaque événement de défilement la laisse toujours en retard d'une image sur le contenu :
-  // c'est la saccade que voyait Sébastien. On bascule donc entre deux états, et c'est une
+  // c'est la saccade constatée à l'essai. On bascule donc entre deux états, et c'est une
   // transition CSS — confiée au compositeur, donc indépendante du script — qui fait le
   // mouvement. Le geste perd en fidélité ce qu'il gagne en fluidité, et sur un téléphone la
   // fluidité prime.
@@ -840,6 +970,7 @@
       </div>
     </div>`;
   document.body.appendChild(reglages);
+  equiperBandeau(reglages.querySelector(".groupe-boutons"));
 
   const zoneEffacement = reglages.querySelector("#zone-effacement");
 
@@ -972,7 +1103,7 @@
           <li>
             <a class="carte-lecon carte-lecon--${statut}" href="#/lecon/${lecon.numero}">
               <span class="carte-lecon__numero"
-                ><span class="carte-lecon__mot">Leçon</span
+                ><span class="carte-lecon__mot visuellement-cache">Leçon</span
                 ><span class="carte-lecon__chiffre">${lecon.numero}</span></span
               >
               <p class="carte-lecon__titre">${echapper(lecon.titre)}</p>
@@ -1015,6 +1146,8 @@
       `,
       ""
     );
+    boutonPartage.hidden = false;
+    barre.classList.add("barre--accueil");
   }
 
   function avertissementStockage() {
@@ -1097,6 +1230,13 @@
             ${disponibles.includes("questions") ? boutonOnglet(numero, "questions", "Questions", `${nbReponses(lecon)} / ${lecon.questions.length}`, onglet) : ""}
           </div>`
         : "";
+    // La barre d'onglets est reconstruite à chaque changement d'onglet : la pastille repart de
+    // l'onglet qu'on quitte, si c'est la même leçon.
+    const rangeeOnglets = zoneOnglets.querySelector(".onglets");
+    if (rangeeOnglets) {
+      equiperBandeau(rangeeOnglets, departPastille && departPastille.lecon === numero ? departPastille.index : undefined);
+      departPastille = { lecon: numero, index: disponibles.indexOf(onglet) };
+    }
     ajusterHauteurBarre();
 
     brancherVersets(principal);
@@ -1235,6 +1375,7 @@
   }
 
   function brancherVersets(racine) {
+    racine.querySelectorAll(".verset-carte .groupe-boutons").forEach((groupe) => equiperBandeau(groupe));
     racine.querySelectorAll(".verset-carte").forEach((carte) => {
       const texteComplet = carte.dataset.texte;
       const zone = carte.querySelector(".verset-carte__texte");
@@ -1401,10 +1542,6 @@
 
   async function afficherAPropos() {
     const apropos = await chargerJson("contenu/a-propos.json");
-    // Le lien partagé porte « ?installer », comme le QR code : qui le reçoit arrive sur
-    // l'écran d'installation. L'adresse affichée reste sans ce marqueur, plus lisible.
-    const adresse = location.origin + location.pathname;
-    const lien = adresse + "?installer";
     const paragraphes = apropos.paragraphes
       .map((element) => (typeof element === "string" ? html`<p>${enrichir(element)}</p>` : rendreBloc(element)))
       .join("");
@@ -1425,13 +1562,6 @@
           Installer le cours sur votre écran d’accueil les met à l’abri : sans installation, le
           navigateur peut faire le ménage de lui-même au bout de quelques jours sans visite.
         </p>
-        <h2>Partager ce cours</h2>
-        <img class="partage__qr" src="${sourceQrCode()}" alt="Code à scanner menant à ${echapper(adresse)}" width="240" height="240" />
-        <p class="partage__adresse">${echapper(adresse)}</p>
-        <button type="button" class="bouton-principal" data-partage="${echapper(lien)}">
-          ${navigator.share ? "Partager le lien" : "Copier le lien"}
-        </button>
-        <p class="partage__etat" aria-live="polite"></p>
         <p class="pied">
           Version ${echapper(apropos.versionApplication)}<br />
           ${echapper(apropos.droits)}
@@ -1445,6 +1575,62 @@
     titreBarre.textContent = "À propos du cours";
 
   }
+
+  // ---------------------------------------------------------------------------
+  // Partager le cours
+  // ---------------------------------------------------------------------------
+
+  // L'icône de la liste des leçons ouvre une fenêtre : le QR code pour le voisin de table,
+  // l'adresse en toutes lettres, et un bouton pour l'envoyer. La section vivait au bas de
+  // « À propos », après tout le texte de la préface : il fallait la chercher.
+  const fenetrePartage = document.createElement("div");
+  fenetrePartage.className = "feuille";
+  fenetrePartage.hidden = true;
+  fenetrePartage.innerHTML = `
+    <div class="feuille__carte" role="dialog" aria-modal="true" aria-labelledby="partage-titre">
+      <div class="feuille__entete">
+        <p class="feuille__titre" id="partage-titre">Partager ce cours</p>
+        <button type="button" class="feuille__fermer" aria-label="Fermer">${CROIX}</button>
+      </div>
+      <div class="feuille__corps feuille__corps--partage">
+        <img class="partage__qr" alt="" width="240" height="240" />
+        <p class="partage__adresse"></p>
+        <button type="button" class="bouton-principal" data-partage=""></button>
+        <p class="partage__etat" aria-live="polite"></p>
+      </div>
+    </div>`;
+  document.body.appendChild(fenetrePartage);
+
+  function ouvrirPartage() {
+    // Le lien partagé porte « ?installer », comme le QR code : qui le reçoit arrive sur
+    // l'écran d'installation. L'adresse affichée reste sans ce marqueur, plus lisible.
+    const adresse = location.origin + location.pathname;
+    const code = fenetrePartage.querySelector(".partage__qr");
+    code.src = sourceQrCode();
+    code.alt = `Code à scanner menant à ${adresse}`;
+    fenetrePartage.querySelector(".partage__adresse").textContent = adresse;
+    const bouton = fenetrePartage.querySelector("[data-partage]");
+    bouton.dataset.partage = adresse + "?installer";
+    bouton.textContent = navigator.share ? "Partager le lien" : "Copier le lien";
+    fenetrePartage.querySelector(".partage__etat").textContent = "";
+    fenetrePartage.hidden = false;
+    neutraliserArrierePlan(true);
+    fenetrePartage.querySelector(".feuille__fermer").focus();
+  }
+
+  function fermerPartage() {
+    fenetrePartage.hidden = true;
+    neutraliserArrierePlan(false);
+    boutonPartage.focus();
+  }
+
+  boutonPartage.addEventListener("click", ouvrirPartage);
+  fenetrePartage.addEventListener("click", (evenement) => {
+    if (evenement.target === fenetrePartage || evenement.target.closest(".feuille__fermer")) fermerPartage();
+  });
+  document.addEventListener("keydown", (evenement) => {
+    if (evenement.key === "Escape" && !fenetrePartage.hidden) fermerPartage();
+  });
 
   // Seule l'adresse du cours est partagée, jamais les réponses. Le menu de partage du téléphone
   // s'ouvre là où il existe ; ailleurs, le lien est copié.
@@ -1583,6 +1769,8 @@
       await chargerVersets();
       const lecon = chemin.match(/^\/lecon\/(\d+)(?:\/(lecture|versets|questions))?\/?$/);
       if (lecon) return await afficherLecon(Number(lecon[1]), lecon[2]);
+      // Hors d'une leçon, la pastille des onglets n'a plus de point de départ à retenir.
+      departPastille = null;
       if (chemin === "/a-propos") return await afficherAPropos();
       return await afficherAccueil();
     } catch (erreur) {

@@ -51,15 +51,8 @@
   --ombre: none;
 }
 
-/* Le logo et les figures du livret sont imprimés sur blanc : on leur laisse leur papier
-   plutôt que de les afficher en bloc blanc au milieu du sombre. */
-:root[data-apparence="sombre"] .marque__logo {
-  background: #ffffff;
-  border-radius: 6px;
-  padding: 2px 5px;
-  box-sizing: content-box;
-}
-
+/* Les figures du livret, elles, sont imprimées sur blanc : on leur laisse leur papier plutôt
+   que de les afficher en bloc blanc au milieu du sombre. */
 :root[data-apparence="sombre"] .figure {
   background: #ffffff;
   border-color: transparent;
@@ -253,6 +246,19 @@ button {
   display: block;
 }
 
+/* Le logo existe en deux versions : celle du livret, imprimée sur blanc, et une version
+   détourée aux lettres éclaircies pour l'apparence sombre. Il y était auparavant posé sur un
+   rectangle blanc, ce qui faisait autocollant. Ces règles doivent rester APRÈS celle du
+   dessus : à force égale, c'est la dernière écrite qui l'emporte. */
+.marque__logo--sombre,
+:root[data-apparence="sombre"] .marque__logo--clair {
+  display: none;
+}
+
+:root[data-apparence="sombre"] .marque__logo--sombre {
+  display: block;
+}
+
 .marque__titre {
   flex: 1;
   min-width: 0;
@@ -273,7 +279,8 @@ button {
   }
 }
 
-.bouton-reglages {
+/* Les boutons de la barre : le partage, sur la liste des leçons seulement, et les réglages. */
+.bouton-barre {
   flex: none;
   border: none;
   background: none;
@@ -285,15 +292,45 @@ button {
   color: var(--texte-doux);
 }
 
-.bouton-reglages .icone {
+/* Sans cette règle, « display: grid » l'emporterait sur l'attribut hidden. */
+.bouton-barre[hidden] {
+  display: none;
+}
+
+.bouton-barre .icone {
   display: block;
 }
 
+/* La roue est tirée de 8 px vers le bord, comme la flèche de retour l'est à gauche : c'est ce
+   qui rend au titre une part de la place prise par l'icône de partage. Elle l'est sur tous
+   les écrans, pour ne pas sauter d'un écran à l'autre. */
+#ouvrir-reglages {
+  margin-right: -0.5rem;
+}
+
 @media (hover: hover) {
-  .bouton-reglages:hover {
+  .bouton-barre:hover {
     background: var(--teinte);
     color: var(--violet);
   }
+}
+
+/* Sur la liste des leçons, l'icône de partage prend 44 px à côté de la roue. Le titre y passe
+   de 1,2 à 1,05 rem pour ne pas être coupé, choix validé le 16 novembre 2026 : mesuré,
+   « Cours découvertes » demande 177 px à sa taille d'origine et il n'en reste que 162 sur un
+   écran de 360 px. L'écart entre les éléments est resserré pour tenir aussi en sombre, où le
+   logo porte un fond blanc plus large. Sur un écran de 320 px, le titre reste coupé. */
+.barre--accueil .entete__contenu {
+  gap: 0.5rem;
+}
+
+.barre--accueil .marque__titre {
+  font-size: 1.05rem;
+}
+
+/* Le partage est collé à la roue : l'écart entre les éléments de la barre est annulé. */
+.barre--accueil #ouvrir-partage {
+  margin-right: -0.5rem;
 }
 
 /* ---------- Structure des pages ---------- */
@@ -389,7 +426,7 @@ main {
 
 .carte-lecon {
   display: grid;
-  grid-template-columns: 3.3rem 1fr auto;
+  grid-template-columns: 2.5rem 1fr auto;
   /* L'avancement occupe une ligne à lui, sur toute la largeur : il tient alors d'un trait. */
   grid-template-areas:
     "numero titre marque"
@@ -411,43 +448,27 @@ main {
   }
 }
 
-/* Le numéro porte le mot « Leçon » : le titre à côté n'a plus à le répéter. */
+/* Le numéro de la leçon est un grand chiffre violet, sans cadre, dans le caractère des titres
+   du cours. Choix validé le 16 novembre 2026, sur trois variantes montrées en image : le
+   carré teinté qui portait « LEÇON 1 » ne lui plaisait pas. Le mot « Leçon » n'est plus
+   affiché mais reste dans la page, masqué à l'œil seulement : le lecteur d'écran annonce
+   toujours « Leçon 1, Le plan du salut ». Une leçon terminée se reconnaît à sa coche, plus à
+   la couleur de son numéro. */
 .carte-lecon__numero {
   grid-area: numero;
-  width: 3.3rem;
-  min-height: 2.9rem;
-  border-radius: 9px;
   display: grid;
-  place-content: center;
-  justify-items: center;
-  gap: 0.05rem;
-  padding: 0.3rem 0;
-  background: var(--teinte);
+  place-content: center start;
   color: var(--violet);
 }
 
-.carte-lecon__mot {
-  font-size: 0.6rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  line-height: 1;
-}
-
-/* Le numéro relève de l'interface, pas du livret : il suit donc la police du téléphone, comme
-   le mot « LEÇON » au-dessus. Le serif est réservé au texte du cours, où il évoque le livre.
-   Les chiffres tabulaires gardent la même largeur, pour que « 1 » et « 10 » s'alignent. */
+/* Les chiffres tabulaires gardent la même largeur, pour que « 1 » et « 10 » s'alignent. */
 .carte-lecon__chiffre {
+  font-family: Georgia, "Times New Roman", serif;
   font-weight: 700;
-  font-size: 1.25rem;
+  font-size: 2.1rem;
   line-height: 1;
   font-variant-numeric: tabular-nums;
-  letter-spacing: -0.01em;
-}
-
-.carte-lecon--terminee .carte-lecon__numero {
-  background: var(--violet);
-  color: #fff;
+  letter-spacing: -0.02em;
 }
 
 .carte-lecon__titre {
@@ -489,20 +510,39 @@ main {
 
 /* ---------- Leçon : onglets ---------- */
 
+/* Les onglets forment un seul bandeau : un fond teinté commun, l'onglet choisi en violet plein.
+   Le bandeau est dessiné par un pseudo-élément calé sur les marges intérieures du conteneur.
+   Un onglet n'a pas besoin de contour, son libellé suffit à l'identifier ; c'est l'état choisi
+   qui doit trancher à 3 pour 1 sur le bandeau (WCAG 1.4.11, « Understanding Non-text
+   Contrast », page du 4 octobre 2026), ce que mesure verifier-contrastes.mjs. */
 .onglets {
+  position: relative;
   max-width: 720px;
   margin: 0 auto;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 0.25rem;
   padding: 0 1rem 0.6rem;
 }
 
-.onglet {
-  border: 1px solid var(--bord-actif);
-  background: var(--carte);
+.onglets::before {
+  content: "";
+  position: absolute;
+  inset: 0 1rem 0.6rem;
+  background: var(--teinte);
+  border-radius: 13px;
+}
+
+/* La marge de 3 px laisse voir le bandeau autour de l'onglet choisi ; la marge intérieure est
+   réduite d'autant, moins l'ancien filet : la barre garde exactement sa hauteur.
+   « copie-onglet » est la case décorative de la pastille : elle doit tomber pile dessus. */
+.onglet,
+.copie-onglet {
+  position: relative;
+  border: none;
+  background: transparent;
   border-radius: 10px;
-  padding: 0.55rem 0.25rem;
+  margin: 3px;
+  padding: calc(0.55rem - 2px) 0.25rem;
   font-weight: 600;
   font-size: 0.92rem;
   display: flex;
@@ -519,12 +559,94 @@ main {
 
 .onglet[aria-selected="true"] {
   background: var(--violet);
-  border-color: var(--violet);
   color: #fff;
+}
+
+/* Le cadre de focus passe au-dessus de l'onglet voisin. */
+.onglet:focus-visible {
+  z-index: 1;
 }
 
 .onglet[aria-selected="true"] .onglet__compte {
   color: rgba(255, 255, 255, 0.85);
+}
+
+/* ---------- Bandeaux : la pastille qui s'étire ---------- */
+
+/* Les deux bords de la pastille violette sont deux valeurs animables séparément : c'est ce qui
+   permet de l'étirer, le bord de devant partant plus vite que celui de derrière. Ce sont les
+   distances, mesurées par app.js, entre les bords du bandeau et ceux du bouton choisi. Prise
+   en charge lue le 16 novembre 2026 (webstatus.dev, « Registered custom properties ») : Safari
+   16.4, Chrome 85, Firefox 128. Un navigateur plus ancien déplace la pastille sans mouvement. */
+@property --pastille-gauche {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --pastille-droite {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+/* La pastille est une copie décorative de la rangée, en violet et texte blanc, posée par
+   app.js par-dessus les vrais boutons. On n'en laisse voir que la part située sous le choix
+   actif : fond et texte changent ainsi exactement ensemble pendant le trajet.
+   Mouvement choisi sur un essai à trois variantes, « bulle qui s'étire » : le
+   bord de devant met 200 ms, celui de derrière 360 ms. Le réglage « réduire les animations »
+   du téléphone le supprime, par la règle générale en fin de feuille. */
+.bandeau-copie {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  background: var(--violet);
+  border-radius: 13px;
+  pointer-events: none;
+  clip-path: inset(3px var(--pastille-droite) 3px var(--pastille-gauche) round 10px);
+  transition:
+    --pastille-gauche 360ms cubic-bezier(0.23, 1, 0.32, 1),
+    --pastille-droite 200ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.bandeau-copie[data-sens="gauche"] {
+  transition:
+    --pastille-gauche 200ms cubic-bezier(0.23, 1, 0.32, 1),
+    --pastille-droite 360ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* Posée sans voyage : à l'ouverture d'un écran, ou comme point de départ d'un trajet. */
+.bandeau-copie--posee {
+  transition: none;
+}
+
+.bandeau-copie[hidden] {
+  display: none;
+}
+
+/* Dans la barre d'onglets, le bandeau s'arrête aux marges intérieures du conteneur. */
+.onglets > .bandeau-copie {
+  inset: 0 1rem 0.6rem;
+}
+
+.bandeau-copie > span {
+  color: #fff;
+}
+
+.bandeau-copie .onglet__compte {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* Sous la pastille, le vrai bouton n'a plus à porter le violet lui-même. */
+.bandeau--equipe > .onglet[aria-selected="true"],
+.bandeau--equipe > .bouton-choix[aria-pressed="true"] {
+  background: transparent;
+  color: inherit;
+}
+
+.bandeau--equipe > .onglet[aria-selected="true"] .onglet__compte {
+  color: var(--texte-doux);
 }
 
 .panneau[hidden] {
@@ -919,16 +1041,30 @@ main {
   color: var(--texte-doux);
 }
 
+/* Un choix exclusif prend la forme du bandeau des onglets. Chaque bouton garde ses 44 px.
+   Même géométrie que les onglets, une marge de 3 px autour de chaque bouton, pour que la
+   pastille ait la même forme dans les trois menus. Le contenu est centré à la main
+   pour que la copie de la pastille (« copie-bouton-choix »), faite de simples « span », tombe
+   exactement dessus. */
 .groupe-boutons {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 0.4rem;
+  background: var(--teinte);
+  border-radius: 13px;
 }
 
-.bouton-choix {
+.bouton-choix,
+.copie-bouton-choix {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  margin: 3px;
   min-height: 2.75rem;
-  border: 1px solid var(--bord-actif);
-  background: var(--carte);
+  border: none;
+  background: transparent;
   border-radius: 10px;
   padding: 0.4rem 0.4rem;
   font-size: 0.82rem;
@@ -938,8 +1074,11 @@ main {
 
 .bouton-choix[aria-pressed="true"] {
   background: var(--violet);
-  border-color: var(--violet);
   color: #fff;
+}
+
+.bouton-choix:focus-visible {
+  z-index: 1;
 }
 
 /* ---------- Leçon : questions ---------- */
@@ -1284,7 +1423,8 @@ main {
   cursor: default;
 }
 
-.feuille__corps--reglages {
+.feuille__corps--reglages,
+.feuille__corps--partage {
   font-family: inherit;
   font-size: 1rem;
   line-height: 1.55;
@@ -1347,7 +1487,7 @@ main {
   padding-left: 1.4rem;
 }
 
-/* ---------- À propos : partager le cours ---------- */
+/* ---------- Fenêtre « Partager ce cours » ---------- */
 
 /* Le QR code garde son fond blanc en apparence sombre : un appareil photo lit mal un code clair
    sur fond foncé. Il est plus petit que sur l'écran d'ordinateur, scanné ici de téléphone à
