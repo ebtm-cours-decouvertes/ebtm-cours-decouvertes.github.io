@@ -1927,12 +1927,21 @@
   // L'application tient la liste des écrans de l'historique (`pile`, indexée par le rang que
   // chaque entrée porte), gardée pour la séance dans sessionStorage.
   const DUREE_ENTREE = 240; // ms, à garder égale à celle de la feuille de style
-  // En avançant, l'écran quitté reste affiché 90 ms, ligne touchée teintée, avant d'être
-  // remplacé : sans ce délai, un toucher bref ne laissait rien voir de la ligne touchée.
-  // Essayé et non retenu (21 novembre 2026) : faire pâlir l'écran pendant ce délai, dans
-  // l'espoir que l'iPhone montre la liste sous le doigt pendant le geste de retour. Filmé sur
-  // iPhone virtuel iOS 26.5, la photo sous le doigt restait blanche : sans effet prouvé.
-  const DUREE_MAINTIEN = 90;
+  // Au toucher d'une ligne, celle-ci s'allume 90 ms, puis s'éteint d'un coup, et l'adresse ne
+  // change qu'après deux images. Raison : Safari d'iPhone photographie l'écran au moment où
+  // l'adresse change, et montre cette photo pendant le geste de retour. Si la ligne est encore
+  // allumée à cet instant, on la retrouve allumée en revenant (« ça s'affiche exactement sur
+  // l'endroit où on a cliqué », Sébastien, 21 novembre 2026). Au retour, aucune ligne n'est
+  // mise en valeur : la liste revient telle qu'elle était.
+  const DUREE_ALLUMAGE = 90;
+  let departEnCours = false;
+  // L'image suivante, ou 50 ms au plus : une page cachée ne dessine plus d'images, et le
+  // changement d'écran ne doit jamais rester en attente.
+  const prochaineImage = () =>
+    new Promise((suite) => {
+      requestAnimationFrame(() => suite());
+      setTimeout(suite, 50);
+    });
   const mouvementReduit = window.matchMedia("(prefers-reduced-motion: reduce)");
   const CLASSES_ECRAN = ["ecran--entre"];
   const CLE_PILE = "cours-decouvertes-pile";
@@ -1950,7 +1959,6 @@
     }
   }
   const attendre = (ms) => new Promise((suite) => setTimeout(suite, ms));
-  const lignesQuittees = new Map(); // écran → adresse de la ligne par laquelle on l'a quitté
   const positionsQuittees = new Map(); // écran → hauteur de défilement au moment de le quitter
   // Les écrans de liste retrouvent leur place au retour ; les leçons et les documents ont la
   // leur (reprendreLecture).
@@ -1999,7 +2007,30 @@
       }
       return;
     }
-    if (cible.niveau < ecranCourant.niveau && remonterVers(cible.cle)) evenement.preventDefault();
+    if (cible.niveau < ecranCourant.niveau && remonterVers(cible.cle)) {
+      evenement.preventDefault();
+      return;
+    }
+    // Avancer depuis une ligne de liste : allumer, éteindre, puis seulement changer d'adresse.
+    const ligne = lien.closest("a.carte-lecon, a.annexe");
+    if (!ligne) return;
+    evenement.preventDefault();
+    if (departEnCours) return;
+    departEnCours = true;
+    (async () => {
+      try {
+        ligne.classList.add("ligne--touchee");
+        await attendre(DUREE_ALLUMAGE);
+        relacher();
+        ligne.classList.add("ligne--sans-fondu");
+        ligne.classList.remove("ligne--touchee", "ligne--pressee");
+        await prochaineImage();
+        await prochaineImage();
+        location.hash = `#${chemin}`;
+      } finally {
+        departEnCours = false;
+      }
+    })();
   });
 
   function changementDEcran(chemin) {
@@ -2028,9 +2059,7 @@
   principal.addEventListener("click", (evenement) => {
     const ligne = evenement.target.closest("a.carte-lecon, a.annexe");
     if (!ligne || evenement.button || evenement.metaKey || evenement.ctrlKey || evenement.shiftKey) return;
-    ligne.classList.add("ligne--touchee");
     if (!ecranCourant) return;
-    lignesQuittees.set(ecranCourant.cle, ligne.getAttribute("href"));
     // La position se note ici, au toucher, et non au changement d'adresse : filmé sur iPhone
     // virtuel, Safari avait déjà ramené la page en haut quand l'adresse changeait.
     positionsQuittees.set(ecranCourant.cle, window.scrollY);
@@ -2087,10 +2116,6 @@
     const anime = sens === "avant" && !mouvementReduit.matches;
 
     principal.classList.remove(...CLASSES_ECRAN);
-    if (sens === "avant") {
-      await attendre(DUREE_MAINTIEN);
-      if (jeton !== navigation) return;
-    }
     await afficherChemin(chemin);
     if (jeton !== navigation) return;
 
@@ -2103,14 +2128,6 @@
       requestAnimationFrame(() => {
         if (jeton === navigation && Math.abs(window.scrollY - y) > 2) window.scrollTo(0, y);
       });
-    }
-    if (retour && lignesQuittees.has(ecran.cle)) {
-      const adresse = lignesQuittees.get(ecran.cle);
-      lignesQuittees.delete(ecran.cle);
-      const ligne = [...principal.querySelectorAll("a.carte-lecon, a.annexe")].find(
-        (a) => a.getAttribute("href") === adresse
-      );
-      if (ligne) ligne.classList.add("ligne--revient");
     }
     if (anime) {
       principal.classList.add("ecran--entre");

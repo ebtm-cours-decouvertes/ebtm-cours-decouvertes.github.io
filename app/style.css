@@ -501,6 +501,14 @@ a[href^="#/"] {
   transform: scale(0.985);
 }
 
+/* Juste avant de changer d'écran, la ligne s'éteint d'un coup, sans fondu : l'iPhone la
+   photographie à cet instant pour le geste de retour (voir DUREE_ALLUMAGE dans app.js). */
+.carte-lecon.ligne--sans-fondu,
+.carte-lecon.ligne--sans-fondu::before,
+.annexe.ligne--sans-fondu {
+  transition: none;
+}
+
 /* Le numéro de la leçon est un grand chiffre violet, sans cadre, dans le caractère des titres
    du cours. Choix validé le 16 novembre 2026, sur trois variantes montrées en image : le
    carré teinté qui portait « LEÇON 1 » ne lui plaisait pas. Fin et non plus gras depuis le
@@ -1701,39 +1709,12 @@ a[href^="#/"] {
   .ecran--entre {
     animation: ecran-entre 240ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
   }
-
-  /* Au retour, la ligne d'où l'on venait est encore teintée, puis s'éteint. */
-  .carte-lecon.ligne--revient::before {
-    animation: ligne-revient 600ms 150ms ease-out both;
-  }
-
-  .annexe.ligne--revient {
-    animation: annexe-revient 600ms 150ms ease-out both;
-  }
 }
 
 @keyframes ecran-entre {
   from {
     opacity: 0.4;
     transform: translate3d(18px, 0, 0);
-  }
-}
-
-@keyframes ligne-revient {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-  }
-}
-
-@keyframes annexe-revient {
-  from {
-    background-color: var(--pression);
-  }
-  to {
-    background-color: transparent;
   }
 }
 
