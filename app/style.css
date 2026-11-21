@@ -1692,25 +1692,18 @@ a[href^="#/"] {
 
 /* ---------- Changement d'écran ---------- */
 
-/* L'écran quitté s'efface vite (110 ms), le nouveau arrive en glissant de quelques pixels
-   (280 ms) : de la droite quand on entre dans une leçon, de la gauche quand on remonte par la
-   flèche. app.js pose ces classes et les retire ; les durées y sont répétées. Rien ne joue
-   quand le lecteur a demandé moins de mouvement, ni au retour par le geste de l'iPhone. */
+/* En entrant dans une leçon ou un document, l'écran quitté s'efface vite (110 ms) et le
+   nouveau arrive en glissant de quelques pixels depuis la droite (280 ms). app.js pose ces
+   classes et les retire ; les durées y sont répétées. Au retour, rien ne s'efface : la liste
+   réapparaît aussitôt (une page blanche s'y voyait, relevé par Sébastien le 21 novembre 2026).
+   Rien ne joue quand le lecteur a demandé moins de mouvement. */
 @media (prefers-reduced-motion: no-preference) {
-  .ecran--sort-avant {
-    animation: ecran-sort-avant 110ms cubic-bezier(0.4, 0, 1, 1) both;
+  .ecran--sort {
+    animation: ecran-sort 110ms cubic-bezier(0.4, 0, 1, 1) both;
   }
 
-  .ecran--sort-arriere {
-    animation: ecran-sort-arriere 110ms cubic-bezier(0.4, 0, 1, 1) both;
-  }
-
-  .ecran--entre-avant {
-    animation: ecran-entre-avant 280ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
-  }
-
-  .ecran--entre-arriere {
-    animation: ecran-entre-arriere 280ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  .ecran--entre {
+    animation: ecran-entre 280ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
   }
 
   /* Au retour, la ligne d'où l'on venait est encore teintée, puis s'éteint. */
@@ -1723,31 +1716,17 @@ a[href^="#/"] {
   }
 }
 
-@keyframes ecran-sort-avant {
+@keyframes ecran-sort {
   to {
     opacity: 0;
     transform: translate3d(-10px, 0, 0);
   }
 }
 
-@keyframes ecran-sort-arriere {
-  to {
-    opacity: 0;
-    transform: translate3d(10px, 0, 0);
-  }
-}
-
-@keyframes ecran-entre-avant {
+@keyframes ecran-entre {
   from {
     opacity: 0;
     transform: translate3d(22px, 0, 0);
-  }
-}
-
-@keyframes ecran-entre-arriere {
-  from {
-    opacity: 0;
-    transform: translate3d(-22px, 0, 0);
   }
 }
 

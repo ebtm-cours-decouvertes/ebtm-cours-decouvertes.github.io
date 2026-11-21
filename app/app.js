@@ -1912,19 +1912,25 @@
   // changeait d'un coup. Trois gestes simples, sans la fonction « View Transitions » des
   // navigateurs (trop jeune, et coûteuse à régler : voir les fondus de Plateforme Théologie) :
   //   1. la ligne touchée se teinte et le reste pendant le départ ;
-  //   2. l'écran quitté s'efface vite, le nouveau arrive en glissant de quelques pixels :
-  //      de la droite quand on entre, de la gauche quand on remonte par la flèche ;
-  //   3. au retour, la ligne d'où l'on venait est encore teintée un instant puis s'éteint,
-  //      comme dans les listes de l'iPhone.
-  // Le retour par le geste de l'iPhone ou le bouton du navigateur ne joue aucun glissement :
-  // l'iPhone fait déjà le sien, un second donnerait un à-coup. On le reconnaît au rang que
-  // chaque entrée de l'historique porte : une entrée déjà numérotée est une entrée revisitée.
+  //   2. en entrant dans une leçon ou un document, l'écran quitté s'efface vite et le nouveau
+  //      arrive en glissant de quelques pixels depuis la droite ;
+  //   3. au retour, aucun effacement : la liste réapparaît aussitôt, à l'endroit où on l'avait
+  //      laissée, et la ligne d'où l'on venait, encore teintée, s'éteint doucement, comme dans
+  //      les listes de l'iPhone. Sébastien, le 21 novembre 2026 : au retour, il voyait une page
+  //      blanche au lieu de la liste des leçons (le fondu de sortie, puis celui d'entrée).
+  // Un retour se reconnaît à la profondeur de l'écran (flèche) ou au rang que chaque entrée de
+  // l'historique porte (geste de l'iPhone, bouton du navigateur) : une entrée déjà numérotée
+  // est une entrée revisitée.
   const DUREE_SORTIE = 110; // ms, à garder égale à celle de la feuille de style
   const DUREE_ENTREE = 280;
   const mouvementReduit = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const CLASSES_ECRAN = ["ecran--sort-avant", "ecran--sort-arriere", "ecran--entre-avant", "ecran--entre-arriere"];
+  const CLASSES_ECRAN = ["ecran--sort", "ecran--entre"];
   const attendre = (ms) => new Promise((suite) => setTimeout(suite, ms));
   const lignesQuittees = new Map(); // écran → adresse de la ligne par laquelle on l'a quitté
+  const positionsQuittees = new Map(); // écran → hauteur de défilement au moment de le quitter
+  // Les écrans de liste retrouvent leur place au retour ; les leçons et les documents ont la
+  // leur (reprendreLecture).
+  const LISTES = new Set(["/", "/documents"]);
   let ecranCourant = null;
   let rangCourant = 0;
   let navigation = 0;
@@ -1962,7 +1968,11 @@
     const ligne = evenement.target.closest("a.carte-lecon, a.annexe");
     if (!ligne || evenement.button || evenement.metaKey || evenement.ctrlKey || evenement.shiftKey) return;
     ligne.classList.add("ligne--touchee");
-    if (ecranCourant) lignesQuittees.set(ecranCourant.cle, ligne.getAttribute("href"));
+    if (!ecranCourant) return;
+    lignesQuittees.set(ecranCourant.cle, ligne.getAttribute("href"));
+    // La position se note ici, au toucher, et non au changement d'adresse : filmé sur iPhone
+    // virtuel, Safari avait déjà ramené la page en haut quand l'adresse changeait.
+    positionsQuittees.set(ecranCourant.cle, window.scrollY);
   });
 
   // La teinte sous le doigt est posée ici et non par « :active » dans la feuille de style :
@@ -2013,11 +2023,11 @@
     const chemin = location.hash.replace(/^#/, "") || "/";
     const jeton = ++navigation;
     const { ecran, sens, retour } = changementDEcran(chemin);
-    const anime = Boolean(sens) && !mouvementReduit.matches;
+    const anime = sens === "avant" && !mouvementReduit.matches;
 
     principal.classList.remove(...CLASSES_ECRAN);
     if (anime) {
-      principal.classList.add(`ecran--sort-${sens}`);
+      principal.classList.add("ecran--sort");
       await attendre(DUREE_SORTIE);
       // Un autre changement est arrivé pendant la sortie : c'est lui qui affiche.
       if (jeton !== navigation) return;
@@ -2027,6 +2037,15 @@
     if (jeton !== navigation) return;
 
     principal.classList.remove(...CLASSES_ECRAN);
+    if (retour && LISTES.has(ecran.cle) && positionsQuittees.has(ecran.cle)) {
+      const y = positionsQuittees.get(ecran.cle);
+      window.scrollTo(0, y);
+      // Une seconde fois à l'image suivante, au cas où le navigateur replacerait la page
+      // après nous ; sans effet si elle est déjà à sa place.
+      requestAnimationFrame(() => {
+        if (jeton === navigation && Math.abs(window.scrollY - y) > 2) window.scrollTo(0, y);
+      });
+    }
     if (retour && lignesQuittees.has(ecran.cle)) {
       const adresse = lignesQuittees.get(ecran.cle);
       lignesQuittees.delete(ecran.cle);
@@ -2036,7 +2055,7 @@
       if (ligne) ligne.classList.add("ligne--revient");
     }
     if (anime) {
-      principal.classList.add(`ecran--entre-${sens}`);
+      principal.classList.add("ecran--entre");
       await attendre(DUREE_ENTREE + 40);
       if (jeton === navigation) principal.classList.remove(...CLASSES_ECRAN);
     }
