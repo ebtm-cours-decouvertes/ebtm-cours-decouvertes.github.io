@@ -1927,14 +1927,18 @@
   // L'application tient la liste des écrans de l'historique (`pile`, indexée par le rang que
   // chaque entrée porte), gardée pour la séance dans sessionStorage.
   const DUREE_ENTREE = 240; // ms, à garder égale à celle de la feuille de style
-  // Au toucher d'une ligne, celle-ci s'allume 90 ms, puis s'éteint d'un coup, et l'adresse ne
-  // change qu'après deux images. Raison : Safari d'iPhone photographie l'écran au moment où
-  // l'adresse change, et montre cette photo pendant le geste de retour. Si la ligne est encore
-  // allumée à cet instant, on la retrouve allumée en revenant (« ça s'affiche exactement sur
-  // l'endroit où on a cliqué », Sébastien, 21 novembre 2026). Au retour, aucune ligne n'est
-  // mise en valeur : la liste revient telle qu'elle était.
+  // Au toucher d'une ligne, dans cet ordre :
+  //   1. l'adresse change tout de suite (le lien suit son cours normal) ; Safari photographie
+  //      la liste à cet instant, avant tout allumage (WebKit prend sa photo « juste avant que
+  //      l'entrée d'historique change », bug WebKit 135058), et montre cette photo pendant le
+  //      geste de retour : elle est donc propre ;
+  //   2. la ligne s'allume brièvement sur l'écran encore affiché (Apple : surbrillance brève) ;
+  //   3. le nouvel écran le remplace directement, ligne allumée comprise : il n'y a jamais
+  //      d'étape où la liste réapparaît éteinte.
+  // Historique : allumer puis éteindre avant de changer d'adresse donnait un double
+  // clignotement, filmé deux fois par Sébastien sur son iPhone (21 novembre 2026).
   const DUREE_ALLUMAGE = 90;
-  let departEnCours = false;
+  let ligneDepart = null;
   // L'image suivante, ou 50 ms au plus : une page cachée ne dessine plus d'images, et le
   // changement d'écran ne doit jamais rester en attente.
   const prochaineImage = () =>
@@ -2011,25 +2015,9 @@
       evenement.preventDefault();
       return;
     }
-    // Avancer depuis une ligne de liste : allumer, éteindre, puis seulement changer d'adresse.
-    const ligne = lien.closest("a.carte-lecon, a.annexe");
-    if (!ligne) return;
-    evenement.preventDefault();
-    if (departEnCours) return;
-    departEnCours = true;
-    (async () => {
-      try {
-        ligne.classList.add("ligne--touchee");
-        await attendre(DUREE_ALLUMAGE);
-        ligne.classList.add("ligne--sans-fondu");
-        ligne.classList.remove("ligne--touchee");
-        await prochaineImage();
-        await prochaineImage();
-        location.hash = `#${chemin}`;
-      } finally {
-        departEnCours = false;
-      }
-    })();
+    // Avancer : le lien suit son cours. La ligne touchée est notée, le routeur l'allumera
+    // une fois l'adresse changée.
+    ligneDepart = lien.closest("a.carte-lecon, a.annexe");
   });
 
   function changementDEcran(chemin) {
@@ -2094,6 +2082,16 @@
     const anime = sens === "avant" && !mouvementReduit.matches;
 
     principal.classList.remove(...CLASSES_ECRAN);
+    const ligne = ligneDepart;
+    ligneDepart = null;
+    if (sens === "avant" && ligne && principal.contains(ligne)) {
+      // Une image d'attente : la photo de Safari est prise avant que la ligne s'allume.
+      await prochaineImage();
+      if (jeton !== navigation) return;
+      ligne.classList.add("ligne--touchee");
+      await attendre(DUREE_ALLUMAGE);
+      if (jeton !== navigation) return;
+    }
     await afficherChemin(chemin);
     if (jeton !== navigation) return;
 

@@ -475,8 +475,8 @@ a[href^="#/"] {
   }
 }
 
-/* Au toucher, la ligne s'allume un instant (« ligne--touchee », posé par app.js au clic),
-   puis s'éteint d'un coup avant le changement d'écran. La teinte déborde un peu des deux
+/* Au toucher, la ligne s'allume un instant (« ligne--touchee », posé par app.js juste après
+   le changement d'adresse), puis le nouvel écran la remplace. La teinte déborde un peu des deux
    côtés, coins arrondis, et recouvre les deux filets qui l'encadrent. Pas de « :active » :
    il restait allumé pendant un défilement commencé sur la ligne. */
 .carte-lecon::before {
@@ -493,13 +493,6 @@ a[href^="#/"] {
 .carte-lecon.ligne--touchee::before {
   opacity: 1;
   transition-duration: 80ms;
-}
-
-/* Juste avant de changer d'écran, la ligne s'éteint d'un coup, sans fondu : l'iPhone la
-   photographie à cet instant pour le geste de retour (voir DUREE_ALLUMAGE dans app.js). */
-.carte-lecon.ligne--sans-fondu::before,
-.annexe.ligne--sans-fondu {
-  transition: none;
 }
 
 /* Le numéro de la leçon est un grand chiffre violet, sans cadre, dans le caractère des titres
