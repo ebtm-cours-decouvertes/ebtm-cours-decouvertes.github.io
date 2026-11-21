@@ -2131,9 +2131,9 @@
   window.addEventListener("pointercancel", eteindreAppui);
   window.addEventListener("scroll", eteindreAppui, { passive: true });
 
-  // Pendant l'arrivée d'un écran, une copie de l'écran quitté reste dessous, immobile, et
-  // s'efface pendant que le nouveau se pose par-dessus : un fondu de l'un à l'autre, sans
-  // jamais passer par une page blanche (relevé par Sébastien le 21 novembre 2026). La copie est
+  // Pendant l'arrivée d'un écran, une copie de l'écran quitté reste dessous et recule un peu
+  // pendant que le nouveau glisse par-dessus (style.css, « Changement d'écran »), sans jamais
+  // passer par une page blanche (relevé par Sébastien le 21 novembre 2026). La copie est
   // décorative : cachée aux lecteurs d'écran, inerte, sans identifiants.
   let calque = null;
   function retirerCalque() {

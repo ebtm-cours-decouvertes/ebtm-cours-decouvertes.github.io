@@ -1742,11 +1742,13 @@ a[href^="#/"] {
 
 /* ---------- Changement d'écran ---------- */
 
-/* En avançant, le nouvel écran se pose en fondu par-dessus une copie immobile de l'écran
-   quitté (« calque-quitte », posé par app.js), qui s'efface dessous : jamais de page blanche
-   (relevé par Sébastien le 21 novembre 2026). Il glisse aussi de quelques pixels depuis la
-   droite. En revenant, rien ne bouge : l'écran précédent réapparaît tel qu'on l'a laissé.
-   Rien ne joue quand le lecteur a demandé moins de mouvement. */
+/* En avançant, le nouvel écran, opaque, glisse depuis la droite par-dessus une copie de l'écran
+   quitté (« calque-quitte », posé par app.js), qui recule un peu vers la gauche en pâlissant.
+   Jamais de page blanche, ni de texte vu à travers un autre : le fondu des deux écrans laissait
+   lire la liste sous la leçon (vidéo de Sébastien, 21 novembre 2026, 21 h 03 ; « Glisse
+   par-dessus » choisi sur vidéo face à « En deux temps »). Le geste de retour de l'iPhone fait
+   repartir l'écran vers la droite : même chemin. En revenant, rien ne bouge : l'écran précédent
+   réapparaît tel qu'on l'a laissé. Rien ne joue quand le lecteur a demandé moins de mouvement. */
 .calque-quitte {
   position: fixed;
   left: 0;
@@ -1768,13 +1770,25 @@ main.ecran--attente {
   opacity: 0;
 }
 
+/* Pendant la glissade, l'écran dépasse à droite. Le couper au bord de la page (body) et non
+   seulement de la fenêtre : sinon Chrome sur téléphone élargit la page le temps de la glissade et
+   la barre des onglets déborde (vu le 21 novembre 2026). « clip » ne fait pas de body une zone
+   de défilement à part, contrairement à « hidden ». */
+html:has(main.ecran--entre),
+html:has(main.ecran--entre) body {
+  overflow-x: clip;
+}
+
 @media (prefers-reduced-motion: no-preference) {
-  .ecran--entre {
+  main.ecran--entre {
+    background: var(--fond);
+    min-height: 100dvh;
+    box-shadow: -12px 0 32px rgba(28, 18, 30, 0.1);
     animation: ecran-entre var(--ecran-entree) var(--feuille-courbe) both;
   }
 
   .calque-quitte--part {
-    animation: calque-quitte calc(var(--ecran-entree) * 0.6) ease-out both;
+    animation: calque-quitte var(--ecran-entree) var(--feuille-courbe) both;
   }
 
   /* La ligne quittée revient de son état « enfoncé », celui de la photo que l'iPhone montre
@@ -1813,14 +1827,14 @@ main.ecran--attente {
 
 @keyframes ecran-entre {
   from {
-    opacity: 0;
-    transform: translate3d(24px, 0, 0);
+    transform: translate3d(100%, 0, 0);
   }
 }
 
 @keyframes calque-quitte {
   to {
-    opacity: 0;
+    transform: translate3d(-25%, 0, 0);
+    opacity: 0.7;
   }
 }
 
