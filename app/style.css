@@ -381,6 +381,15 @@ main {
   color: var(--texte-doux);
 }
 
+/* Sur un téléphone, le navigateur pose un voile gris sur le lien qu'on touche. Pour un lien
+   qui change d'écran, ce voile est pris dans l'image que l'iPhone garde de l'écran quitté :
+   au retour en arrière, la carte touchée réapparaissait grise un instant (filmé par Sébastien
+   le 21 novembre 2026, reproduit sur iPhone virtuel). Il est retiré de tous les liens internes
+   de l'application, et d'eux seuls. Rien ne le remplace : l'écran change dès le toucher. */
+a[href^="#/"] {
+  -webkit-tap-highlight-color: transparent;
+}
+
 /* ---------- Accueil ---------- */
 
 .accueil__intro {
