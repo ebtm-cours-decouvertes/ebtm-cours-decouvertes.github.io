@@ -2021,9 +2021,8 @@
       try {
         ligne.classList.add("ligne--touchee");
         await attendre(DUREE_ALLUMAGE);
-        relacher();
         ligne.classList.add("ligne--sans-fondu");
-        ligne.classList.remove("ligne--touchee", "ligne--pressee");
+        ligne.classList.remove("ligne--touchee");
         await prochaineImage();
         await prochaineImage();
         location.hash = `#${chemin}`;
@@ -2065,31 +2064,10 @@
     positionsQuittees.set(ecranCourant.cle, window.scrollY);
   });
 
-  // La teinte sous le doigt est posée ici et non par « :active » dans la feuille de style :
-  // filmé sur iPhone virtuel, « :active » laissait la ligne teintée pendant tout un
-  // défilement commencé sur elle. Ici, la teinte attend 80 ms (le temps de savoir si le doigt
-  // glisse) et s'en va dès que le navigateur prend la main pour faire défiler (pointercancel).
-  // Un toucher plus bref que 80 ms est teinté par le clic, ci-dessus.
-  const DELAI_PRESSION = 80;
-  let attentePression = null;
-  let lignePressee = null;
-  function relacher() {
-    clearTimeout(attentePression);
-    attentePression = null;
-    if (lignePressee) lignePressee.classList.remove("ligne--pressee");
-    lignePressee = null;
-  }
-  principal.addEventListener("pointerdown", (evenement) => {
-    const ligne = evenement.target.closest("a.carte-lecon, a.annexe");
-    relacher();
-    if (!ligne || evenement.button) return;
-    attentePression = setTimeout(() => {
-      lignePressee = ligne;
-      ligne.classList.add("ligne--pressee");
-    }, DELAI_PRESSION);
-  });
-  for (const fin of ["pointerup", "pointercancel"]) window.addEventListener(fin, relacher);
-  window.addEventListener("scroll", relacher, { passive: true });
+  // Un seul allumage, au clic (voir DUREE_ALLUMAGE). Il y en avait un second pendant l'appui,
+  // qui s'éteignait au lever du doigt juste avant que le clic rallume la ligne : la ligne
+  // clignotait deux fois (filmé par Sébastien sur son iPhone, 21 novembre 2026). Rien ne
+  // s'allume donc pendant un défilement, ni pendant un appui : seulement quand on a touché.
 
   async function afficherChemin(chemin) {
     try {

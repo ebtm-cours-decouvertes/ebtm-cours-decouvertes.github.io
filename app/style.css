@@ -461,7 +461,6 @@ a[href^="#/"] {
   /* Pour l'état « touché » ci-dessous : la teinte est un calque posé derrière le contenu. */
   position: relative;
   isolation: isolate;
-  transition: transform 140ms ease-out;
   /* Une ligne est une commande, pas un texte : un appui long ne sélectionne rien et n'ouvre
      pas le menu des liens de l'iPhone. */
   -webkit-user-select: none;
@@ -476,10 +475,10 @@ a[href^="#/"] {
   }
 }
 
-/* Sous le doigt, la ligne se teinte et s'enfonce à peine. La teinte déborde un peu des deux
-   côtés, coins arrondis, et recouvre les deux filets qui l'encadrent. Elle arrive vite
-   (80 ms) et repart plus doucement (220 ms). C'est app.js qui pose « ligne--pressee », pas
-   « :active » : celui-ci restait allumé pendant un défilement commencé sur la ligne. */
+/* Au toucher, la ligne s'allume un instant (« ligne--touchee », posé par app.js au clic),
+   puis s'éteint d'un coup avant le changement d'écran. La teinte déborde un peu des deux
+   côtés, coins arrondis, et recouvre les deux filets qui l'encadrent. Pas de « :active » :
+   il restait allumé pendant un défilement commencé sur la ligne. */
 .carte-lecon::before {
   content: "";
   position: absolute;
@@ -491,19 +490,13 @@ a[href^="#/"] {
   transition: opacity 220ms ease-out;
 }
 
-.carte-lecon.ligne--pressee::before,
 .carte-lecon.ligne--touchee::before {
   opacity: 1;
   transition-duration: 80ms;
 }
 
-.carte-lecon.ligne--pressee {
-  transform: scale(0.985);
-}
-
 /* Juste avant de changer d'écran, la ligne s'éteint d'un coup, sans fondu : l'iPhone la
    photographie à cet instant pour le geste de retour (voir DUREE_ALLUMAGE dans app.js). */
-.carte-lecon.ligne--sans-fondu,
 .carte-lecon.ligne--sans-fondu::before,
 .annexe.ligne--sans-fondu {
   transition: none;
@@ -593,8 +586,7 @@ a[href^="#/"] {
   touch-action: manipulation;
 }
 
-/* Sous le doigt, l'entrée fonce un peu : le bloc est déjà teinté, c'est un voile qui s'ajoute. */
-.annexe.ligne--pressee,
+/* Au toucher, l'entrée fonce un peu : le bloc est déjà teinté, c'est un voile qui s'ajoute. */
 .annexe.ligne--touchee {
   background-color: var(--pression);
   transition-duration: 80ms;
