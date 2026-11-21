@@ -1,6 +1,7 @@
 #!/usr/bin/env node
-// Régénère app/contenu/index.json (leçons, titres, nombre de questions, figures) à partir des
-// fichiers app/contenu/lecons/*.json. À relancer après toute modification d'une leçon.
+// Régénère app/contenu/index.json (leçons, titres, nombre de questions, figures, documents de
+// l'église) à partir des fichiers app/contenu/lecons/*.json et app/contenu/documents/*.json.
+// À relancer après toute modification d'une leçon ou d'un document.
 import { readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -20,6 +21,19 @@ const lecons = readdirSync(dossier)
   })
   .sort((a, b) => a.numero - b.numero);
 
+// Les documents de l'église (confession de foi, statuts…) : app/contenu/documents/*.json.
+const dossierDocuments = join(racine, "app", "contenu", "documents");
+const documents = readdirSync(dossierDocuments)
+  .filter((f) => f.endsWith(".json"))
+  .sort()
+  .map((fichier) => {
+    const document = JSON.parse(readFileSync(join(dossierDocuments, fichier), "utf8"));
+    return { numero: document.numero, slug: document.slug, titre: document.titre, fichier };
+  })
+  .sort((a, b) => a.numero - b.numero);
+
 const cible = join(racine, "app", "contenu", "index.json");
-writeFileSync(cible, JSON.stringify({ lecons, figures: [...figures].sort() }, null, 2) + "\n");
-console.log(`app/contenu/index.json régénéré : ${lecons.length} leçon(s), ${figures.size} figure(s).`);
+writeFileSync(cible, JSON.stringify({ lecons, figures: [...figures].sort(), documents }, null, 2) + "\n");
+console.log(
+  `app/contenu/index.json régénéré : ${lecons.length} leçon(s), ${figures.size} figure(s), ${documents.length} document(s).`
+);

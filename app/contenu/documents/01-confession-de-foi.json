@@ -1,0 +1,424 @@
+{
+  "numero": 1,
+  "slug": "confession-de-foi",
+  "titre": "Confession de foi",
+  "soustitre": "affirmée et enseignée par le conseil d’anciens de l’EBTM",
+  "pages": "2-16",
+  "sections": [
+    {
+      "titre": "Les Saintes Écritures",
+      "blocs": [
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que la Bible est la révélation écrite de Dieu à l’homme, et qu’ainsi les 66 livres de la Bible qui nous ont été donnés par le Saint-Esprit constituent l’entière Parole de Dieu, inspirée de manière égale dans chacune de ses parties. (1Cor 2.7-14, 2Pi 1.20-21)."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que la Parole de Dieu est une révélation objective, sous forme de propositions (1Cor 2.13, 1Th 2.13), verbalement inspirée dans chacun de ses termes (2Ti 3.16), absolument inerrante dans les documents originaux, infaillible et inspirée de Dieu. Nous croyons à l’interprétation littérale, historico-grammaticale de l’Ecriture. Sur cette base, nous affirmons que les premiers chapitres de Genèse parlent d’une création en six jours pris au sens littéral. (Ge 1.31, Ex 20.11 ; 31.17)."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que la Bible constitue la seule autorité infaillible pour la foi et la pratique (Mt 5.18, 24.35, Jn 10.35, 16.12-13, 17.17, 1Cor 2.13, 2Ti 3.15-17, Hé 4.12, 2Pi 1.20-21)."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que Dieu a parlé dans sa Parole écrite en recourant au principe d’un double auteur : Le Saint-Esprit, lequel a dirigé les auteurs humains de telle manière que, à travers leurs différences de personnalité et de style rédactionnel, ils ont transcrit et rapporté la Parole de Dieu à l’homme (2Pi 1.20-21) sans erreur, que ce soit dans le message d’ensemble ou les points de détail (Mt 5.18, 2Ti 3.16)."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que, bien qu’il puisse y avoir plusieurs applications d’un passage donné de l’Ecriture, il ne peut y avoir qu’une seule véritable interprétation. Celui qui applique avec zèle et sous l’éclairage du Saint-Esprit la méthode d’interprétation littérale, historico-grammaticale découvrira le sens de l’Ecriture (Jn.7.17, 16.12-15, 1Cor.2.7-15, 1Jn 2.20). Les croyants ont la responsabilité d’examiner avec soin l’objectif et la signification véritables de l’Ecriture, en reconnaissant que son application correcte concerne toutes les générations. Toutefois, c’est la vérité scripturaire qui porte un jugement sur les hommes, et jamais l’inverse (Jn.12.48)."
+        }
+      ]
+    },
+    {
+      "titre": "Dieu",
+      "blocs": [
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons qu’il n’y qu’un seul vrai Dieu vivant et vrai (De 6.4, Es 45.5-7, 1Cor 8.4), Esprit infini et omniscient (Jn 4.24), parfait dans tous ses attributs, un dans son essence, existant éternellement en trois personnes– le Père, le Fils et le Saint-Esprit (Mt 28.19, 2Cor 13.13) – qui ont chacune tout autant droit à l’obéissance."
+        },
+        {
+          "type": "sous-titre",
+          "texte": "Dieu le Père"
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que Dieu le Père, la première personne de la Trinité, ordonne et dispose toutes choses selon son propre dessein et sa grâce (Ps 145.8-9, 1Cor 8.6). Il est créateur de toutes choses (Ge 1.1-31, Ep 3.9). En tant que seul maître absolu et omnipotent de l’univers, il exerce sa souveraineté sur la création, la providence et la rédemption (Ps 103.19, Ro 11.36). Sa paternité concerne à la fois sa fonction au sein de la Trinité et sa relation avec les hommes. En tant que créateur, il est le Père de tous les hommes (Ep 3.15), mais il est le Père spirituel des croyants uniquement (Ro 8.14, 2Cor 6.18). Il a décrété pour sa propre gloire que toutes choses se passeront (Ep 1.11). Continuellement, il soutient, dirige et gouverne toutes les créatures et tous les événements (1Ch 29.11). Bien que souverain, il n’est pas l’auteur du péché et ne l’approuve pas (Ha 1.13), et il ne diminue pas la responsabilité des êtres qu’il a créés, dotés d’un sens moral et d’intelligence (1Pi 1.17). Dans sa grâce, il a choisi les siens depuis l’éternité passée (Ep 1.4-6) ; il délivre du péché tous ceux qui viennent à lui par Jésus-Christ ; il adopte comme ses enfants tous ceux qui viennent à lui et devient, par adoption, un Père pour tous les siens (Jn 1.12, Ro 8.15, Ga 4.5, Hé 12.5-9)."
+        },
+        {
+          "type": "sous-titre",
+          "texte": "Dieu le Fils"
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que Jésus-Christ, la deuxième personne de la Trinité, possède toutes les perfections divines et est en elles égal et consubstantiel au Père, coéternel avec lui (Jn 10.30, 14.9)."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que c’est par son Fils Jésus-Christ que Dieu le Père a créé « les cieux et la terre et tout ce qui s’y trouve » selon sa propre volonté, et que c’est par lui aussi que toutes choses subsistent et fonctionnent (Jn 1.3, Col 1.15-17, Hé 1.2)."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que dans l’incarnation (Dieu fait homme) Christ a renoncé uniquement à ses prérogatives divines mais n’a rien abandonné de son essence divine, que ce soit en degré ou en genre. Dans son incarnation, la deuxième personne de la Trinité, bien qu’existant de toute éternité, a accepté toutes les caractéristiques essentielles de l’humanité et est ainsi devenue Dieu-homme (Ph 2.5-8, Col 2.9)."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que Jésus-Christ représente l’humanité et la divinité dans une indivisible unité (Mi 5.1, Jn 5.23, 14.9-10, Col 2.9)"
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que notre Seigneur Jésus-Christ est né d’une vierge (Es 7.14, Mt 1.23, 25, Lu 1.26-35), qu’il était Dieu incarné (Jn 1.1,14) et que le but de l’incarnation était de révéler Dieu (Jn.1,18), de racheter les hommes et de régner sur le royaume de Dieu (Ps 2.7-9, Es 9.5, Jn 1.29, Ph 2.9-11 ; Hé 7.25-26, 1Pi 1.18-19)."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que notre Seigneur Jésus-Christ a accompli notre rédemption en versant son sang et mourant en sacrifice sur la croix. Sa mort était volontaire, substitutive, propitiatoire et rédemptrice (Jn 10.15/18, Ro 3.24-25, 5.8, 1Pi 2.24)."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que, sur la base de l’efficacité de la mort de notre Seigneur Jésus-Christ, le pécheur croyant est libéré de la punition, de la puissance et, un jour, de la présence même du péché ; il est déclaré juste, reçoit la vie éternelle et est adopté dans la famille de Dieu (Ro 3.25, 5.8-9, 2Cor 5.14-15, 1Pi 2.24, 3.18)."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que notre justification est assurée par la résurrection au sens littéral, physique de Christ d’entre les morts et qu’il se trouve maintenant à la droite du Père d’où il intercède pour nous en tant qu’avocat et souverain sacrificateur (Mt 28.6, Luc 24.38-39, Ac 2.30-31, Ro 4.25, 8.34, Hé 7.25, 9.24, 1Jn 2.1)"
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que, par la résurrection de Jésus-Christ, Dieu a confirmé la divinité de son Fils (Ro.1.4) et donné la preuve qu’il avait accepté l’œuvre expiatrice de Christ sur la croix. La résurrection corporelle de Jésus garantit aussi la future vie de résurrection de tous les croyants (Jn 5.26-29, 14.19, Ro 4.25, 6.5-10, 1Cor 15.20,23)."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que Jésus-Christ reviendra pour accueillir auprès de lui l’Eglise, qui est son corps, lors de l’enlèvement et que, revenant avec elle dans la gloire, il établira son royaume de mille ans sur la terre (Ac 1.9-11, 1Th 4.13-18, Ap 20)."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que Jésus-Christ est le seul par lequel Dieu jugera tous les hommes (Jn 5.22-23) : les croyants (1Cor.3.10-15; 2Cor 5,10), les personnes vivant sur la terre lors de son retour en gloire (Mt 25.31-46), et ceux qui sont morts incrédules, devant le grand trône blanc (Ap 20.11-15). En tant que médiateur entre Dieu et les hommes (1Ti 2.5), chef de l’Eglise qui est son corps (Ep 1.22, 5.23, Col 1.18) et roi universel qui s’assiéra sur le trône de David (Es 9.5-6, Ez 37.24-28, Lu 1.31-33), Christ est le juge suprême de tous ceux qui refusent de placer leur confiance en lui comme Seigneur et Sauveur (Mt 25.14-46, Ac 17.30-31)."
+        },
+        {
+          "type": "sous-titre",
+          "texte": "Dieu le Saint-Esprit"
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que le Saint-Esprit est une personne divine, éternelle, non créée, possédant tous les attributs de la personnalité et de la divinité, y compris l’intelligence, (1Cor 2.10-13), les émotions (Ep 4.30), la volonté (1Cor 2.11), l’éternité (Hé 9.14), l’omniprésence (Ps 139.7-10), l’omniscience (Es 40.13-14), l’omnipotence (Ro 15.13) et la véracité (Jn 16.13). Dans tous les attributs divins, il est égal et consubstantiel au Père et au Fils (Mt 28.19, Ac 5.3-4, 28.25-26, 1Cor 12.4-6, 2Cor 13.14, cf. Jér 31.31-34 avec Hé 10.15-17.)"
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que son œuvre consiste à exécuter la volonté divine en relation avec toute l’humanité. Nous pouvons reconnaître son activité souveraine dans la création (Ge 1.2), l’incarnation (Mt 1.18), la révélation écrite (2Pi 1.20-21) et l’œuvre du salut (Jn 3.5-7)."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons qu’une œuvre unique du Saint-Esprit dans ce monde a débuté à la Pentecôte lorsqu’il est venu du Père, comme Christ l’avait promis (Jn 14.16-17, 15.26), pour commencer et mener à terme l’édification du corps de Christ. Son activité consiste notamment à convaincre le monde de péché, de justice et de jugement, à glorifier le Seigneur Jésus-Christ et à transformer les croyants à l’image de Christ (Jn 16.7-9 ; Ac 1.5, 2.4, Ro 8.29, 2Cor 3.18, Ep 2.22)."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que le Saint-Esprit est l’agent surnaturel et souverain de la régénération qui baptise tous les croyants pour les introduire dans le corps de Christ (1Cor 12.13). Le Saint-Esprit demeure dans les croyants, les sanctifie, les instruit, les remplit de puissance pour servir et les scelle pour le jour de la rédemption (Ro 8.9-11, 2Cor 3.6, Ep 1.13)."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que le Saint-Esprit est l’enseignant divin qui a conduit les apôtres et les prophètes dans toute la vérité alors qu’ils écrivaient la révélation de Dieu, la Bible (2Pi 1.19-21). Le Saint-Esprit réside en chaque croyant depuis le jour où ce dernier a accepté le salut, et c’est le devoir de tous ceux qui sont nés de l’Esprit de se laisser enseigner, conduire et remplir par lui (contrôler par lui ; Ro 8.9-11 ; Ep 5.18, 1Jn 2.20-27)"
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que le Saint Esprit distribue ses dons spirituels à l’Eglise. Le Saint-Esprit ne se glorifie pas lui-même et ne glorifie pas non plus ses dons par des démonstrations prétentieuses ; il glorifie Christ en concrétisant son œuvre de rachat des perdus et d’affermissement des croyants dans la très sainte foi (Jn.16.13-14, Ac.1.8, 1Cor 12.4-11, 2Cor 3.18)."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons, à cet égard, que Dieu le Saint-Esprit est souverain dans la distribution de ses dons pour le perfectionnement des saints, que le parler en langues et l’accomplissement des signes et miracles à l’époque de l’Eglise primitive avaient pour but de signaler et d’authentifier les apôtres comme révélateurs de la vérité divine ; ils n’ont jamais été destiné à devenir caractéristiques de la vie des croyants (1 Cor.12.4-11, 13.8-10 ; 2Cor 12.12, Ep 4.7-12, Hé 2.1-4)."
+        }
+      ]
+    },
+    {
+      "titre": "L’homme",
+      "blocs": [
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que l’homme a été directement et immédiatement créé par Dieu à son image et à sa ressemblance. L’homme a été créé libre de péché, avec une nature rationnelle, une intelligence, une volonté, et une responsabilité morale envers Dieu (Ge.2.7, 15-25, Jac.3.9)."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons qu’en créant l’homme, Dieu voulait que celui-ci le glorifie, qu’il jouisse de son intimité et vive dans l’obéissance à sa volonté afin d’accomplir son but dans le monde (Es 43.7, Col.1.16 Ap.4.11)."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que, par le péché qu’a représenté la désobéissance d’Adam à la volonté révélée et à la Parole de Dieu (Ge.2.16-17), l’homme a perdu son innocence, a subi le châtiment de la mort spirituelle et physique (Ge.3.1-19), et est devenu l’objet de la colère de Dieu (Jn.3.36 ; Ro.3.23); il est aussi devenu fondamentalement corrompu et absolument incapable de choisir ou de faire ce qui est acceptable aux yeux de Dieu sans la grâce divine (Ro.3). Dans l’impossibilité de se rétablir par lui-même, l’homme est désespérément perdu (6.23, 1Cor.2.14). Son salut est, par conséquent, entièrement un don de grâce de Dieu par l’œuvre rédemptrice de notre Seigneur Jésus-Christ (Ep.2.1-3, 1Ti.2.13-14, 1Jn.1.8)."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que, puisque tous les hommes étaient en Adam, une nature corrompue par le péché d’Adam a été transmise à tous les hommes de tous les âges, Jésus-Christ étant la seule exception puisque n’étant pas procréé par la semence de l’homme (Luc 1,34-35). Tous les hommes sont ainsi des pécheurs par nature, par choix et par déclaration divine (Ps.14.1-3, Jé.17.9, Ro.3.9-18,23 ; 5.10-12)."
+        }
+      ]
+    },
+    {
+      "titre": "Le salut",
+      "blocs": [
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que le salut est un don de grâce de Dieu accordé à l’homme sur la base de la rédemption accomplie par Jésus-Christ – le prix de son sang versé — et non sur la base du mérite humain, de rites sacramentaux, ou des œuvres (Jn.1.12, Ep.1.4-7 ; 2.8-10, 1Pi.1.18-19)."
+        },
+        {
+          "type": "sous-titre",
+          "texte": "L’élection"
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que l’élection est l’acte de Dieu par lequel, avant la fondation du monde, il a choisi en Christ ceux qu’il régénère, sauve et sanctifie dans sa grâce (Ro.8.28-30, Ep.1.4-11, 2Th.2.13, 2Ti.2.10, 1Pi.1.1-2)."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que cette souveraine élection ne contredit pas et n’annule pas la responsabilité de l’homme de se repentir et de croire en Christ comme Sauveur et Seigneur (Ez.18.23,32, 33.11, Jn.3.18-19,36 , 5.40, 2Th.2.10-12, Ap.22.17). Néanmoins, puisque la grâce souveraine inclut les moyens de recevoir le don du salut aussi bien que le don lui-même, l’élection souveraine entraînera ce que Dieu décide. Tous ceux que le Père appelle à lui viendront à la foi et tous ceux qui viennent à la foi seront reçus par le Père (Jn.6.37-40, 44 ; Ac.13.48 ; Ja.4.8)."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que la faveur imméritée que Dieu accorde à des pécheurs totalement corrompus n’est pas liée à une quelconque initiative de leur part ni à l’anticipation par Dieu de ce qu’ils pourraient décider par eux-mêmes, mais qu’elle est uniquement liée à sa grâce souveraine et à sa miséricorde (Ep.1.4-7, Tit.3.4-7, 1Pi.1.2,)."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que l’élection ne devrait pas être considérée comme basée uniquement sur une souveraineté abstraite ou aléatoire. Dieu est vraiment souverain, mais il exerce cette souveraineté en harmonie avec ses autres attributs, en particulier son omniscience, sa justice, sa sainteté, sa sagesse, sa grâce, et son amour (Ro.9.11-16). Cette souveraineté exaltera toujours la volonté de Dieu d’une manière totalement cohérente avec son caractère tel qu’il a été révélé dans la vie de notre Seigneur Jésus-Christ (Mt.11.25-28, 2Ti.1.9)."
+        },
+        {
+          "type": "sous-titre",
+          "texte": "La régénération"
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que la régénération est une œuvre spirituelle du Saint-Esprit par laquelle la semence et la vie divines sont données (Jn.3.3-8, Tit 3.5). Cette œuvre est instantanée et accomplie uniquement par la puissance du Saint-Esprit, à travers l’instrument de la Parole de Dieu (Jn.5.24 ; 1Pi.1.23), lorsque le pécheur repentant, convaincu par le Saint-Esprit, accepte par la foi le don divin du salut. La régénération véritable se manifeste par des fruits dignes de la repentance tels qu’une attitude et une conduite droites. Les bonnes œuvres en constituent la preuve et le fruit (1Cor.6.19-20, Ep.5.17-21, Ph.2.12b, Col.3.12-17, 2Pi.1.4-11). Cette obéissance rend le croyant de plus en plus conforme à l’image de notre Seigneur Jésus-Christ (2Cor.3.18). Une telle conformité atteint son paroxysme dans la glorification du croyant lors du retour de Christ (Ro.8.16-17, 2Pi.1.4, 1Jn.3.2-3)."
+        },
+        {
+          "type": "sous-titre",
+          "texte": "La justification"
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que la justification est un acte de Dieu (Ro.8.30, 33) par lequel il déclare justes ceux qui par la foi en Christ, se repentent de leurs péchés (Lu.13.3, Ac.2.38, 3.19, 11.18, Ro.2.4, 2Cor.7.10, Es.55.6-7) et le confessent comme leur souverain Seigneur (Ro.10.9-10, 1Cor.12.3, 2Cor.4.5, Ph.2.11). Cette justice est différente de toute vertu ou œuvre propre à l’homme (Ro.3.20, 4.6) ; elle implique le transfert sur Christ de tous nos péchés (Col.2.14 ; 1Pi.2.24) et l’imputation à nous-mêmes de la justice de Christ (1Cor.1.2,30, 6.11, 2Cor.5.21). Dieu peut ainsi être « juste tout en justifiant celui qui a la foi en Jésus ». (Ro.3.26)"
+        },
+        {
+          "type": "sous-titre",
+          "texte": "La sanctification"
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que chaque croyant est sanctifié (mis à part) pour Dieu par la justification. Il est, par conséquent, déclaré saint et reconnu comme tel. Cette sanctification est une sanctification instantanée liée à un statut et ne doit pas être confondue avec la sanctification progressive. Elle concerne la position du croyant, et non sa marche ou sa condition actuelle (Ac.20.32, 1Cor.1.2, 30, 6.11, 2Th.2.13, Hé.2.11, 3.1, 10.10, 14, 13.12, 1Pi.1.2)."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons qu’il y aussi une sanctification progressive grâce à l’œuvre du Saint-Esprit. Le croyant ressemble de plus en plus à Christ en obéissant à la Parole de Dieu et en se laissant remplir par la puissance du Saint-Esprit. Il peut vivre une vie toujours sainte en conformité avec la volonté de Dieu et devenir de plus en plus semblable à notre Seigneur Jésus-Christ (Jn.17.17, 19, Ro.6.1-22 ; 2Cor.3.18, 1Th.4.1-4, 5.23)."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "A cet égard, nous croyons que chaque personne sauvée est engagée dans un conflit quotidien – la nouvelle création en Christ livrant bataille à la chair – mais dispose de moyens appropriés pour remporter la victoire, grâce à la puissance du Saint-Esprit qui demeure en elle. La lutte se poursuit néanmoins tout au long de cette vie terrestre sans jamais prendre réellement fin. Toute déclaration affirmant l’éradication du péché dans cette vie est non scripturaire. L’éradication du péché n’est pas possible, mais le Saint-Esprit accorde la victoire sur le péché (Ga.5.16-25, Ep.4.22-24, Ph.3.12, Col.3.9-10, 1Pi.1.14-16, 1Jn.3.5-9)."
+        },
+        {
+          "type": "sous-titre",
+          "texte": "La sécurité"
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que tous les rachetés, une fois sauvés, sont gardés par la puissance de Dieu et sont ainsi pour toujours en sécurité en Christ (Jn.5.24, 6.37-40 ; 10.27-30, Ro.5.9-10, 8.1, 31-39, 1Cor.1.4-9, Ep.4.30, Hé.7.25, 13.5, 1Pi.1.4-5, Jud.24)."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que les chrétiens ont le privilège de jouir de l’assurance de leur salut par le témoignage intérieur que donne le Saint-Esprit en accord avec la Parole de Dieu (Ro.8.15-16 ; 1Jn.5.12-13); celle-ci interdit cependant clairement de recourir à la liberté chrétienne comme une excuse pour mener une vie pécheresse et immorale (Ro.6.15-22, 13.13-14, Ga.5.13, 16-17, 25-26, Tit.2.11-14)."
+        },
+        {
+          "type": "sous-titre",
+          "texte": "La séparation"
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que l’Ancien et le Nouveau Testaments nous appellent clairement à nous séparer du péché et que, selon un enseignement clair des Ecritures, dans les derniers jours l’apostasie et le matérialisme augmenteront dans ce monde (2Cor.6.14-7.1, 2Ti.3.1-5, 2Thess.2.3, 10)."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que tous les croyants doivent vivre de manière à manifester leur amour rempli d’adoration pour Dieu, à ne pas jeter le discrédit sur notre Seigneur et Sauveur, par reconnaissance pour la grâce imméritée que Dieu leur a accordée et parce que notre Dieu de gloire a vraiment droit à une consécration totale. Nous croyons aussi que Dieu nous a ordonné de renoncer à toute association avec l’apostasie religieuse et à toutes les pratiques mauvaises du monde (Ro.12.1-2, 1Cor.5.9-13, 2Cor.6.14-7.1 ; 1Jn.2.15-17, 2Jn.9-11)."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que cette séparation doit conduire les croyants à s’attacher à notre Seigneur Jésus-Christ (2Th.1.11-12, Hé.12.1-2), et nous affirmons que la vie chrétienne est une vie joyeuse de justice et d’obéissance (Mt 5.2-12 ; Phil.2.17 ; 4.4) manifestée par une recherche constante de la sainteté (Ro.12.1-2, 2Cor.7.1, Hé.12.14 ; Tit.2.11-14 ; 1Jn.3.1-10)."
+        }
+      ]
+    },
+    {
+      "titre": "L’Eglise",
+      "blocs": [
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que tous ceux qui mettent leur foi en Jésus-Christ sont immédiatement intégrés par le Saint-Esprit au corps spirituel qu’est l’Eglise (1Cor.12.12-13), l’épouse de Christ (2Cor.11.2, Ep.5.23-32, Ap.19.7-8) qui est son chef (Ep.1.22, 4.15, Col.1.18)."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que la formation de l’Eglise, le corps de Christ, a commencé le jour de la Pentecôte (Ac.2.1-21, 38-47) et sera achevée lors de la venue de Christ pour les siens, lors de l’enlèvement (1Cor.15.51-52, 1Th.4.13-18)."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que l’Eglise est ainsi un organisme spirituel unique créé par Christ et constitué de tous les croyants nés de nouveau (Ep.2.11-3.6). L’Eglise est distincte d’Israël (1Cor.10.32), elle est un mystère gardé secret jusqu’à notre ère (Ep.3.1-6, 5.32)."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que l’implantation d’Eglises locales est clairement enseignée et définie dans les écrits du Nouveau Testament (Ac.14.23,27, 20.17,28, Ga.1.2, Ph.1.1, 1Th.1.1, 2Th.1.1) et qu’il est recommandé aux membres du corps spirituel de Christ de se réunir en assemblées locales (1Co.11.18-20, Hé.10.25)."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que l’autorité suprême de l’Eglise est Christ (Ep 1.22, Col 1.18) et que c’est sa souveraineté qui préside à l’attribution de responsabilités et de dons, à l’ordre, à la discipline et à l’adoration en son sein, conformément aux enseignements de l’Ecriture. Les officiants, que la Bible désigne comme servant sous l’autorité de Christ à la tête de l’assemblée, sont les anciens (hommes aussi appelés évêques, pasteurs et enseignants, (Ac.20.28, Ro.12.7 ; Ep.4.11) et les diacres. Ces deux groupes doivent répondre aux exigences bibliques (1Ti.3.1-13, Tit.1.5-9, 1Pi.5.1-5)."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que ces responsables accomplissent leur tâche de conduire ou diriger comme des serviteurs de Christ (1Ti.5.17-22) et bénéficient de son autorité pour diriger l’Eglise. L’assemblée doit se soumettre à leur direction en accord avec l’esprit de la Bible (Hé.13.7, 17)."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons à l’importance de faire des disciples (Mt.28.19-20, 2Ti.2.2), à la responsabilité mutuelle des croyants (Mt.18.15-17) ainsi qu’à la nécessité d’exercer la discipline, en accord avec les normes de l’Ecriture, pour les membres de l’assemblée qui pèchent (Mt.18.15-22 ; Ac.5.1-11, 1Co.5.1-13, 2Th.3.6-15, 1Ti.1.19-20 ; 5.20, Tit.1.10-16 ; 3.10-11 ; Ro.16.17)."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons à l’autonomie de l’Eglise locale, à son indépendance vis-à-vis de toute autorité et de tout contrôle externes. Elle a le droit de se gérer seule, sans ingérence d’une quelconque hiérarchie constituée d’individus ou d’organisations (Tit.1.5). En accord avec l’Ecriture, nous déclarons qu’il est juste que les véritables Eglises coopèrent les unes avec les autres pour présenter et propager la foi. Les Eglises locales devraient cependant êtres les seules juges, à travers leurs pasteurs et leur interprétation et application de l’Ecriture, des limites et de la forme de leur coopération (Ac.15.19-31, 20.28, 1Co.5.4-7,13, 1Pi.5.1-4)."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que le but de l’Eglise est de glorifier Dieu (Ep.3.21) en progressant dans la foi (Ep.4.13-16), en enseignant la Parole (2Ti.2.2,15 ; 3.16-17), en vivant la communion fraternelle (Ac.2.47, 1Jn.1.3), en observant les ordonnances (Lu.22.19, Ac.2.38-42) et en annonçant et communiquant l’Evangile au monde entier (Mt.28.19, Ac.1.8)."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons à l’appel de tous les saints à servir (1Cor.15.58, Ep.4.11ss, Ap. 22.12).Nous croyons à la nécessaire coopération de l’Eglise avec Dieu alors qu’il accomplit son but dans le monde. A cette fin, il accorde des dons spirituels à l’Eglise. Il donne premièrement des personnes choisies afin d’équiper les saints pour l’œuvre du ministère (Ep.4.7-12), mais il donne aussi des aptitudes spirituelles uniques et spécifiques à chaque membre du corps du Christ (Ro.12.5-8, 1Cor.12.4-31, 1Pi.4.10-11)."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons qu’il y avait deux sortes de dons accordés à l’Eglise primitive : les dons miraculeux de révélation divine, de connaissance, de guérison et de langues, donnés temporairement à l’époque apostolique dans le but de confirmer l’authenticité du message des apôtres (Hé.2.3-4, 2Cor.12.12), et les dons liés au service, accordés pour équiper les croyants en vue de l’édification mutuelle. Puisque la révélation du Nouveau Testament est désormais complète, l’Ecriture devient la seule preuve d’authenticité du message d’un homme. Les dons miraculeux de confirmation ne sont plus nécessaires pour accréditer un homme ou son message (1Cor.13.8-12), la souveraineté de Dieu reste néanmoins de règle. Les dons miraculeux ne sont pas un signe certain de Dieu, et peuvent même être contrefaits par Satan pour tromper les croyants (Mt.7.22-23 ; 24.24 ; 2Cor.11,14 ; 2Thes.2.9). Les seuls dons en vigueur aujourd’hui sont ceux qui ne sont pas liés à la révélation et qui équipent en vue de l’édification (Ro.12.6-8)."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que personne ne possède le don de guérison de nos jours, mais que Dieu entend la prière faite avec foi et y répond selon sa souveraineté, sa volonté particulière et parfaite, pour la personne malade ou souffrante (Lu.18.1-8, Jn.5.7-9, 2Cor.12.6-10, Ja.5.13-16, 1Jn.5.14-15)."
+        },
+        {
+          "type": "sous-titre",
+          "texte": "Les symboles"
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que deux ordonnances symboliques ont été confiées à l’Eglise locale : le baptême et la cène (Ac.2.38-42)."
+        },
+        {
+          "type": "sous-titre",
+          "texte": "Le baptême"
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Le mot « baptême » signifiant « immersion », nous croyons à la nécessité de l’immersion totale du croyant. Ce mode de baptême est le seul enseigné et pratiqué dans les Ecritures (Mt.28.19 ; Jn.3.23 ; Ac.2.38-41 ; Ac.8.36-39 ; Ac.10.47-48 ; 1Pi.3.21). Il est le témoignage solennel et magnifique d’un croyant qui manifeste sa foi dans le Sauveur crucifié, enseveli et ressuscité, et proclame son union avec lui dans sa mort au péché et dans sa résurrection à une vie nouvelle (Ro.6.1-11 ; Gal.3.26-27 ; Col.2.12). C’est aussi un signe de la communion et de l’identification avec le corps visible de Christ (Ac.2.41-42)."
+        },
+        {
+          "type": "sous-titre",
+          "texte": "La cène ou souper ou repas du Seigneur"
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que la cène est la commémoration et la proclamation de la mort du Seigneur jusqu’à ce qu’il revienne. Elle devrait toujours être précédée d’un examen de conscience. Une personne qui vit dans le péché, qui mange et boit sans discerner le corps du Seigneur attire un jugement contre elle-même (1Cor.11.23-32). Nous croyons aussi que, si les éléments de la cène ne font que représenter le corps et le sang de Christ, ce repas du Seigneur constitue néanmoins une communion réelle avec le Christ ressuscité ; celui-ci est présent d’une manière unique et s’associe à son peuple. (1Cor.10-16-22)."
+        }
+      ]
+    },
+    {
+      "titre": "Les anges",
+      "blocs": [
+        {
+          "type": "sous-titre",
+          "texte": "Les anges saints"
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons à l’existence des anges, lesquels possèdent une intelligence et un pouvoir supérieurs à l’homme dans son état actuel (Ps.8.6 ; Hé.2.7)."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que les anges sont des êtres créés et ne doivent par conséquent pas être adorés (Apo.19, 10 ; 22,8-9). Bien qu’ils représentent un ordre plus élevé dans la création de l’homme, ils ont été créés pour servir Dieu et l’adorer (Luc 2.9-14, Hé.1.6-7, 14, 2.6-7, Ap.5.11-14)."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que Dieu emploie ses saints anges pour exercer ses jugements (2Sa.24.16 ; 2R.19.35 ; Za.1.7-12), de même que pour exercer un ministère en faveur des enfants de Dieu (Ge.28.12 ; 48.16 ; Es.63.9 ; Luc 1.11ss ; 1.26ss ; Luc 22.43 ; Act.12.7)."
+        },
+        {
+          "type": "sous-titre",
+          "texte": "Les anges déchus"
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que Satan est un ange créé et l’auteur du péché. Il a encouru le jugement de Dieu, car il s’est rebellé contre son Créateur (Es.14.12-17 ; Ez.28.11-19), a entraîné plusieurs anges avec lui dans sa chute (Mt.25.41 ; Ap.12.1-4) et a introduit le péché dans la race humaine en tentant Eve (Ge.3.1-15)."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que Satan est l’ennemi déclaré de Dieu et de l’homme (Es.14.13-14, Mt.4.1-11, Ap.12.9-10), le prince de ce monde vaincu par la mort et la résurrection de Jésus-Christ (Jn.12.31-32 ; Ro.16.20 ; Col.2.15, 1Jn.3.8, Héb 2.14-15), et qu’il sera éternellement puni dans l’étang de feu (Es.14.12-17, Ez.28.11-19, Mt.25.41, Ap.20.10)."
+        }
+      ]
+    },
+    {
+      "titre": "Les derniers temps",
+      "blocs": [
+        {
+          "type": "sous-titre",
+          "texte": "La mort"
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que la mort physique n’entraîne aucune perte de notre conscience immatérielle (Luc 16.24-31 ; Ap.6.9-11), qu’il y a une séparation de l’âme et du corps (Eccl.12.9 ; Ja.2.26), que l’âme du racheté passe immédiatement dans la présence de Christ (Lu.23.43, 2Cor.5.8, Ph.1.23). Pour le racheté, cette séparation durera jusqu’à l’enlèvement (1Th.4.13-17) qui constitue la première résurrection (Ap.20.4-6), le moment où notre âme et notre corps seront réunis pour être glorifiés pour toujours avec notre Seigneur (1Cor.15.35-44, 50-54, Ph.3.21). En attendant ce moment, l’âme des rachetés reste dans une joyeuse communion avec notre Seigneur Jésus-Christ (2Cor.5.8)."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons à la résurrection corporelle de tous les hommes (Dan.12.2 ; Jn.5.28-29 Ap.20.6, 13-15) : ceux qui sont sauvés, pour la vie éternelle (Jn.6.39-40, Ro.8.10-11, 19-23, 2Cor.4.14), et ceux qui ne sont pas sauvés, pour le jugement et le châtiment éternels (Mt.25.41 ; 2Thes.1.8-9)."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que l’âme de ceux qui meurent sans avoir accepté le salut est réservée pour le châtiment jusqu’à l’ultime résurrection (Lu.16.19-26 ; Ap.20.13-15), au moment où l’âme et le corps ressuscités seront réunis (Jn 5.28-29). Ils comparaîtront alors devant le grand trône blanc (Ap.20.11-13) et seront jetés dans l’étang de feu (Mt.25.41-46 ; Ap.20.10,14-15), coupés pour toujours de la vie de Dieu, ce qui sera la seconde mort, éternelle cette fois (Mt.25.41-46, 2Th.1.7-9 ; Apo.21, 8)."
+        },
+        {
+          "type": "sous-titre",
+          "texte": "L’enlèvement de l’Eglise"
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons qu’avant la tribulation de sept ans, notre Seigneur Jésus-Christ reviendra en personne physiquement (1Th.4.16, Tit.2.13), pour enlever son Eglise de cette terre (Jn.14.1-3, 1Cor.15.51-53, 1Th.4.15-5.11) et pour récompenser les croyants selon leurs œuvres (1Cor.3.11-15, 2Cor.5.10). Après quoi, il reviendra avec tous ses saints (2Th.1.10)."
+        },
+        {
+          "type": "sous-titre",
+          "texte": "La période de la tribulation"
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons qu’immédiatement après l’enlèvement de l’église (Jn.14.1-3, 1Th.4.13-18), Dieu exercera son juste jugement sur un monde incrédule (Jé.30.7, Da.9.27, 12.1, 2Th.2.7-12, Ap.16) et que ses jugements atteindront leur paroxysme lors du retour de Christ en gloire sur la terre (Mt.24.27-31, 25.31-46, 2Th.2.7-12 ; Apo.19). A ce moment-là, les saints de l’Ancien Testament et de la période de la tribulation ressusciteront, et les vivants seront jugés (Da.12.2-3, Ap.20.4-6). Cette période inclut la 70ème semaine de la prophétie de Daniel (Da.9.24-27, Mt.24.15-31, 25.31-46)."
+        },
+        {
+          "type": "sous-titre",
+          "texte": "La seconde venue et le règne de 1000 ans"
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons qu’après la période de la tribulation, Christ viendra sur la terre pour occuper le trône de David (Mt.25.31, Lu.1.32-33, Ac.1.10-11, 2.29-30) et établir son royaume messianique de 1000 ans sur la terre (Ap.20.1-7). Pendant ce temps, les saints ressuscités régneront avec lui sur Israël et sur toutes les nations de la terre (Ez.37.21-28, Da.7.17-22, Ap.19.11-16). Ce règne sera précédé par le renversement de l’Antéchrist et du faux prophète et par le retrait de Satan du monde (Da.7.26, Ap.20.1-10)."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que le royaume lui-même sera l’accomplissement de la promesse faite par Dieu aux Israélites (Es.65.17-25, Ez.37.21-28, Za.8.1-17) de leur rendre le pays qu’ils avaient perdu à cause de leur désobéissance (De.28.15-68). Cette désobéissance a eu pour conséquence leur mise à l’écart provisoire (Mt.21.43, Ro.11.1-26), mais un réveil interviendra pour eux à travers leur repentance (Za.12.10), et ils entreront dans le pays de bénédictions (Jé.31.34, Ez.36.22-32, Ro.11.25-29)."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que la période où notre Seigneur régnera sera caractérisée par l’harmonie, la justice, la paix, la droiture et une longue vie (Es.11, 65.17-25, Ez.36.33-38) et prendra fin lorsque Satan sera relâché (Ap.20.7)."
+        },
+        {
+          "type": "sous-titre",
+          "texte": "Le jugement des perdus"
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que, une fois relâché à la fin du règne millénaire de Christ (Ap.20.7), Satan trompera les nations de la terre et les rassemblera pour combattre à nouveau les saints et la ville bien-aimée ; c’est alors que lui et son armée seront dévorés par le feu du ciel (Ap.20.9). Il sera ensuite jeté dans l’étang de feu et de soufre (Mt.25.41, Ap.20.10) tandis que Christ, qui est le juge de tous les hommes (Jn.5.22) ressuscitera grands et petits et les jugera devant le grand trône blanc (Ap.20.11)."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons que cette résurrection des perdus pour le jugement sera une résurrection physique. Après leur jugement (Jn.5.29), ils seront jetés dans l’étang de feu pour une punition consciente et éternelle (Mt.25.41, Ap.20.11-15)."
+        },
+        {
+          "type": "sous-titre",
+          "texte": "L’Eternité"
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Nous croyons qu’à la fin du millénium, après le relâchement temporaire de Satan et le jugement des incrédules (2Th.1.9, Ap.20.7-15), ceux qui sont sauvés entreront dans un état éternel de gloire avec Dieu. Puis les éléments de cette terre se dissoudront (2Pi.3.10) et seront remplacés par une nouvelle terre où habitera la justice (Es.51.16 ; 65.17 ; 66.22 ; 2Pi.3.13 ; Ap.21.1 ; Ep.5.5, Ap.20.15, Ap.21 et 22). Ensuite, la cité céleste descendra du ciel (Ap.21.2) et sera l’endroit où demeureront les saints, où ils jouiront pour toujours de l’intimité avec Dieu et les uns avec les autres (Jn.17.3,24, Ap.21 et 22). Notre Seigneur Jésus-Christ, ayant accompli sa mission rédemptrice, remettra ensuite le royaume à Dieu le Père (1Cor.15.23-28) pour que le Dieu trinitaire puisse régner à toujours sur l’univers entier (1Cor.15.28)."
+        }
+      ]
+    }
+  ]
+}

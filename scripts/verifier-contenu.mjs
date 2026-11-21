@@ -4,6 +4,7 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { verifierVersetsDocuments } from "./verifier-versets-documents.mjs";
 
 const racine = join(dirname(fileURLToPath(import.meta.url)), "..");
 const dossier = join(racine, "app", "contenu", "lecons");
@@ -125,7 +126,61 @@ for (const fichier of fichiers) {
   }
 }
 
-// L'index doit correspondre exactement aux fichiers de leçons (voir scripts/generer-index.mjs).
+// Les documents de l'église (app/contenu/documents/*.json) : confession de foi, statuts,
+// règlement intérieur, principes ecclésiastiques. Leur texte est repris du PDF tel qu'imprimé,
+// fautes et apostrophes comprises : on ne contrôle ici que la structure. La fidélité au PDF
+// se contrôle à part, avec scripts/comparer-documents-au-pdf.mjs.
+const dossierDocuments = join(racine, "app", "contenu", "documents");
+const fichiersDocuments = existsSync(dossierDocuments)
+  ? readdirSync(dossierDocuments).filter((f) => f.endsWith(".json")).sort()
+  : [];
+const documentsAttendus = [];
+
+function verifierTexteDocument(fichier, ou, texte) {
+  if (typeof texte !== "string" || !texte.trim()) return err(fichier, `${ou} : texte vide`);
+  if (/\s\s/.test(texte)) err(fichier, `${ou} : double espace`);
+  if (/^\s|\s$/.test(texte)) err(fichier, `${ou} : espace en début ou fin`);
+}
+
+for (const fichier of fichiersDocuments) {
+  let document;
+  try {
+    document = JSON.parse(readFileSync(join(dossierDocuments, fichier), "utf8"));
+  } catch (e) {
+    err(fichier, `JSON invalide : ${e.message}`);
+    continue;
+  }
+  const { numero, slug, titre, soustitre, pages, sections } = document;
+  documentsAttendus.push({ numero, slug, titre, fichier });
+  if (!Number.isInteger(numero) || numero < 1) err(fichier, "numero manquant ou invalide");
+  if (!fichier.startsWith(String(numero).padStart(2, "0") + "-")) err(fichier, "le nom du fichier ne commence pas par le numéro");
+  if (!/^[a-z0-9-]+$/.test(slug || "")) err(fichier, "slug manquant ou invalide (minuscules, chiffres, tirets)");
+  verifierTexteDocument(fichier, "titre", titre);
+  if (soustitre !== undefined) verifierTexteDocument(fichier, "soustitre", soustitre);
+  if (!/^\d+-\d+$/.test(pages || "")) err(fichier, "pages attendu sous la forme « 2-16 »");
+  if (!Array.isArray(sections) || sections.length === 0) {
+    err(fichier, "sections manquantes");
+    continue;
+  }
+  sections.forEach((s, i) => {
+    const ou = `sections[${i}]`;
+    verifierTexteDocument(fichier, `${ou}.titre`, s.titre);
+    if (!Array.isArray(s.blocs) || s.blocs.length === 0) return err(fichier, `${ou} : blocs manquants`);
+    s.blocs.forEach((b, j) => {
+      const ouB = `${ou}.blocs[${j}]`;
+      if (b.type === "liste") {
+        if (!Array.isArray(b.elements) || b.elements.length === 0) err(fichier, `${ouB} : elements vide`);
+        else b.elements.forEach((e, k) => verifierTexteDocument(fichier, `${ouB}.elements[${k}]`, e));
+      } else if (b.type === "paragraphe" || b.type === "sous-titre") verifierTexteDocument(fichier, ouB, b.texte);
+      else err(fichier, `${ouB} : type « ${b.type} » non prévu dans un document`);
+    });
+  });
+}
+if (new Set(documentsAttendus.map((d) => d.slug)).size !== documentsAttendus.length)
+  err("app/contenu/documents", "deux documents portent le même slug");
+
+// L'index doit correspondre exactement aux fichiers de leçons et de documents
+// (voir scripts/generer-index.mjs).
 try {
   const index = JSON.parse(readFileSync(join(racine, "app", "contenu", "index.json"), "utf8"));
   const attendu = fichiers.map((fichier) => {
@@ -141,9 +196,14 @@ try {
   }
   if (
     JSON.stringify(index.lecons) !== JSON.stringify(attendu) ||
-    JSON.stringify(index.figures || []) !== JSON.stringify([...figuresAttendues].sort())
+    JSON.stringify(index.figures || []) !== JSON.stringify([...figuresAttendues].sort()) ||
+    JSON.stringify(index.documents || []) !==
+      JSON.stringify(documentsAttendus.sort((a, b) => a.numero - b.numero))
   )
-    err("app/contenu/index.json", "ne correspond pas aux leçons : lancer node scripts/generer-index.mjs");
+    err(
+      "app/contenu/index.json",
+      "ne correspond pas aux leçons et aux documents : lancer node scripts/generer-index.mjs"
+    );
 } catch (e) {
   err("app/contenu/index.json", `illisible : ${e.message}`);
 }
@@ -160,9 +220,15 @@ try {
   err("app/contenu/versets.json", `illisible : ${e.message}`);
 }
 
+// Les références bibliques des documents de l'église : repérées au bon endroit, chacune avec
+// son passage complet (voir scripts/verifier-versets-documents.mjs).
+if (fichiersDocuments.length) erreurs.push(...verifierVersetsDocuments().erreurs);
+
 if (erreurs.length) {
   console.error(erreurs.join("\n"));
   console.error(`\n${erreurs.length} erreur(s) dans ${fichiers.length} leçon(s).`);
   process.exit(1);
 }
-console.log(`OK — ${fichiers.length} leçon(s) valide(s) : ${[...numeros].sort((a, b) => a - b).join(", ")}`);
+console.log(
+  `OK — ${fichiers.length} leçon(s) valide(s) : ${[...numeros].sort((a, b) => a - b).join(", ")} ; ${fichiersDocuments.length} document(s) valide(s)`
+);

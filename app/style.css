@@ -501,6 +501,43 @@ main {
   color: var(--texte-doux);
 }
 
+/* L'entrée vers les documents de l'église, sous les leçons : même carte, mais sans numéro et
+   détachée de la liste, pour ne pas passer pour une onzième leçon. */
+.carte-lecon--documents {
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    "titre marque"
+    "detail detail";
+  margin-top: 1.5rem;
+}
+
+/* ---------- Documents de l'église ---------- */
+
+/* « ecclésiastiques » et « l’association » sont de longs mots : en texte très grand sur un
+   écran de 320 pixels, ils poussaient la carte hors de l'écran. Le titre peut donc se couper
+   à la syllabe, ce que la langue déclarée de la page (fr) permet au navigateur. */
+.carte-lecon--document .carte-lecon__titre {
+  min-width: 0;
+  hyphens: auto;
+  overflow-wrap: break-word;
+}
+
+.documents__eglise {
+  margin: 0 0 1.25rem;
+}
+
+.document__soustitre {
+  margin: 0 0 0.5rem;
+}
+
+/* Un document commence par son premier titre : le filet qui sépare les chapitres ferait
+   double emploi juste sous le titre de la page. */
+.lecture--document > h2:first-child {
+  margin-top: 1.25rem;
+  padding-top: 0;
+  border-top: 0;
+}
+
 .pied {
   margin-top: 2rem;
   font-size: 0.85rem;

@@ -1,0 +1,208 @@
+{
+  "numero": 2,
+  "slug": "statuts-de-l-association",
+  "titre": "Statuts de l’association",
+  "pages": "17-20",
+  "sections": [
+    {
+      "titre": "Article 1 : Fondation",
+      "blocs": [
+        {
+          "type": "paragraphe",
+          "texte": "Cette association cultuelle est fondée conformément aux dispositions de la loi du 1er Juillet 1901 et du 9 décembre 1905. Elle prend pour titre: «EGLISE BAPTISTE TOULOUSE METROPOLE»."
+        }
+      ]
+    },
+    {
+      "titre": "Article 2 : But",
+      "blocs": [
+        {
+          "type": "liste",
+          "elements": [
+            "L’exercice et la célébration du culte protestant évangélique baptiste dans toutes ses formes",
+            "L’acquisition, la location et l’entretien de locaux et édifices nécessaires au culte",
+            "De pourvoir en tout ou partie aux frais et aux besoins de ce culte",
+            "La rémunération et la formation des pasteurs ministres du culte et de toute personne occupant une fonction dans l’exercice et la conduite du culte",
+            "La coopération religieuse internationale intercultuelle et interdénominationnelle pour la pratique du culte protestant, évangélique, baptiste."
+          ]
+        }
+      ]
+    },
+    {
+      "titre": "Article 3 : Siège social",
+      "blocs": [
+        {
+          "type": "paragraphe",
+          "texte": "Son siège est à Toulouse, 195, avenue des Etats-Unis - 31200 Toulouse. Ce siège pourra être transféré ailleurs par décision de l’Assemblée Générale."
+        }
+      ]
+    },
+    {
+      "titre": "Article 4 : Circonscription géographique de l’association",
+      "blocs": [
+        {
+          "type": "paragraphe",
+          "texte": "La circonscription de l’association comprend la France, et s’étend au monde entier."
+        }
+      ]
+    },
+    {
+      "titre": "Article 5 : Limitations d’action",
+      "blocs": [
+        {
+          "type": "paragraphe",
+          "texte": "L’association s’interdit tout but ou action ou discussion politique."
+        }
+      ]
+    },
+    {
+      "titre": "Article 6 : Conditions pour être membre",
+      "blocs": [
+        {
+          "type": "paragraphe",
+          "texte": "Pour être membre de l’association, il faut en faire la demande à l’un des membres du Conseil de l’Eglise et se soumettre aux conditions suivantes:"
+        },
+        {
+          "type": "paragraphe",
+          "texte": "1. avoir fait une expérience réelle du salut en Jésus-Christ, suivi du baptême par immersion, selon les Écritures."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "2. remplir les conditions religieuses, définies dans la Confession de Foi et dans le Règlement Intérieur de l’église, lesquelles seront vérifiées par le(s) pasteur(s), assisté(s) du Conseil."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "3. Prendre l’engagement de soutenir l’association par une offrande régulière et librement consentie. Sans être imposée, la dîme sera conseillée."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "4. L’admission, étant décidée par le(s) pasteur(s) et le Conseil de l’église, sera ensuite soumise à la ratification de l’église lors de la prochaine Assemblée Générale, sous condition qu’un délai de trois mois minimum se soit écoulé depuis le jour où la demande d’admission a été présentée par le candidat. Très exceptionnellement, ce délai de trois mois pourra être réduit."
+        }
+      ]
+    },
+    {
+      "titre": "Article 7 : Admission comme électeur",
+      "blocs": [
+        {
+          "type": "paragraphe",
+          "texte": "Tout membre de l’association, admis conformément à l’article 6, est électeur de droit, pourvu qu’il ait atteint la majorité de 18 ans."
+        }
+      ]
+    },
+    {
+      "titre": "Article 8 : Retrait et radiation de l’état de membre",
+      "blocs": [
+        {
+          "type": "paragraphe",
+          "texte": "Tout membre de l’association peut s’en retirer en tout temps, par écrit adressé au pasteur principal, qui en informe le Conseil, puis l’église. Les personnes ne remplissant plus les conditions de l’article 6 alinéa 2 pourront être exclues sur décision du (des) pasteur(s) suivis du Conseil, qui en informeront l’église, lors de la prochaine Assemblée Générale."
+        }
+      ]
+    },
+    {
+      "titre": "Article 9 : Responsables au sein de l’Association",
+      "blocs": [
+        {
+          "type": "paragraphe",
+          "texte": "L’association est administrée par un Conseil composé du (des) pasteur(s), le premier d’entre eux étant aussi le Président de l’association, et des anciens. Le pasteur, Président de l’association et le Conseil choisissent parmi l’ensemble des membres de l’association un Bureau composé d’un Vice-Président, d’un Secrétaire, d’un Trésorier et d’un Trésorier Adjoint. Ce Bureau est présenté en Assemblée Générale et ratifié membre par membre par bulletin secret et à la majorité des deux tiers. Les mandats des membres du bureau ont une durée de 3ans et sont reconductibles."
+        }
+      ]
+    },
+    {
+      "titre": "Article 10 : Mandat des diacres",
+      "blocs": [
+        {
+          "type": "paragraphe",
+          "texte": "Les diacres sont élus, au scrutin secret, à la majorité des deux-tiers des membres présents ou représentés par procuration, à l’Assemblée Générale, sous réserve qu’ils remplissent les conditions définies dans le Règlement Intérieur."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Le Conseil peut convoquer une Assemblée Générale Extraordinaire pour voter en ce qui concerne la radiation éventuelle d‘un diacre. La majorité simple des membres présents ou représentés est alors habilitée à valider cette action. Cette Assemblée sera convoquée au moins 15 jours avant la date du vote."
+        }
+      ]
+    },
+    {
+      "titre": "Article 11 : Mandat de pasteur et celui d’ancien",
+      "blocs": [
+        {
+          "type": "paragraphe",
+          "texte": "Chaque pasteur ou ancien est présenté en son temps à l’église par le Conseil, et élu par l’Assemblée Générale de l’église, au scrutin secret et à la majorité des trois-quarts des membres présents ou représentés. Cette Assemblée Générale sera convoquée 15 jours au moins avant 1’élection."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Le Conseil peut convoquer une Assemblée Générale Extraordinaire pour voter en ce qui concerne la démission éventuelle d’un pasteur ou d’un ancien ou sa radiation pour faute grave. La majorité simple des membres présents ou représentés est alors habilitée à valider cette action. Cette Assemblée sera convoquée au moins 15 jours avant la date du vote."
+        }
+      ]
+    },
+    {
+      "titre": "Article 12 : Fonctions des membres du Conseil",
+      "blocs": [
+        {
+          "type": "paragraphe",
+          "texte": "Le Conseil s’occupe de toutes les questions d’ordre spirituel et de la discipline au sein de l’association. Il a le devoir de veiller à ce que l’association ne dévie pas de son objet. Le Conseil a les pouvoirs qui lui sont conférés par l’association pour gérer ses intérêts et la représenter à l’égard des tiers ou devant les tribunaux. Il arrête les comptes annuels, dresse l’inventaire des biens de l’association, délibère et statue en Assemblée Générale sur les propositions à faire, établit l’ordre du jour et convoque lesdites Assemblées, tant Ordinaire qu’Extraordinaire. Il dresse le budget de l’association, présente à l’approbation de l’Assemblée Générale Ordinaire le compte de l’exercice clos. L’exercice financier commence le premier janvier et se clôture le trente et un décembre de chaque année."
+        }
+      ]
+    },
+    {
+      "titre": "Article 13 : Convocation du Conseil",
+      "blocs": [
+        {
+          "type": "paragraphe",
+          "texte": "Le Conseil se réunit sur la convocation du pasteur principal ou sur demande de la moitié des membres du conseil. En cas d’incapacité du pasteur le conseil pourra se réunir sur convocation de l’un de ses membres. Les décisions du Conseil sont prises à la majorité simple des membres présents, la voix du Président étant prépondérante en cas de partage égal des voix."
+        }
+      ]
+    },
+    {
+      "titre": "Article 14 : Pouvoirs du Président ou de l’un de ses représentants",
+      "blocs": [
+        {
+          "type": "paragraphe",
+          "texte": "Le Président, en cas d’empêchement le Vice-Président ou tout autre membre délégué à cet effet par l’association, peut représenter en justice l’association et signer valablement tout acte, sous seing privé et authentique au nom de l’association, sous les conditions prescrites dans le règlement intérieur. Il est chargé de remplir toute formalité administrative édictée par les lois et règlements en vigueur. En outre, l’association peut, par mandat spécial et pour une ou plusieurs affaires déterminées, déléguer ses pouvoirs à un tiers, comme bon lui semblera, lequel rendra compte au conseil."
+        }
+      ]
+    },
+    {
+      "titre": "Article 15 : Responsabilité pénale",
+      "blocs": [
+        {
+          "type": "paragraphe",
+          "texte": "Le patrimoine de l’association répond seul des engagements contractés. Aucun membre du Conseil ou de l’association ne peut être tenu pénalement comme personnellement responsable."
+        }
+      ]
+    },
+    {
+      "titre": "Article 16 : Assemblées Générales",
+      "blocs": [
+        {
+          "type": "paragraphe",
+          "texte": "16a L’association se réunit une fois par an sous forme d’Assemblée Générale Ordinaire, afin de rendre compte de sa gestion, tant financière que spirituelle"
+        },
+        {
+          "type": "paragraphe",
+          "texte": "16b L’association se réunit en Assemblée Générale Extraordinaire toutes les fois que le Conseil le souhaite, en vue de modifier le bureau ou les statuts, ou toute autre décision importante. Les convocations seront envoyées au moins 15 jours avant la date fixée."
+        }
+      ]
+    },
+    {
+      "titre": "Article 17 : Modification des statuts",
+      "blocs": [
+        {
+          "type": "paragraphe",
+          "texte": "Les présents statuts ne pourront être modifiés que lors d’une Assemblée Générale Extraordinaire, et ce, à la majorité des deux-tiers des membres présents ou représentés."
+        }
+      ]
+    },
+    {
+      "titre": "Article 18 : Dissolution de l’Association",
+      "blocs": [
+        {
+          "type": "paragraphe",
+          "texte": "En cas de dissolution volontaire de l’association prononcée par deux tiers au moins des membres présents à l’assemblée Générale Extraordinaire, un ou plusieurs liquidateurs sont nommés par l’assemblée générale au bénéfice d’une ou plusieurs associations ayant le même objet."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "*Fait à Toulouse, le 28 août 2022*"
+        }
+      ]
+    }
+  ]
+}

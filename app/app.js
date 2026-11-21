@@ -193,6 +193,35 @@
     return lecon;
   }
 
+  // Les documents de l'église : confession de foi, statuts, règlement intérieur, principes.
+  const documentsCharges = new Map();
+
+  async function chargerDocument(slug) {
+    if (documentsCharges.has(slug)) return documentsCharges.get(slug);
+    const liste = await chargerIndex();
+    const entree = (liste.documents || []).find((d) => d.slug === slug);
+    if (!entree) throw new Error("Ce document n’existe pas.");
+    const texte = await chargerJson(`contenu/documents/${entree.fichier}`);
+    documentsCharges.set(slug, texte);
+    return texte;
+  }
+
+  // Les références bibliques des documents : où elles se trouvent dans chaque texte, et le
+  // passage de chacune (scripts/construire-versets-documents.mjs). Chargé à la première
+  // ouverture d'un document seulement. S'il manque, les références restent du texte simple.
+  let versetsDocuments = null;
+
+  async function chargerVersetsDocuments() {
+    if (versetsDocuments) return versetsDocuments;
+    try {
+      versetsDocuments = await chargerJson("contenu/versets-documents.json");
+    } catch (erreur) {
+      console.warn("Passages des documents indisponibles :", erreur);
+      versetsDocuments = { traduction: "", reperes: {}, passages: {} };
+    }
+    return versetsDocuments;
+  }
+
   // ---------------------------------------------------------------------------
   // Outils d'affichage
   // ---------------------------------------------------------------------------
@@ -207,12 +236,12 @@
 
   // Convertit la mise en forme légère du contenu (**gras**, *italique*, retours à la ligne),
   // puis rend cliquables les adresses de sites et les références bibliques.
-  function enrichir(texte) {
+  function enrichir(texte, { references = true } = {}) {
     const base = echapper(texte)
       .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
       .replace(/\*(.+?)\*/g, "<em>$1</em>")
       .replace(/\n/g, "<br>");
-    return lierReferences(lierAdresses(base));
+    return references ? lierReferences(lierAdresses(base)) : lierAdresses(base);
   }
 
   // N'applique une transformation qu'au texte, jamais à l'intérieur d'une balise déjà posée.
@@ -394,6 +423,7 @@
     <img class="marque__logo marque__logo--clair" src="__SRC__" alt="EBTM" width="500" height="273" />
     <img class="marque__logo marque__logo--sombre" src="__SRC_SOMBRE__" alt="EBTM" width="500" height="273" /></a>`;
   const RETOUR = `<a class="bouton-retour" href="#/" aria-label="Retour à toutes les leçons">←</a>`;
+  const RETOUR_DOCUMENTS = `<a class="bouton-retour" href="#/documents" aria-label="Retour aux documents">←</a>`;
 
   // ---------------------------------------------------------------------------
   // Proposer l'installation sur l'écran d'accueil
@@ -1123,6 +1153,15 @@
           <p class="progression__detail">${terminees} / ${total} leçon${total > 1 ? "s" : ""}</p>
         </section>
         <ul class="liste-lecons">${cartes}</ul>
+        ${
+          (liste.documents || []).length
+            ? html`<a class="carte-lecon carte-lecon--documents" href="#/documents">
+                <p class="carte-lecon__titre">${TITRE_DOCUMENTS}</p>
+                <span class="carte-lecon__marque">${CHEVRON}</span>
+                <p class="carte-lecon__detail">${liste.documents.map((d) => echapper(d.titre)).join(" · ")}</p>
+              </a>`
+            : ""
+        }
         <p class="pied">
           <a href="#/a-propos">À propos du cours</a>
         </p>
@@ -1526,6 +1565,116 @@
   }
 
   // ---------------------------------------------------------------------------
+  // Documents de l'église : « La foi et les pratiques »
+  // ---------------------------------------------------------------------------
+
+  // Les mots de la couverture du PDF : « Documents définissant la foi et les pratiques de
+  // l'Église Baptiste Toulouse Métropole », suivis de la liste des quatre documents.
+  const TITRE_DOCUMENTS = "La foi et les pratiques";
+
+  async function afficherDocuments() {
+    const liste = await chargerIndex();
+    const cartes = (liste.documents || [])
+      .map(
+        (d) => html`
+          <li>
+            <a class="carte-lecon carte-lecon--document" href="#/documents/${d.slug}">
+              <span class="carte-lecon__numero"><span class="carte-lecon__chiffre">${d.numero}</span></span>
+              <p class="carte-lecon__titre">${echapper(d.titre)}</p>
+              <span class="carte-lecon__marque">${CHEVRON}</span>
+            </a>
+          </li>
+        `
+      )
+      .join("");
+    afficherDans(
+      html`
+        <p class="surtitre">Documents définissant</p>
+        <h1 class="page-titre">${TITRE_DOCUMENTS}</h1>
+        <p class="texte-doux documents__eglise">de l’Église Baptiste Toulouse Métropole</p>
+        <ul class="liste-lecons">${cartes}</ul>
+      `,
+      TITRE_DOCUMENTS
+    );
+    zoneNavigation.innerHTML = RETOUR;
+    titreBarre.textContent = TITRE_DOCUMENTS;
+  }
+
+  // Le texte d'un document est repris du PDF tel qu'imprimé. Ses références bibliques sont
+  // abrégées, et le livre n'est donné qu'une fois pour toute une suite (« Mt 5.18, 24.35 ») :
+  // le motif des leçons ne peut pas les reconnaître. Leur place dans le texte et leur passage
+  // viennent donc d'un fichier préparé d'avance : « reperes » liste, pour ce texte,
+  // [début, fin, nom du passage].
+  function enrichirDocument(texte, reperes) {
+    const simple = (t) => enrichir(t, { references: false });
+    if (!reperes || !reperes.length) return simple(texte);
+    let sortie = "";
+    let curseur = 0;
+    for (const [debut, fin, cle] of reperes) {
+      // Le repère doit tomber dans le texte, à la suite du précédent : sinon le fichier ne
+      // correspond plus à ce document, et mieux vaut un texte simple qu'un bouton mal placé.
+      if (debut < curseur || fin > texte.length) return simple(texte);
+      // La ponctuation collée à la référence l'accompagne, avant comme après, pour ne pas
+      // tomber seule en bout de ligne (même règle que dans les leçons).
+      let avant = texte.slice(curseur, debut);
+      const ouvrante = /[(\[]$/.test(avant) ? avant.slice(-1) : "";
+      if (ouvrante) avant = avant.slice(0, -1);
+      const fermante = /^[.,;:!?»)\]]*/.exec(texte.slice(fin))[0];
+      sortie +=
+        simple(avant) +
+        `<span class="ref-groupe">${echapper(ouvrante)}<button type="button" class="ref" data-ref="${echapper(cle)}" ` +
+        `aria-label="Lire le passage ${echapper(cle)}">${echapper(texte.slice(debut, fin))}</button>${echapper(fermante)}</span>`;
+      curseur = fin + fermante.length;
+    }
+    return sortie + simple(texte.slice(curseur));
+  }
+
+  function rendreBlocDocument(bloc, reperes, adresse) {
+    switch (bloc.type) {
+      case "sous-titre":
+        return html`<h3>${enrichir(bloc.texte, { references: false })}</h3>`;
+      case "paragraphe":
+        return html`<p>${enrichirDocument(bloc.texte, reperes[adresse])}</p>`;
+      case "liste":
+        return html`<ul>${bloc.elements
+          .map((e, k) => html`<li>${enrichirDocument(e, reperes[`${adresse}/${k}`])}</li>`)
+          .join("")}</ul>`;
+      default:
+        return "";
+    }
+  }
+
+  async function afficherDocument(slug) {
+    const texte = await chargerDocument(slug);
+    const reperes = (await chargerVersetsDocuments()).reperes[slug] || {};
+    const sections = texte.sections
+      .map(
+        (section, s) =>
+          html`<h2>${echapper(section.titre)}</h2>${section.blocs
+            .map((b, i) => rendreBlocDocument(b, reperes, `${s}/${i}`))
+            .join("")}`
+      )
+      .join("");
+    afficherDans(
+      html`
+        <h1 class="page-titre">${echapper(texte.titre)}</h1>
+        ${texte.soustitre ? html`<p class="texte-doux document__soustitre"><em>${echapper(texte.soustitre)}</em></p>` : ""}
+        <section class="panneau">
+          <article class="lecture lecture--document">${sections}</article>
+        </section>
+      `,
+      texte.titre
+    );
+
+    // Un document est un écran de lecture, comme une leçon : la barre s'efface à la descente,
+    // et l'application retient où l'on s'est arrêté.
+    barreEffacable = true;
+    zoneNavigation.innerHTML = RETOUR_DOCUMENTS;
+    titreBarre.textContent = texte.titre;
+    reprendreLecture(`document/${slug}`);
+  }
+
+  // ---------------------------------------------------------------------------
   // Page « À propos »
   // ---------------------------------------------------------------------------
 
@@ -1704,21 +1853,26 @@
   function ouvrirVerset(reference) {
     // L'attribut porte la forme échappée : on la ramène à la clé du fichier des versets.
     const cle = reference.replace(/&amp;/g, "&");
-    const passages = (versets && versets.versets[cle]) || [];
+    // Les passages des leçons d'abord, puis ceux des documents de l'église.
+    const passages =
+      (versets && versets.versets[cle]) || (versetsDocuments && versetsDocuments.passages[cle]) || [];
     feuille.querySelector(".feuille__titre").textContent = cle;
     // Le numéro n'est utile que si le passage en compte plusieurs. Il éviterait surtout de
     // dérouter là où la numérotation de la Segond diffère de celle du livret (Psaume 22).
+    // Un passage à cheval sur deux chapitres (« 2 Corinthiens 6.14-7.1 ») porte aussi le
+    // chapitre de chaque verset.
     const numeroter = passages.length > 1;
     feuille.querySelector(".feuille__corps").innerHTML = passages.length
       ? passages
           .map(
             (p) => html`<p class="passage">${
-              numeroter ? html`<span class="passage__numero">${p.v}</span>` : ""
+              numeroter ? html`<span class="passage__numero">${p.c ? `${p.c}.${p.v}` : p.v}</span>` : ""
             }${echapper(p.t)}</p>`
           )
           .join("")
       : html`<p class="texte-doux">Le texte de ce passage n’est pas disponible dans l’application.</p>`;
-    feuille.querySelector(".feuille__source").textContent = versets.traduction || "";
+    feuille.querySelector(".feuille__source").textContent =
+      (versets && versets.traduction) || (versetsDocuments && versetsDocuments.traduction) || "";
     feuille.hidden = false;
     neutraliserArrierePlan(true);
     feuille.querySelector(".feuille__fermer").focus();
@@ -1759,6 +1913,9 @@
       const lecon = chemin.match(/^\/lecon\/(\d+)(?:\/(lecture|versets|questions))?\/?$/);
       if (lecon) return await afficherLecon(Number(lecon[1]), lecon[2]);
       if (chemin === "/a-propos") return await afficherAPropos();
+      if (chemin === "/documents" || chemin === "/documents/") return await afficherDocuments();
+      const texte = chemin.match(/^\/documents\/([a-z0-9-]+)\/?$/);
+      if (texte) return await afficherDocument(texte[1]);
       return await afficherAccueil();
     } catch (erreur) {
       console.error(erreur);

@@ -19,7 +19,8 @@ const sortie = process.argv[2] || join(racine, "apercu.html");
 
 const lire = (...morceaux) => readFileSync(join(app, ...morceaux), "utf8");
 
-// --- Contenu : index, à propos et les 10 leçons, sous les mêmes chemins que dans l'app ---
+// --- Contenu : index, à propos, les 10 leçons et les documents de l'église, sous les mêmes
+// chemins que dans l'app ---
 
 const contenu = {
   "contenu/index.json": JSON.parse(lire("contenu", "index.json")),
@@ -28,6 +29,11 @@ const contenu = {
 };
 for (const fichier of readdirSync(join(app, "contenu", "lecons")).filter((f) => f.endsWith(".json"))) {
   contenu[`contenu/lecons/${fichier}`] = JSON.parse(lire("contenu", "lecons", fichier));
+}
+const nbLecons = Object.keys(contenu).length - 3;
+contenu["contenu/versets-documents.json"] = JSON.parse(lire("contenu", "versets-documents.json"));
+for (const fichier of readdirSync(join(app, "contenu", "documents")).filter((f) => f.endsWith(".json"))) {
+  contenu[`contenu/documents/${fichier}`] = JSON.parse(lire("contenu", "documents", fichier));
 }
 
 // --- Figures : embarquées en base64, l'aperçu devant tenir dans un seul fichier ---
@@ -98,5 +104,5 @@ ${lire("app.js")}
 writeFileSync(sortie, page);
 const ko = Math.round(page.length / 1024);
 console.log(
-  `Aperçu écrit : ${sortie} (${ko} Ko, ${Object.keys(contenu).length - 3} leçons, ${Object.keys(figures).length - 1} figure(s)).`
+  `Aperçu écrit : ${sortie} (${ko} Ko, ${nbLecons} leçons, ${Object.keys(contenu).length - 4 - nbLecons} documents, ${Object.keys(figures).length - 1} figure(s)).`
 );

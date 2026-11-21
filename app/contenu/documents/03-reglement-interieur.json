@@ -1,0 +1,148 @@
+{
+  "numero": 3,
+  "slug": "reglement-interieur",
+  "titre": "Règlement intérieur",
+  "pages": "21-25",
+  "sections": [
+    {
+      "titre": "INTRODUCTION",
+      "blocs": [
+        {
+          "type": "paragraphe",
+          "texte": "L’Église locale a été suscitée par Dieu pour lui apporter l’adoration qui lui est suprêmement due, pour lui servir de témoignage au milieu des hommes, et pour veiller et aider au perfectionnement de ses membres dont dépendent la qualité de son adoration et de sontémoignage."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "L’Église reconnaît pour seul chef Jésus-Christ, son Seigneur et elle a pour unique base et norme de doctrine et de vie : la Bible, Parole de Dieu. Ceci dit, sa foi et ses pratiques s’articulent et s’expriment dans sa Confession de Foi, les Principes Ecclésiastiques de son union d’église (l’AEEBLF), l’Engagement Moral des Membres, ce Règlement Intérieur ainsi que dans divers supports clés. Les cas de conduite dont les principes décisionnaires ne figurent pas dans ces documents seront examinés au sein du Conseil."
+        }
+      ]
+    },
+    {
+      "titre": "I. LES MEMBRES",
+      "blocs": [
+        {
+          "type": "sous-titre",
+          "texte": "Les conditions pour devenir membre"
+        },
+        {
+          "type": "liste",
+          "elements": [
+            "Satisfaire les conditions définies dans les Statuts, à savoir reconnaître Jésus-Christ comme Seigneur et Sauveur et prendre l’engagement de conformer sa vie à la volonté de Dieu en donnant des signes de cet engagement dans sa vie et avoir été baptisé(e) par immersion à un âge qui permet de comprendre la signification de cet acte.",
+            "Lire et accepter la confession de foi, le règlement intérieur et l’engagement du membre de l’EBTM",
+            "Suivre un parcours d’intégration",
+            "Manifester une implication réelle dans la vie d’église (typiquement une cellule).",
+            "Formuler la demande auprès d’un membre du conseil qui vérifie que les conditions sont remplies. Si le candidat vient d’une autre église, il pourrait présenter une attestation de baptême et une lettre de recommandation de son église d’origine.",
+            "Etre présenté et soumis à un vote d’approbation lors d’une Assemblée Générale."
+          ]
+        },
+        {
+          "type": "sous-titre",
+          "texte": "La perte de qualité de membre"
+        },
+        {
+          "type": "paragraphe",
+          "texte": "La qualité de membre actif peut se perdre par démission volontaire, par suite de décès, ou par un changement de résidence en en lieu éloigné. Elle peut aussi se perdre par une non-participation ou un désintéressement manifeste de la vie de l’Eglise pendant plus de 6 mois, ou par décision disciplinaire du Conseil pour faute grave."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Dans les cas d’une non-participation provisoire ou d’une décision disciplinaire du conseil, l’état de membre pourra être rétabli par décision du conseil."
+        },
+        {
+          "type": "sous-titre",
+          "texte": "La mise en discipline"
+        },
+        {
+          "type": "paragraphe",
+          "texte": "L’Église peut être amenée, pour certaines inconduites persistantes, à mettre en discipline un croyant selon la démarche biblique (Mat.18,15-17 ; 1Cor.6,11-13 ; Hé.12,15-16). La sanction peut être un avertissement, la mise à l’écart de la participation à la cène, la cessation d’activité particulière exercée dans l’Église, la perte de qualité de membre votant. Le conseil signifie au sanctionné en quoi consiste sa mise en discipline et, dans certains cas, en informe l’assemblée. Le sanctionné est néanmoins invité à fréquenter régulièrement l’Église pendant son temps de mise en discipline. Le temps de discipline étant écoulé, le conseil réintègre le discipliné après examen de son comportement. La persistance dans ce qui a conduit à la mise en discipline peut conduire à l’exclusion."
+        }
+      ]
+    },
+    {
+      "titre": "LES RESPONSABLES",
+      "blocs": [
+        {
+          "type": "sous-titre",
+          "texte": "Les diacres"
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Le diaconat est décrit en 1 Timothée 3.8-13 et Actes 6.1-7. L’Église choisira des personnes majeures (homme ou femme) qui manifestent ces qualités bibliques ainsi qu’une disposition et des dons particuliers de service. Le conseil définit le nombre de diacres et de diaconesses souhaités. Des candidats au diaconat suivent un parcours de formation et sont proposés par le conseil et confirmés par l’assemblée à la majorité des deux tiers. Le mandat du diaconat est fixé à trois ans, renouvelable. Un diacre qui ne remplirait plus les prescriptions de 1 Timothée 3 perdra sa qualité de diacre."
+        },
+        {
+          "type": "sous-titre",
+          "texte": "Les anciens"
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Selon des passages bibliques (1 Timothée 3.1-7, Tite 1.5-9, Actes 14.23), l’église se dotera des anciens pour assurer sa direction. Les anciens, issus de l’église locale, sont proposés par le Conseil selon les critères bibliques, suivent un parcours de formation et sont confirmés par l’assemblée à la majorité des trois-quarts par vote à bulletin secret après une année probatoire. Le mandat d’un ancien est fixé à cinq ans, renouvelable."
+        },
+        {
+          "type": "sous-titre",
+          "texte": "Les pasteurs"
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Arrivant souvent de l’extérieur de l’église, mais pas nécessairement, il doit être en accord avec la confession de foi de l’église, les statuts de l’association et le règlement intérieur. Il doit pouvoir témoigner d’un appel divin à ce ministère et en manifester les dons. Son appel doit avoir été reconnu par un collège d’anciens et de pasteurs (cf.1Tim.4/14). Il doit satisfaire les mêmes qualités morales que les anciens (cf.1Tim.3/1-7). Il sera proposé aux fonctions pastorales dans l’église par le conseil et confirmé par vote de l’Assemblée (par vote à bulletin secret à la majorité des deux-tiers) cela après une période probatoire définie par le conseil et le pasteur candidat. Occupé entièrement à cette œuvre, il devrait percevoir une rémunération équivalente à un salaire moyen dans la région et dans l’église. Le salaire est proposé par le conseil et voté en Assemblée Générale (cf.1Co.9/13-14). Le ministère du pasteur au sein de l’église devra être confirmé par vote de l’assemblée après un mandat de 5 ans."
+        },
+        {
+          "type": "sous-titre",
+          "texte": "Le Conseil"
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Le Conseil est composé du (des) pasteur(s) et des anciens. Le Conseil s’occupe de la direction de l’église et veille à son état spirituel. Il peut s’adjoindre les diacres ou toute autre personne selon leur compétence pour aider dans l’organisation et les décisions de l’église. Pour encourager la relève, et préserver la continuité de l’œuvre, l’âge limite pour participer au conseil est de 70 ans."
+        },
+        {
+          "type": "sous-titre",
+          "texte": "Les stagiaires"
+        },
+        {
+          "type": "paragraphe",
+          "texte": "L’Eglise peut avoir dans son sein, pour aider dans l’œuvre du ministère, des missionnaires dans l’apprentissage de la langue, ou encore des étudiants ou diplômés d’un Institut Biblique en stage pratique. Pour être stagiaire, la personne doit remplir toutes les qualifications d’un membre et d’un responsable spirituel dans l’Eglise. Ensuite, avec le conseil, un contrat clair doit être établi, précisant son activité et son ministère dans l’Eglise, la durée du stage, ainsi que toute éventuelle rémunération. En tant que stagiaire, il peut être amené à participer à des activités pastorales, des réunions de conseil et des temps de formation. Le conseil de l’Eglise aura le droit de mettre fin à un stage qui s’avère insatisfaisant ou qui apporte du trouble dans l’Eglise."
+        }
+      ]
+    },
+    {
+      "titre": "LES ORDONNANCES",
+      "blocs": [
+        {
+          "type": "sous-titre",
+          "texte": "Le Baptême"
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Conformément à l’enseignement de la Parole de Dieu, confirmé par la pratique des Églises apostoliques, le baptême est l’immersion du croyant qui confesse dans cet acte symbolique sa mort et sa résurrection spirituelles avec Christ et son engagement à le suivre. Pour être baptisé, il faut en faire la demande, suivre les cours de formation, rencontrer le Conseil qui examine la candidature et témoigner publiquement de sa foi. Si le candidat est un mineur, le Conseil s’assurera de l’autorisation des parents."
+        },
+        {
+          "type": "sous-titre",
+          "texte": "La Sainte Cène (ou le repas du Seigneur)"
+        },
+        {
+          "type": "paragraphe",
+          "texte": "La cène étant la commémoration et la proclamation de la mort du Seigneur jusqu’à ce qu’il revienne, seuls ceux qui croient du cœur au Seigneur Jésus-Christ, l’ont confessé par leur baptême par immersion et qui vivent en règle avec le Seigneur sont invités à y participer. La Sainte Cène est présidée par un pasteur ou un ancien, aidé de préférence par les diacres. L’ancien expliquera le sens des symboles et précisera les conditions de participation."
+        }
+      ]
+    },
+    {
+      "titre": "LE MARIAGE",
+      "blocs": [
+        {
+          "type": "paragraphe",
+          "texte": "Pour célébrer un mariage en son sein et dans ses locaux, les principes suivants doivent être respectés ; ils seront vérifiés par le conseil pour toute demande d’utiliser les locaux de l’EBTM pour célébrer un mariage."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Etabli par Dieu dès la création, le mariage unit nécessairement un homme et une femme et cela de manière profonde, définitive et extraordinaire (Gen. 2.24). Tout en existant pour le bonheur de l’être humain, pour le bien de la société, pour la procréation et pour l’éducation des enfants (Gen. 1.28, Gen. 2.18, Eph. 6.1-4), nous croyons que le mariage existe avant tout pour illustrer et refléter l’union définitive et glorieuse de Christ et de son Église (Eph. 5.32, Apo.19.7). Puisque le mariage reflète une chose si noble et si précieuse, l’église se doit de préserver et d’honorer cette institution en respectant et en rappelant les normes divines établies, non seulement pour son bien et le bien de ses membres, mais pour la préservation de l’Evangile et pour la gloire de Dieu dans ce monde."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "En France, l’acte légal a lieu à la mairie et peut être suivi d’une éventuelle cérémonie religieuse. En acceptant qu’une telle cérémonie se fasse dans ses locaux, l’EBTM reconnaît un désir et une démarche du couple de vivre selon les principes bibliques du mariage. Il serait contradictoire pour un couple et pour l’EBTM de demander la bénédiction divine sur une union qui n’est manifestement pas dans la volonté de Dieu."
+        },
+        {
+          "type": "paragraphe",
+          "texte": "Les couples qui se marient dans l’église auront suivi les cours sur le mariage. La date de la célébration du mariage doit être communiquée au conseil, et connue au moins 2 mois avant le mariage. Les organisateurs veilleront à ce qu’il n’y ait pas de débordements ou de pratiques qui nuiraient au témoignage évangélique de l’église."
+        }
+      ]
+    }
+  ]
+}

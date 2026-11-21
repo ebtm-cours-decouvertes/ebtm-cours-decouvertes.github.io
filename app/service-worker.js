@@ -7,7 +7,7 @@
  * ci-dessous force le renouvellement complet du cache à la prochaine visite.
  */
 
-const VERSION = "2026-11-16-3";
+const VERSION = "2026-11-21-1";
 const CACHE = `cours-decouvertes-${VERSION}`;
 
 const FICHIERS = [
@@ -28,6 +28,7 @@ const FICHIERS = [
   "./contenu/index.json",
   "./contenu/a-propos.json",
   "./contenu/versets.json",
+  "./contenu/versets-documents.json",
 ];
 
 self.addEventListener("install", (evenement) => {
@@ -35,7 +36,7 @@ self.addEventListener("install", (evenement) => {
     (async () => {
       const cache = await caches.open(CACHE);
       await cache.addAll(FICHIERS);
-      // Les leçons listées dans l'index sont ajoutées à leur tour.
+      // Les leçons, figures et documents listés dans l'index sont ajoutés à leur tour.
       try {
         const reponse = await cache.match("./contenu/index.json");
         const index = await reponse.json();
@@ -43,6 +44,7 @@ self.addEventListener("install", (evenement) => {
         await Promise.allSettled([
           ...index.lecons.map((l) => cache.add(`./contenu/lecons/${l.fichier}`)),
           ...(index.figures || []).map((f) => cache.add(`./contenu/figures/${f}`)),
+          ...(index.documents || []).map((d) => cache.add(`./contenu/documents/${d.fichier}`)),
         ]);
       } catch (erreur) {
         console.warn("Leçons non mises en cache à l'installation :", erreur);

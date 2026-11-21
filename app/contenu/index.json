@@ -67,5 +67,31 @@
     "origine-autres-religions.png",
     "origine-christianisme.png",
     "trinite.png"
+  ],
+  "documents": [
+    {
+      "numero": 1,
+      "slug": "confession-de-foi",
+      "titre": "Confession de foi",
+      "fichier": "01-confession-de-foi.json"
+    },
+    {
+      "numero": 2,
+      "slug": "statuts-de-l-association",
+      "titre": "Statuts de l’association",
+      "fichier": "02-statuts-de-l-association.json"
+    },
+    {
+      "numero": 3,
+      "slug": "reglement-interieur",
+      "titre": "Règlement intérieur",
+      "fichier": "03-reglement-interieur.json"
+    },
+    {
+      "numero": 4,
+      "slug": "principes-ecclesiastiques",
+      "titre": "Principes ecclésiastiques",
+      "fichier": "04-principes-ecclesiastiques.json"
+    }
   ]
 }

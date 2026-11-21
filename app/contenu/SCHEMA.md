@@ -84,3 +84,37 @@ sans reformulation ; seules la structure et les coupures de ligne changent.
   sinon `"Segond 1910"` (texte pris dans la traduction Louis Segond 1910, libre de droits).
 - `questions` : numérotées comme dans le livret ; `recitation: true` pour la question
   « Récitez les versets… ». Les blancs à compléter s'écrivent `____________`.
+
+# Format d'un document de l'église (`app/contenu/documents/NN-slug.json`)
+
+Confession de foi, statuts, règlement intérieur, principes ecclésiastiques. Ces fichiers sont
+produits par `scripts/transcrire-documents.mjs` et ne s'éditent pas à la main : leur texte
+reste celui du PDF, fautes comprises.
+
+```json
+{
+  "numero": 1,
+  "slug": "confession-de-foi",
+  "titre": "Confession de foi",
+  "soustitre": "affirmée et enseignée par le conseil d’anciens de l’EBTM",
+  "pages": "2-16",
+  "sections": [
+    {
+      "titre": "Dieu",
+      "blocs": [
+        { "type": "paragraphe", "texte": "Nous croyons qu’il n’y qu’un seul vrai Dieu…" },
+        { "type": "sous-titre", "texte": "Dieu le Père" },
+        { "type": "liste", "elements": ["premier point", "second point"] }
+      ]
+    }
+  ]
+}
+```
+
+- `numero` : l'ordre de la couverture du PDF. `soustitre` est facultatif.
+- Trois types de blocs seulement : `paragraphe`, `sous-titre`, `liste`.
+- Les références bibliques s'écrivent comme dans le PDF, abrégées. Elles deviennent cliquables
+  grâce à `app/contenu/versets-documents.json`, qui donne pour chaque texte la place de ses
+  références (`reperes` : document → « section/bloc » → `[début, fin, passage]`) et le texte de
+  chaque passage (`passages`). Fichier produit par `scripts/construire-versets-documents.mjs`.
+- `*italique*` est la seule mise en forme rencontrée (la date à la fin des statuts).
