@@ -1288,7 +1288,7 @@
       aria-selected="${actif === id}"
       aria-controls="panneau-${id}"
       tabindex="${actif === id ? 0 : -1}"
-      onclick="location.hash = '#/lecon/${numero}/${id}'"
+      data-adresse="#/lecon/${numero}/${id}"
     >
       <span>${libelle}</span>
       ${compte ? html`<span class="onglet__compte">${compte}</span>` : ""}
@@ -1912,19 +1912,43 @@
   // changeait d'un coup. Trois gestes simples, sans la fonction « View Transitions » des
   // navigateurs (trop jeune, et coûteuse à régler : voir les fondus de Plateforme Théologie) :
   //   1. la ligne touchée se teinte et le reste pendant le départ ;
-  //   2. en entrant dans une leçon ou un document, l'écran quitté s'efface vite et le nouveau
-  //      arrive en glissant de quelques pixels depuis la droite ;
-  //   3. au retour, aucun effacement : la liste réapparaît aussitôt, à l'endroit où on l'avait
-  //      laissée, et la ligne d'où l'on venait, encore teintée, s'éteint doucement, comme dans
-  //      les listes de l'iPhone. Sébastien, le 21 novembre 2026 : au retour, il voyait une page
-  //      blanche au lieu de la liste des leçons (le fondu de sortie, puis celui d'entrée).
-  // Un retour se reconnaît à la profondeur de l'écran (flèche) ou au rang que chaque entrée de
-  // l'historique porte (geste de l'iPhone, bouton du navigateur) : une entrée déjà numérotée
-  // est une entrée revisitée.
-  const DUREE_SORTIE = 110; // ms, à garder égale à celle de la feuille de style
-  const DUREE_ENTREE = 280;
+  //   2. en avançant (leçon, document, liste des documents, à propos), le nouvel écran
+  //      remplace aussitôt l'ancien et se pose en glissant de quelques pixels : jamais de blanc ;
+  //   3. en revenant, aucun mouvement : l'écran précédent réapparaît aussitôt, à l'endroit où
+  //      on l'avait laissé, et la ligne d'où l'on venait s'éteint doucement.
+  //
+  // Une seule règle pour revenir, quel que soit le geste (demande de Sébastien, 21 novembre
+  // 2026 : « peu importe ce que j'ouvre, pas de hasard ») :
+  //   - la flèche, le logo et « Toutes les leçons » remontent dans l'historique quand l'écran
+  //     visé y est déjà, exactement comme le geste de l'iPhone ; sinon seulement ils ajoutent
+  //     une entrée (application ouverte directement sur une leçon, par exemple) ;
+  //   - les onglets d'une leçon remplacent l'entrée au lieu d'en ajouter : un seul geste de
+  //     retour ramène à la liste, depuis n'importe quel onglet.
+  // L'application tient la liste des écrans de l'historique (`pile`, indexée par le rang que
+  // chaque entrée porte), gardée pour la séance dans sessionStorage.
+  const DUREE_ENTREE = 240; // ms, à garder égale à celle de la feuille de style
+  // En avançant, l'écran quitté reste affiché 90 ms, ligne touchée teintée, avant d'être
+  // remplacé : sans ce délai, un toucher bref ne laissait rien voir de la ligne touchée.
+  // Essayé et non retenu (21 novembre 2026) : faire pâlir l'écran pendant ce délai, dans
+  // l'espoir que l'iPhone montre la liste sous le doigt pendant le geste de retour. Filmé sur
+  // iPhone virtuel iOS 26.5, la photo sous le doigt restait blanche : sans effet prouvé.
+  const DUREE_MAINTIEN = 90;
   const mouvementReduit = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const CLASSES_ECRAN = ["ecran--sort", "ecran--entre"];
+  const CLASSES_ECRAN = ["ecran--entre"];
+  const CLE_PILE = "cours-decouvertes-pile";
+  let pile = [];
+  try {
+    pile = JSON.parse(sessionStorage.getItem(CLE_PILE)) || [];
+  } catch {
+    pile = [];
+  }
+  function noterPile() {
+    try {
+      sessionStorage.setItem(CLE_PILE, JSON.stringify(pile));
+    } catch {
+      /* sans stockage, la pile vit le temps de la page */
+    }
+  }
   const attendre = (ms) => new Promise((suite) => setTimeout(suite, ms));
   const lignesQuittees = new Map(); // écran → adresse de la ligne par laquelle on l'a quitté
   const positionsQuittees = new Map(); // écran → hauteur de défilement au moment de le quitter
@@ -1946,6 +1970,38 @@
     return { cle: "/", niveau: 0 };
   }
 
+  let remplacementEnCours = false;
+
+  // Remonte dans l'historique jusqu'à l'écran visé s'il s'y trouve, plus haut que l'écran
+  // actuel. Renvoie vrai si c'est le cas.
+  function remonterVers(cle) {
+    for (let rang = rangCourant - 1; rang >= 0; rang--) {
+      if (pile[rang] === cle) {
+        history.go(rang - rangCourant);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // Tous les liens internes de l'application passent par ici.
+  document.addEventListener("click", (evenement) => {
+    const lien = evenement.target.closest('a[href^="#/"]');
+    if (!lien || !ecranCourant || evenement.button || evenement.metaKey || evenement.ctrlKey || evenement.shiftKey) return;
+    const chemin = lien.getAttribute("href").replace(/^#/, "") || "/";
+    const cible = situer(chemin);
+    if (cible.cle === ecranCourant.cle) {
+      // Même écran (un onglet, « S'entraîner aux versets ») : on remplace, on n'empile pas.
+      evenement.preventDefault();
+      if (location.hash !== `#${chemin}`) {
+        remplacementEnCours = true;
+        location.replace(`#${chemin}`);
+      }
+      return;
+    }
+    if (cible.niveau < ecranCourant.niveau && remonterVers(cible.cle)) evenement.preventDefault();
+  });
+
   function changementDEcran(chemin) {
     const ecran = situer(chemin);
     const precedent = ecranCourant;
@@ -1956,10 +2012,15 @@
     if (revisitee) {
       rangCourant = etat.rang;
     } else {
-      if (precedent) rangCourant += 1;
+      // Une entrée remplacée (onglet d'une leçon) garde le rang de celle qu'elle remplace.
+      if (precedent && !remplacementEnCours) rangCourant += 1;
       history.replaceState({ ...(etat || {}), rang: rangCourant }, "");
       if (precedent && precedent.cle !== ecran.cle) sens = ecran.niveau < precedent.niveau ? "arriere" : "avant";
+      pile.length = rangCourant; // les écrans « suivants » d'un ancien parcours sont oubliés
     }
+    remplacementEnCours = false;
+    pile[rangCourant] = ecran.cle;
+    noterPile();
     const autreEcran = Boolean(precedent) && precedent.cle !== ecran.cle;
     return { ecran, sens, retour: autreEcran && (revisitee || sens === "arriere") };
   }
@@ -2026,13 +2087,10 @@
     const anime = sens === "avant" && !mouvementReduit.matches;
 
     principal.classList.remove(...CLASSES_ECRAN);
-    if (anime) {
-      principal.classList.add("ecran--sort");
-      await attendre(DUREE_SORTIE);
-      // Un autre changement est arrivé pendant la sortie : c'est lui qui affiche.
+    if (sens === "avant") {
+      await attendre(DUREE_MAINTIEN);
       if (jeton !== navigation) return;
     }
-
     await afficherChemin(chemin);
     if (jeton !== navigation) return;
 
@@ -2075,9 +2133,17 @@
     }
   }
 
+  // Un onglet remplace l'entrée de l'historique au lieu d'en ajouter une : voir « Une seule
+  // règle pour revenir », plus haut.
   zoneOnglets.addEventListener("click", (evenement) => {
     const bouton = evenement.target.closest('[role="tab"]');
-    if (bouton) marquerOnglet(bouton.id.replace("onglet-", ""));
+    if (!bouton) return;
+    marquerOnglet(bouton.id.replace("onglet-", ""));
+    const adresse = bouton.dataset.adresse;
+    if (adresse && location.hash !== adresse) {
+      remplacementEnCours = true;
+      location.replace(adresse);
+    }
   });
 
   // Navigation au clavier dans la barre d'onglets.

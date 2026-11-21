@@ -1692,18 +1692,14 @@ a[href^="#/"] {
 
 /* ---------- Changement d'écran ---------- */
 
-/* En entrant dans une leçon ou un document, l'écran quitté s'efface vite (110 ms) et le
-   nouveau arrive en glissant de quelques pixels depuis la droite (280 ms). app.js pose ces
-   classes et les retire ; les durées y sont répétées. Au retour, rien ne s'efface : la liste
-   réapparaît aussitôt (une page blanche s'y voyait, relevé par Sébastien le 21 novembre 2026).
-   Rien ne joue quand le lecteur a demandé moins de mouvement. */
+/* En avançant, le nouvel écran remplace aussitôt l'ancien et se pose en glissant de quelques
+   pixels depuis la droite (240 ms). Il part d'une opacité de 0,4, pas de zéro : aucun instant
+   blanc entre deux écrans (relevé par Sébastien le 21 novembre 2026). En revenant, rien ne
+   bouge : l'écran précédent réapparaît tel qu'on l'a laissé. app.js pose la classe et la
+   retire ; la durée y est répétée. Rien ne joue quand le lecteur a demandé moins de mouvement. */
 @media (prefers-reduced-motion: no-preference) {
-  .ecran--sort {
-    animation: ecran-sort 110ms cubic-bezier(0.4, 0, 1, 1) both;
-  }
-
   .ecran--entre {
-    animation: ecran-entre 280ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    animation: ecran-entre 240ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
   }
 
   /* Au retour, la ligne d'où l'on venait est encore teintée, puis s'éteint. */
@@ -1716,17 +1712,10 @@ a[href^="#/"] {
   }
 }
 
-@keyframes ecran-sort {
-  to {
-    opacity: 0;
-    transform: translate3d(-10px, 0, 0);
-  }
-}
-
 @keyframes ecran-entre {
   from {
-    opacity: 0;
-    transform: translate3d(22px, 0, 0);
+    opacity: 0.4;
+    transform: translate3d(18px, 0, 0);
   }
 }
 
