@@ -1153,18 +1153,21 @@
           <p class="progression__detail">${terminees} / ${total} leçon${total > 1 ? "s" : ""}</p>
         </section>
         <ul class="liste-lecons">${cartes}</ul>
-        ${
-          (liste.documents || []).length
-            ? html`<a class="carte-lecon carte-lecon--documents" href="#/documents">
-                <p class="carte-lecon__titre">${TITRE_DOCUMENTS}</p>
-                <span class="carte-lecon__marque">${CHEVRON}</span>
-                <p class="carte-lecon__detail">${liste.documents.map((d) => echapper(d.titre)).join(" · ")}</p>
-              </a>`
-            : ""
-        }
-        <p class="pied">
-          <a href="#/a-propos">À propos du cours</a>
-        </p>
+        <div class="annexes">
+          ${
+            (liste.documents || []).length
+              ? html`<a class="annexe" href="#/documents">
+                  <p class="annexe__titre">${TITRE_DOCUMENTS}</p>
+                  <span class="annexe__marque">${CHEVRON}</span>
+                  <p class="annexe__detail">${liste.documents.map((d) => echapper(d.titre)).join(" · ")}</p>
+                </a>`
+              : ""
+          }
+          <a class="annexe" href="#/a-propos">
+            <p class="annexe__titre">À propos du cours</p>
+            <span class="annexe__marque">${CHEVRON}</span>
+          </a>
+        </div>
       `,
       ""
     );

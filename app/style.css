@@ -6,7 +6,9 @@
   --magenta: #d40775;
   --encre: #2b1f2e;
   --texte-doux: #5f5363;
-  --fond: #faf7fb;
+  /* Blanc pur depuis le 21 novembre 2026 (« Fond blanc, lignes fines », choisi par Sébastien
+     sur captures) : l'ancien gris-mauve #faf7fb donnait un air terne. */
+  --fond: #ffffff;
   --carte: #ffffff;
   --bord: #e6dce8;
   /* Bordure des éléments avec lesquels on interagit : 3 pour 1, exigé pour être repérable. */
@@ -328,6 +330,12 @@ button {
   font-size: 1.05rem;
 }
 
+/* Sur l'accueil, la page est du même blanc que la barre : pas de filet entre les deux. En
+   sombre la barre et la page n'ont pas la même teinte, la limite se voit sans filet. */
+.barre--accueil {
+  border-bottom-color: transparent;
+}
+
 /* Le partage est collé à la roue : l'écart entre les éléments de la barre est annulé. */
 .barre--accueil #ouvrir-partage {
   margin-right: -0.5rem;
@@ -362,17 +370,17 @@ main {
 
 .page-titre {
   font-family: Georgia, "Times New Roman", serif;
-  font-size: 1.85rem;
+  font-weight: 400;
+  font-size: 2.15rem;
   line-height: 1.2;
-  margin: 0.25rem 0 0.5rem;
+  letter-spacing: -0.01em;
+  margin: 0.25rem 0 1rem;
   color: var(--violet);
 }
 
 .surtitre {
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  font-size: 0.75rem;
-  font-weight: 700;
+  font-size: 0.9rem;
+  font-weight: 500;
   color: var(--texte-doux);
   margin: 0;
 }
@@ -404,18 +412,16 @@ a[href^="#/"] {
   align-items: baseline;
   justify-content: space-between;
   gap: 1rem;
-  background: var(--carte);
-  border: 1px solid var(--bord);
-  border-radius: var(--rayon);
-  padding: 0.9rem 1rem;
-  margin-bottom: 1rem;
-  box-shadow: var(--ombre);
+  /* Une simple ligne en tête de la liste, fermée par le même filet que les leçons. */
+  border-bottom: 1px solid var(--bord);
+  padding: 0.6rem 0 0.9rem;
 }
 
 .progression__titre {
   margin: 0;
-  font-weight: 700;
-  font-size: 1.05rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--texte-doux);
 }
 
 .progression__detail {
@@ -430,51 +436,50 @@ a[href^="#/"] {
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 0.6rem;
 }
 
+/* Une leçon est une ligne de la liste, séparée de la suivante par un filet : ni boîte, ni
+   ombre (« Fond blanc, lignes fines », choisi par Sébastien le 21 novembre 2026 sur captures).
+   Le nom de classe « carte » date de l'époque où chaque leçon était une boîte. */
 .carte-lecon {
   display: grid;
-  grid-template-columns: 2.5rem 1fr auto;
+  grid-template-columns: 3.1rem 1fr auto;
   /* L'avancement occupe une ligne à lui, sur toute la largeur : il tient alors d'un trait. */
   grid-template-areas:
     "numero titre marque"
     "numero detail detail";
-  align-items: center;
+  /* Le chiffre et le titre sont posés sur la même ligne d'écriture. */
+  align-items: baseline;
   column-gap: 0.8rem;
-  background: var(--carte);
-  border: 1px solid var(--bord);
-  border-radius: var(--rayon);
-  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--bord);
+  padding: 1.05rem 0;
   text-decoration: none;
   color: inherit;
-  box-shadow: var(--ombre);
 }
 
 @media (hover: hover) {
   .carte-lecon:hover {
-    border-color: var(--violet);
+    border-bottom-color: var(--violet);
   }
 }
 
 /* Le numéro de la leçon est un grand chiffre violet, sans cadre, dans le caractère des titres
    du cours. Choix validé le 16 novembre 2026, sur trois variantes montrées en image : le
-   carré teinté qui portait « LEÇON 1 » ne lui plaisait pas. Le mot « Leçon » n'est plus
+   carré teinté qui portait « LEÇON 1 » ne lui plaisait pas. Fin et non plus gras depuis le
+   21 novembre 2026, comme les titres. Le mot « Leçon » n'est plus
    affiché mais reste dans la page, masqué à l'œil seulement : le lecteur d'écran annonce
    toujours « Leçon 1, Le plan du salut ». Une leçon terminée se reconnaît à sa coche, plus à
    la couleur de son numéro. */
 .carte-lecon__numero {
   grid-area: numero;
-  display: grid;
-  place-content: center start;
   color: var(--violet);
 }
 
 /* Les chiffres tabulaires gardent la même largeur, pour que « 1 » et « 10 » s'alignent. */
 .carte-lecon__chiffre {
   font-family: Georgia, "Times New Roman", serif;
-  font-weight: 700;
-  font-size: 2.1rem;
+  font-weight: 400;
+  font-size: 2.3rem;
   line-height: 1;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.02em;
@@ -483,6 +488,7 @@ a[href^="#/"] {
 .carte-lecon__titre {
   grid-area: titre;
   font-weight: 600;
+  font-size: 1.08rem;
   margin: 0;
 }
 
@@ -495,6 +501,7 @@ a[href^="#/"] {
 
 .carte-lecon__marque {
   grid-area: marque;
+  align-self: center;
   display: flex;
   align-items: center;
   gap: 0.35rem;
@@ -510,14 +517,73 @@ a[href^="#/"] {
   color: var(--texte-doux);
 }
 
-/* L'entrée vers les documents de l'église, sous les leçons : même carte, mais sans numéro et
-   détachée de la liste, pour ne pas passer pour une onzième leçon. */
-.carte-lecon--documents {
+/* Sous les leçons, un seul bloc teinté réunit ce qui n'est pas une leçon : les documents de
+   l'église, puis « À propos du cours ». Sans numéro et détaché de la liste, pour ne pas passer
+   pour une onzième leçon. C'est le seul bloc plein de l'accueil. « Dans le même bloc », choisi
+   par Sébastien le 21 novembre 2026 sur trois captures : « À propos du cours » était un petit
+   lien souligné de 16 px de haut, sous le seuil de 44 px exigé pour le toucher. */
+.annexes {
+  margin-top: 2.25rem;
+  border-radius: var(--rayon);
+  background: var(--teinte);
+}
+
+.annexe {
+  position: relative;
+  display: grid;
   grid-template-columns: 1fr auto;
   grid-template-areas:
     "titre marque"
     "detail detail";
-  margin-top: 1.5rem;
+  align-items: center;
+  column-gap: 0.8rem;
+  padding: 1.1rem 1rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Le cadre de mise en évidence au clavier épouse les coins du bloc. */
+.annexe:first-child {
+  border-top-left-radius: var(--rayon);
+  border-top-right-radius: var(--rayon);
+}
+
+.annexe:last-child {
+  border-bottom-left-radius: var(--rayon);
+  border-bottom-right-radius: var(--rayon);
+}
+
+/* Un trait fin sépare les deux entrées, en retrait des bords. Purement décoratif : chaque
+   entrée se reconnaît à son titre et à sa flèche. */
+.annexe + .annexe::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 1rem;
+  right: 1rem;
+  height: 1px;
+  background: var(--bord-actif);
+  opacity: 0.35;
+}
+
+.annexe__titre {
+  grid-area: titre;
+  margin: 0;
+  font-weight: 600;
+  font-size: 1.08rem;
+}
+
+.annexe__detail {
+  grid-area: detail;
+  margin: 0.25rem 0 0;
+  font-size: 0.85rem;
+  color: var(--texte-doux);
+}
+
+.annexe__marque {
+  grid-area: marque;
+  display: flex;
+  align-items: center;
 }
 
 /* ---------- Documents de l'église ---------- */
@@ -816,7 +882,8 @@ a[href^="#/"] {
 
 .lecture h2 {
   font-family: Georgia, "Times New Roman", serif;
-  font-size: 1.4rem;
+  font-weight: 400;
+  font-size: 1.55rem;
   color: var(--violet);
   margin: 2rem 0 0.75rem;
   padding-top: 1.25rem;
