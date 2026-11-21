@@ -10,9 +10,9 @@
     <meta name="theme-color" content="#6e1c70" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <!-- La page passe sous l'heure de l'iPhone : le violet de la barre monte jusqu'en haut
-         (voir « Le haut de l'écran » dans style.css). -->
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <!-- Pas de « apple-mobile-web-app-status-bar-style » : « black-translucent » est abandonné
+         par WebKit (bug 317153) et ignoré sous iOS 27. La couleur sous l'heure vient de la bande
+         fixée en haut de la page (« body::before », style.css). -->
     <meta name="apple-mobile-web-app-title" content="Cours découvertes" />
     <link rel="manifest" href="manifest.webmanifest" />
     <link rel="icon" href="icones/icone.svg" type="image/svg+xml" />

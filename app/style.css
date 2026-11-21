@@ -123,23 +123,17 @@ html {
   -webkit-tap-highlight-color: var(--toucher);
 }
 
-/* Le haut de l'écran. Dans l'application installée sur iPhone, la page passe sous l'heure
-   (« black-translucent », index.html) : le bandeau de la barre y monte. C'est le fond de la
-   page qu'iOS regarde pour écrire l'heure : sur fond violet, il l'écrit en blanc, sans voile ;
-   sur fond blanc, il posait un voile pâle et l'écrivait en noir. Le fond de la page (html) est
-   donc le violet du début du bandeau, et le contenu est posé sur une nappe blanche fixée
-   derrière lui (« body::after »), qui couvre aussi ce qu'on aperçoit en tirant la page au-delà
-   de ses bords. Méthode éprouvée sur l'application du groupe de jeunes (GDJ-EBTM, suivi du
-   12 novembre 2026), demandée ici par Sébastien le 21 novembre 2026. Body reste sans fond : le
-   sien se peindrait par-dessus la nappe (ordre de peinture CSS), le texte serait sur violet. */
+/* Le fond de la page. Dans l'application installée, il est violet : c'est d'après lui qu'iOS
+   choisit d'écrire l'heure en blanc, sans voile, ou en noir sous un voile clair (vu sous iOS 27
+   sur le simulateur, le 21 novembre 2026 : bande violette en haut mais fond blanc, d'où un voile
+   pâle et l'heure en noir ; même constat sur GDJ-EBTM, 12 novembre 2026). Le contenu est posé
+   sur une nappe blanche fixée derrière lui (« body::after ») ; body reste sans fond, sinon le
+   sien se peindrait par-dessus la nappe. Dans Safari, le fond reste blanc : iOS 26 y teinte le
+   bas de l'écran, derrière la barre d'adresse, avec ce fond. */
 html {
   background: var(--fond);
 }
 
-/* Le violet seulement dans l'application installée, la seule où la page passe sous l'heure.
-   Dans Safari, iOS 26 teinte aussi le bas de l'écran, derrière la barre d'adresse, avec le
-   fond de la page : en violet, une bande violette y apparaissait (vu sur le simulateur, le
-   21 novembre 2026 ; un filet blanc fixé contre le bord n'y changeait rien). */
 @media (display-mode: standalone) {
   html {
     background: var(--bandeau-debut);
@@ -164,28 +158,25 @@ body::after {
   pointer-events: none;
 }
 
-/* Depuis iOS 26, le système fond et floute ce qui passe sous l'heure, et ce fondu déborde de
-   la zone de l'heure : mesuré sur GDJ-EBTM (simulateur, iOS 27), environ 1,6 fois sa hauteur.
-   Le logo et le titre de la barre commencent sous cette ligne, sinon ils sont floutés.
-   « animation-timeline » sert de repère : Safari le connaît depuis iOS 26 (et Chrome, où la
-   zone de l'heure vaut zéro). */
-:root {
-  --sous-heure: env(safe-area-inset-top);
-}
-
-@supports (animation-timeline: scroll()) {
-  :root {
-    --sous-heure: calc(env(safe-area-inset-top) * 1.6);
-  }
-}
-
-/* Sous l'heure, une bande au dégradé du bandeau, toujours là. Quand la barre s'efface dans une
-   leçon, elle se range dessous, et le texte défile sous une bande violette au lieu de passer
-   sous l'heure. Vu sur le simulateur (iPhone 17 Pro, iOS 26.5, application installée, le
-   21 novembre 2026) : sans elle, le texte passait sous l'heure, écrite en noir par-dessus, sans
-   le fondu violet qu'iOS 27 pose sur GDJ-EBTM. Même dégradé que l'en-tête : quand la barre est
-   là, rien ne se voit de la jonction. Elle ne mesure rien hors de l'application installée
-   (Safari, Chrome, Android : zone de l'heure nulle). */
+/* Le haut de l'écran sur iPhone. Depuis iOS 26, la zone de l'heure (dans Safari comme dans
+   l'application installée) prend la couleur du bloc fixé tout en haut de l'écran, s'il mesure
+   plus de 10 px ; à défaut, le fond de la page. Sous iOS 27, rien ne se dessine plus sous
+   l'heure : le réglage « black-translucent » est abandonné (WebKit, bugs 301756 et 317153).
+   Cette bande violette fixée, de 12 px au moins, donne donc sa couleur à la zone de l'heure ;
+   la page commence dessous. Méthode de Plateforme Théologie (journal du 4 novembre 2026),
+   vérifiée là-bas sous iOS 27.0 et 26.5, appli et Safari.
+   Ici, le 21 novembre 2026 : la page passait sous l'heure avec « black-translucent », vérifié
+   sous iOS 26.5 seulement ; sur l'iPhone de Sébastien (iOS 27), bande blanche sous l'heure
+   (capture de 22 h 20). La barre, fixée en haut, a un fond blanc : c'est lui qu'iOS prenait.
+   Couleur unie, pas le dégradé : iOS pose une seule couleur sous l'heure. L'en-tête commence
+   par ce même violet uni (« .entete ») : aucune ligne à la jonction. La bande passe devant la
+   barre : quand celle-ci s'efface dans une leçon, elle se range dessous.
+   Vérifié sur le simulateur (iPhone 18 Pro, iOS 27.0, application installée) : violet jusqu'en
+   haut, heure en blanc, en clair et en sombre. Limites vues : sous iOS 26.5, le texte d'une
+   leçon passe sous l'heure, voilé de violet, quand la barre s'efface ; sous iOS 27, la zone de
+   l'heure ne s'assombrit pas avec le voile d'une fenêtre du bas (essayé : iOS garde la couleur
+   prise à l'ouverture). Remettre « black-translucent » ramenait la bande blanche sous iOS 26.5
+   sur une application déjà installée : essayé et retiré. */
 body::before {
   content: "";
   position: fixed;
@@ -193,8 +184,8 @@ body::before {
   right: 0;
   left: 0;
   z-index: 25;
-  height: env(safe-area-inset-top);
-  background: var(--bandeau);
+  height: max(12px, env(safe-area-inset-top));
+  background-color: var(--bandeau-debut);
   pointer-events: none;
 }
 
@@ -265,11 +256,19 @@ button {
      0,25 s, « disparaît très vite, ça fait pas très beau »), « Fixe », « Douce » (0,32 / 0,38 s).
      Ce réglage a déjà fait des allers-retours (suivi, 2 septembre 2026) : le relire avant d'y
      toucher. */
-  transition: transform var(--barre-mouvement) var(--feuille-courbe), background-color 0.25s ease-out;
+  transition: transform var(--barre-mouvement) var(--feuille-courbe), background-color 0.25s ease-out,
+    opacity 0s linear 0s;
 }
 
+/* Rangée au-dessus de la page, la barre devient transparente une fois arrivée : sous iOS 27, ce
+   qui dépasse en haut de la page s'affiche flouté sous l'heure (onglets vus derrière l'heure sur
+   le simulateur, le 21 novembre 2026). Transparente et non cachée : elle reste lisible par un
+   lecteur d'écran. Elle redevient visible dès qu'elle repart. */
 .barre--masquee {
   transform: translate3d(0, -100%, 0);
+  opacity: 0;
+  transition: transform var(--barre-mouvement) var(--feuille-courbe), background-color 0.25s ease-out,
+    opacity 0s linear var(--barre-mouvement);
 }
 
 /* Dès que la lecture commence, la barre cesse d'être un bandeau opaque et se pose au-dessus
@@ -293,14 +292,17 @@ button {
 }
 
 /* L'en-tête de chaque écran est un bandeau en dégradé, du violet des lettres du logo au rose de
-   sa croix (« Dégradé de la croix », choisi par Sébastien le 21 novembre 2026), qui monte sous
-   l'heure de l'iPhone ; logo, titre et boutons y sont en blanc. Il reste opaque quand la page
-   défile : seule la rangée des onglets, dessous, devient translucide. Sur tous les écrans, pour
-   que la couleur sous l'heure ne change jamais d'un écran à l'autre. */
+   sa croix (« Dégradé de la croix », choisi par Sébastien le 21 novembre 2026) ; logo, titre et
+   boutons y sont en blanc. Il reste opaque quand la page défile : seule la rangée des onglets,
+   dessous, devient translucide. Sur tous les écrans, pour que la couleur sous l'heure ne change
+   jamais d'un écran à l'autre. Son sommet est du violet uni de la bande de l'heure (voir
+   « body::before »), puis le dégradé prend le relais : aucune ligne à la jonction. Le contenu
+   commence sous la bande (moins la marge intérieure de l'en-tête). */
 .entete {
-  background: var(--bandeau);
-  /* Le contenu commence sous le fondu du système (moins la marge intérieure de l'en-tête). */
-  padding-top: max(env(safe-area-inset-top), calc(var(--sous-heure) - 0.6rem));
+  background: linear-gradient(to bottom, var(--bandeau-debut) max(12px, env(safe-area-inset-top)),
+      transparent calc(max(12px, env(safe-area-inset-top)) + 2rem)),
+    var(--bandeau);
+  padding-top: calc(max(12px, env(safe-area-inset-top)) - 0.6rem);
 }
 
 .entete .marque__titre,
