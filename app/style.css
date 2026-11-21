@@ -14,6 +14,8 @@
   /* Bordure des éléments avec lesquels on interagit : 3 pour 1, exigé pour être repérable. */
   --bord-actif: #8a838c;
   --teinte: #f3e8f4;
+  /* Voile posé sur un bloc déjà teinté quand on le touche. */
+  --pression: rgba(43, 31, 46, 0.07);
   --ok: #2b7449;
   --ok-fond: #e6f4ec;
   --danger: #b3261e;
@@ -43,6 +45,7 @@
   --bord: #3a2e3d;
   --bord-actif: #7b7280;
   --teinte: #2c2130;
+  --pression: rgba(255, 255, 255, 0.08);
   --ok: #7fd39f;
   --ok-fond: #1f3527;
   --danger: #f28b82;
@@ -455,12 +458,47 @@ a[href^="#/"] {
   padding: 1.05rem 0;
   text-decoration: none;
   color: inherit;
+  /* Pour l'état « touché » ci-dessous : la teinte est un calque posé derrière le contenu. */
+  position: relative;
+  isolation: isolate;
+  transition: transform 140ms ease-out;
+  /* Une ligne est une commande, pas un texte : un appui long ne sélectionne rien et n'ouvre
+     pas le menu des liens de l'iPhone. */
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
 }
 
 @media (hover: hover) {
   .carte-lecon:hover {
     border-bottom-color: var(--violet);
   }
+}
+
+/* Sous le doigt, la ligne se teinte et s'enfonce à peine. La teinte déborde un peu des deux
+   côtés, coins arrondis, et recouvre les deux filets qui l'encadrent. Elle arrive vite
+   (80 ms) et repart plus doucement (220 ms). C'est app.js qui pose « ligne--pressee », pas
+   « :active » : celui-ci restait allumé pendant un défilement commencé sur la ligne. */
+.carte-lecon::before {
+  content: "";
+  position: absolute;
+  inset: -1px -0.75rem;
+  z-index: -1;
+  border-radius: 12px;
+  background: var(--teinte);
+  opacity: 0;
+  transition: opacity 220ms ease-out;
+}
+
+.carte-lecon.ligne--pressee::before,
+.carte-lecon.ligne--touchee::before {
+  opacity: 1;
+  transition-duration: 80ms;
+}
+
+.carte-lecon.ligne--pressee {
+  transform: scale(0.985);
 }
 
 /* Le numéro de la leçon est un grand chiffre violet, sans cadre, dans le caractère des titres
@@ -540,6 +578,18 @@ a[href^="#/"] {
   padding: 1.1rem 1rem;
   text-decoration: none;
   color: inherit;
+  transition: background-color 220ms ease-out;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
+}
+
+/* Sous le doigt, l'entrée fonce un peu : le bloc est déjà teinté, c'est un voile qui s'ajoute. */
+.annexe.ligne--pressee,
+.annexe.ligne--touchee {
+  background-color: var(--pression);
+  transition-duration: 80ms;
 }
 
 /* Le cadre de mise en évidence au clavier épouse les coins du bloc. */
@@ -1637,6 +1687,85 @@ a[href^="#/"] {
 
   .lecture {
     font-size: 1.1rem;
+  }
+}
+
+/* ---------- Changement d'écran ---------- */
+
+/* L'écran quitté s'efface vite (110 ms), le nouveau arrive en glissant de quelques pixels
+   (280 ms) : de la droite quand on entre dans une leçon, de la gauche quand on remonte par la
+   flèche. app.js pose ces classes et les retire ; les durées y sont répétées. Rien ne joue
+   quand le lecteur a demandé moins de mouvement, ni au retour par le geste de l'iPhone. */
+@media (prefers-reduced-motion: no-preference) {
+  .ecran--sort-avant {
+    animation: ecran-sort-avant 110ms cubic-bezier(0.4, 0, 1, 1) both;
+  }
+
+  .ecran--sort-arriere {
+    animation: ecran-sort-arriere 110ms cubic-bezier(0.4, 0, 1, 1) both;
+  }
+
+  .ecran--entre-avant {
+    animation: ecran-entre-avant 280ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+
+  .ecran--entre-arriere {
+    animation: ecran-entre-arriere 280ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+
+  /* Au retour, la ligne d'où l'on venait est encore teintée, puis s'éteint. */
+  .carte-lecon.ligne--revient::before {
+    animation: ligne-revient 600ms 150ms ease-out both;
+  }
+
+  .annexe.ligne--revient {
+    animation: annexe-revient 600ms 150ms ease-out both;
+  }
+}
+
+@keyframes ecran-sort-avant {
+  to {
+    opacity: 0;
+    transform: translate3d(-10px, 0, 0);
+  }
+}
+
+@keyframes ecran-sort-arriere {
+  to {
+    opacity: 0;
+    transform: translate3d(10px, 0, 0);
+  }
+}
+
+@keyframes ecran-entre-avant {
+  from {
+    opacity: 0;
+    transform: translate3d(22px, 0, 0);
+  }
+}
+
+@keyframes ecran-entre-arriere {
+  from {
+    opacity: 0;
+    transform: translate3d(-22px, 0, 0);
+  }
+}
+
+@keyframes ligne-revient {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes annexe-revient {
+  from {
+    background-color: var(--pression);
+  }
+  to {
+    background-color: transparent;
   }
 }
 

@@ -679,7 +679,7 @@
         /* sans stockage, rien à effacer */
       }
       fermerReglages();
-      history.replaceState(null, "", location.pathname + "?installer" + location.hash);
+      history.replaceState(history.state, "", location.pathname + "?installer" + location.hash);
       afficherAccueil();
       return;
     }
@@ -1907,10 +1907,91 @@
   // Navigation (adresse après le #)
   // ---------------------------------------------------------------------------
 
-  async function router() {
-    // Avant de reconstruire l'écran, dont les champs seront remplis depuis l'enregistrement.
-    enregistrerReponseEnAttente();
-    const chemin = location.hash.replace(/^#/, "") || "/";
+  // --- Toucher et changement d'écran (21 novembre 2026, demande de Sébastien) ---------------
+  // Depuis que les leçons sont des lignes sans boîte, rien ne répondait au doigt et l'écran
+  // changeait d'un coup. Trois gestes simples, sans la fonction « View Transitions » des
+  // navigateurs (trop jeune, et coûteuse à régler : voir les fondus de Plateforme Théologie) :
+  //   1. la ligne touchée se teinte et le reste pendant le départ ;
+  //   2. l'écran quitté s'efface vite, le nouveau arrive en glissant de quelques pixels :
+  //      de la droite quand on entre, de la gauche quand on remonte par la flèche ;
+  //   3. au retour, la ligne d'où l'on venait est encore teintée un instant puis s'éteint,
+  //      comme dans les listes de l'iPhone.
+  // Le retour par le geste de l'iPhone ou le bouton du navigateur ne joue aucun glissement :
+  // l'iPhone fait déjà le sien, un second donnerait un à-coup. On le reconnaît au rang que
+  // chaque entrée de l'historique porte : une entrée déjà numérotée est une entrée revisitée.
+  const DUREE_SORTIE = 110; // ms, à garder égale à celle de la feuille de style
+  const DUREE_ENTREE = 280;
+  const mouvementReduit = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const CLASSES_ECRAN = ["ecran--sort-avant", "ecran--sort-arriere", "ecran--entre-avant", "ecran--entre-arriere"];
+  const attendre = (ms) => new Promise((suite) => setTimeout(suite, ms));
+  const lignesQuittees = new Map(); // écran → adresse de la ligne par laquelle on l'a quitté
+  let ecranCourant = null;
+  let rangCourant = 0;
+  let navigation = 0;
+
+  // L'écran auquel une adresse appartient, et sa profondeur. Les trois onglets d'une leçon
+  // sont un seul écran : passer de l'un à l'autre n'est pas un changement d'écran.
+  function situer(chemin) {
+    const lecon = chemin.match(/^\/lecon\/(\d+)/);
+    if (lecon) return { cle: `/lecon/${lecon[1]}`, niveau: 1 };
+    if (/^\/documents\/[a-z0-9-]+/.test(chemin)) return { cle: chemin.replace(/\/$/, ""), niveau: 2 };
+    if (/^\/documents\/?$/.test(chemin)) return { cle: "/documents", niveau: 1 };
+    if (chemin === "/a-propos") return { cle: "/a-propos", niveau: 1 };
+    return { cle: "/", niveau: 0 };
+  }
+
+  function changementDEcran(chemin) {
+    const ecran = situer(chemin);
+    const precedent = ecranCourant;
+    ecranCourant = ecran;
+    const etat = history.state;
+    const revisitee = Boolean(etat) && typeof etat.rang === "number";
+    let sens = null;
+    if (revisitee) {
+      rangCourant = etat.rang;
+    } else {
+      if (precedent) rangCourant += 1;
+      history.replaceState({ ...(etat || {}), rang: rangCourant }, "");
+      if (precedent && precedent.cle !== ecran.cle) sens = ecran.niveau < precedent.niveau ? "arriere" : "avant";
+    }
+    const autreEcran = Boolean(precedent) && precedent.cle !== ecran.cle;
+    return { ecran, sens, retour: autreEcran && (revisitee || sens === "arriere") };
+  }
+
+  principal.addEventListener("click", (evenement) => {
+    const ligne = evenement.target.closest("a.carte-lecon, a.annexe");
+    if (!ligne || evenement.button || evenement.metaKey || evenement.ctrlKey || evenement.shiftKey) return;
+    ligne.classList.add("ligne--touchee");
+    if (ecranCourant) lignesQuittees.set(ecranCourant.cle, ligne.getAttribute("href"));
+  });
+
+  // La teinte sous le doigt est posée ici et non par « :active » dans la feuille de style :
+  // filmé sur iPhone virtuel, « :active » laissait la ligne teintée pendant tout un
+  // défilement commencé sur elle. Ici, la teinte attend 80 ms (le temps de savoir si le doigt
+  // glisse) et s'en va dès que le navigateur prend la main pour faire défiler (pointercancel).
+  // Un toucher plus bref que 80 ms est teinté par le clic, ci-dessus.
+  const DELAI_PRESSION = 80;
+  let attentePression = null;
+  let lignePressee = null;
+  function relacher() {
+    clearTimeout(attentePression);
+    attentePression = null;
+    if (lignePressee) lignePressee.classList.remove("ligne--pressee");
+    lignePressee = null;
+  }
+  principal.addEventListener("pointerdown", (evenement) => {
+    const ligne = evenement.target.closest("a.carte-lecon, a.annexe");
+    relacher();
+    if (!ligne || evenement.button) return;
+    attentePression = setTimeout(() => {
+      lignePressee = ligne;
+      ligne.classList.add("ligne--pressee");
+    }, DELAI_PRESSION);
+  });
+  for (const fin of ["pointerup", "pointercancel"]) window.addEventListener(fin, relacher);
+  window.addEventListener("scroll", relacher, { passive: true });
+
+  async function afficherChemin(chemin) {
     try {
       await chargerVersets();
       const lecon = chemin.match(/^\/lecon\/(\d+)(?:\/(lecture|versets|questions))?\/?$/);
@@ -1923,6 +2004,41 @@
     } catch (erreur) {
       console.error(erreur);
       afficherErreur(erreur.message);
+    }
+  }
+
+  async function router() {
+    // Avant de reconstruire l'écran, dont les champs seront remplis depuis l'enregistrement.
+    enregistrerReponseEnAttente();
+    const chemin = location.hash.replace(/^#/, "") || "/";
+    const jeton = ++navigation;
+    const { ecran, sens, retour } = changementDEcran(chemin);
+    const anime = Boolean(sens) && !mouvementReduit.matches;
+
+    principal.classList.remove(...CLASSES_ECRAN);
+    if (anime) {
+      principal.classList.add(`ecran--sort-${sens}`);
+      await attendre(DUREE_SORTIE);
+      // Un autre changement est arrivé pendant la sortie : c'est lui qui affiche.
+      if (jeton !== navigation) return;
+    }
+
+    await afficherChemin(chemin);
+    if (jeton !== navigation) return;
+
+    principal.classList.remove(...CLASSES_ECRAN);
+    if (retour && lignesQuittees.has(ecran.cle)) {
+      const adresse = lignesQuittees.get(ecran.cle);
+      lignesQuittees.delete(ecran.cle);
+      const ligne = [...principal.querySelectorAll("a.carte-lecon, a.annexe")].find(
+        (a) => a.getAttribute("href") === adresse
+      );
+      if (ligne) ligne.classList.add("ligne--revient");
+    }
+    if (anime) {
+      principal.classList.add(`ecran--entre-${sens}`);
+      await attendre(DUREE_ENTREE + 40);
+      if (jeton === navigation) principal.classList.remove(...CLASSES_ECRAN);
     }
   }
 
