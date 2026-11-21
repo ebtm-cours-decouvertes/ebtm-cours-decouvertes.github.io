@@ -272,6 +272,17 @@ button {
   padding-top: calc(max(12px, env(safe-area-inset-top)) - 0.6rem);
 }
 
+/* Dans l'application installée, l'iPhone floute le haut de l'écran bien au-delà de l'heure
+   (iOS 27 : croix du logo et titre « Cours découvertes » flous, vus par Sébastien sur son iPhone
+   le 21 novembre 2026 et mesurés sur le simulateur ; GDJ-EBTM : texte net à partir d'environ
+   110 points du haut). Le logo, le titre et les boutons descendent sous cette zone ; le violet
+   du bandeau, lui, garde sa place. */
+@media (display-mode: standalone) {
+  .entete {
+    padding-top: calc(max(12px, env(safe-area-inset-top)) - 0.6rem + 1.75rem);
+  }
+}
+
 .entete .marque__titre,
 .entete .bouton-barre,
 .entete .bouton-retour {
