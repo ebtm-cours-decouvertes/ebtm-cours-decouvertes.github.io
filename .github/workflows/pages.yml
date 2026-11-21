@@ -18,6 +18,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # Premier temps : les contrôles, puis le dépôt du paquet du site.
   verifier:
     runs-on: ubuntu-latest
     steps:
@@ -29,7 +30,18 @@ jobs:
       - run: node scripts/verifier-contenu.mjs
       - run: node scripts/verifier-versets.mjs
       - run: node scripts/verifier-contrastes.mjs
+      # Le paquet est déposé ici, et non dans le travail qui le publie. Quand les deux étapes se
+      # suivaient dans le même travail, la publication cherchait le paquet une demi-seconde après
+      # son dépôt, et GitHub répondait parfois qu'il n'en voyait aucun (« No artifacts named
+      # "github-pages" were found » : trois échecs le 21 novembre 2026, un le 16). Défaut connu
+      # de l'outil : https://github.com/actions/deploy-pages/issues/451. Avec deux travaux,
+      # plusieurs secondes les séparent. C'est la disposition des modèles de GitHub.
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: app
 
+  # Second temps : la publication du paquet, et rien d'autre.
   publier:
     needs: verifier
     runs-on: ubuntu-latest
@@ -37,10 +49,5 @@ jobs:
       name: github-pages
       url: ${{ steps.deploiement.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: app
       - id: deploiement
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
