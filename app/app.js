@@ -307,6 +307,38 @@
 
   // Neutralise l'arrière-plan quand une fenêtre est ouverte : le clavier n'en sort plus et les
   // lecteurs d'écran n'annoncent plus ce qui est derrière. « inert » fait les deux d'un coup.
+  // Fenêtres du bas : montée et descente animées par la feuille de style. On rend la fenêtre
+  // visible, puis on pose « feuille--ouverte » une image plus tard pour que la montée parte
+  // d'en bas ; à la fermeture, on retire la classe et on ne cache la fenêtre qu'une fois la
+  // descente finie. Rouverte pendant sa descente, elle remonte depuis là où elle est.
+  const minuteriesFeuilles = new WeakMap();
+  const moinsDeMouvement = window.matchMedia("(prefers-reduced-motion: reduce)");
+  function dureeFermetureFeuille() {
+    if (moinsDeMouvement.matches) return 0;
+    return parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--feuille-fermeture")) || 0;
+  }
+  function feuilleOuverte(fenetre) {
+    return fenetre.classList.contains("feuille--ouverte");
+  }
+  function montrerFeuille(fenetre) {
+    clearTimeout(minuteriesFeuilles.get(fenetre));
+    if (fenetre.hidden) {
+      fenetre.hidden = false;
+      void fenetre.offsetHeight; // la position de départ (en bas) est posée avant la montée
+    }
+    fenetre.classList.add("feuille--ouverte");
+  }
+  function cacherFeuille(fenetre) {
+    fenetre.classList.remove("feuille--ouverte");
+    clearTimeout(minuteriesFeuilles.get(fenetre));
+    minuteriesFeuilles.set(
+      fenetre,
+      setTimeout(() => {
+        if (!feuilleOuverte(fenetre)) fenetre.hidden = true;
+      }, dureeFermetureFeuille())
+    );
+  }
+
   function neutraliserArrierePlan(actif) {
     for (const zone of [document.getElementById("barre"), document.getElementById("principal")]) {
       if (!zone) continue;
@@ -1014,13 +1046,13 @@
     const bloc = reglages.querySelector("#reglage-installation");
     if (bloc) bloc.hidden = dejaInstallee();
     rafraichirReglages();
-    reglages.hidden = false;
+    montrerFeuille(reglages);
     neutraliserArrierePlan(true);
     reglages.querySelector(".feuille__fermer").focus();
   }
 
   function fermerReglages() {
-    reglages.hidden = true;
+    cacherFeuille(reglages);
     neutraliserArrierePlan(false);
     document.getElementById("ouvrir-reglages").focus();
   }
@@ -1072,7 +1104,7 @@
   });
 
   document.addEventListener("keydown", (evenement) => {
-    if (evenement.key === "Escape" && !reglages.hidden) fermerReglages();
+    if (evenement.key === "Escape" && feuilleOuverte(reglages)) fermerReglages();
   });
 
   appliquerApparence();
@@ -1754,13 +1786,13 @@
     bouton.dataset.partage = adresse + "?installer";
     bouton.textContent = navigator.share ? "Partager le lien" : "Copier le lien";
     fenetrePartage.querySelector(".partage__etat").textContent = "";
-    fenetrePartage.hidden = false;
+    montrerFeuille(fenetrePartage);
     neutraliserArrierePlan(true);
     fenetrePartage.querySelector(".feuille__fermer").focus();
   }
 
   function fermerPartage() {
-    fenetrePartage.hidden = true;
+    cacherFeuille(fenetrePartage);
     neutraliserArrierePlan(false);
     boutonPartage.focus();
   }
@@ -1770,7 +1802,7 @@
     if (evenement.target === fenetrePartage || evenement.target.closest(".feuille__fermer")) fermerPartage();
   });
   document.addEventListener("keydown", (evenement) => {
-    if (evenement.key === "Escape" && !fenetrePartage.hidden) fermerPartage();
+    if (evenement.key === "Escape" && feuilleOuverte(fenetrePartage)) fermerPartage();
   });
 
   // Seule l'adresse du cours est partagée, jamais les réponses. Le menu de partage du téléphone
@@ -1876,13 +1908,13 @@
       : html`<p class="texte-doux">Le texte de ce passage n’est pas disponible dans l’application.</p>`;
     feuille.querySelector(".feuille__source").textContent =
       (versets && versets.traduction) || (versetsDocuments && versetsDocuments.traduction) || "";
-    feuille.hidden = false;
+    montrerFeuille(feuille);
     neutraliserArrierePlan(true);
     feuille.querySelector(".feuille__fermer").focus();
   }
 
   function fermerVerset() {
-    feuille.hidden = true;
+    cacherFeuille(feuille);
     neutraliserArrierePlan(false);
     if (refDeclencheur) refDeclencheur.focus();
   }
@@ -1891,7 +1923,7 @@
     if (evenement.target === feuille || evenement.target.closest(".feuille__fermer")) fermerVerset();
   });
   document.addEventListener("keydown", (evenement) => {
-    if (evenement.key === "Escape" && !feuille.hidden) fermerVerset();
+    if (evenement.key === "Escape" && feuilleOuverte(feuille)) fermerVerset();
   });
   principal.addEventListener("click", (evenement) => {
     const bouton = evenement.target.closest(".ref");
@@ -1964,6 +1996,11 @@
   }
   const attendre = (ms) => new Promise((suite) => setTimeout(suite, ms));
   const positionsQuittees = new Map(); // écran → hauteur de défilement au moment de le quitter
+  // écran → adresse de la ligne par laquelle on l'a quitté. Au retour, cette ligne s'allume
+  // puis s'éteint doucement, pour montrer d'où l'on vient (remise à la demande de Sébastien,
+  // 21 novembre 2026 : « j'aimais bien »). Elle n'est jamais allumée sur la photo que Safari
+  // montre pendant le geste : seulement à l'arrivée.
+  const lignesQuittees = new Map();
   // Les écrans de liste retrouvent leur place au retour ; les leçons et les documents ont la
   // leur (reprendreLecture).
   const LISTES = new Set(["/", "/documents"]);
@@ -2050,6 +2087,7 @@
     // La position se note ici, au toucher, et non au changement d'adresse : filmé sur iPhone
     // virtuel, Safari avait déjà ramené la page en haut quand l'adresse changeait.
     positionsQuittees.set(ecranCourant.cle, window.scrollY);
+    lignesQuittees.set(ecranCourant.cle, ligne.getAttribute("href"));
   });
 
   // Un seul allumage, au clic (voir DUREE_ALLUMAGE). Il y en avait un second pendant l'appui,
@@ -2104,6 +2142,21 @@
       requestAnimationFrame(() => {
         if (jeton === navigation && Math.abs(window.scrollY - y) > 2) window.scrollTo(0, y);
       });
+    }
+    if (retour && lignesQuittees.has(ecran.cle)) {
+      const adresse = lignesQuittees.get(ecran.cle);
+      lignesQuittees.delete(ecran.cle);
+      const ligne = [...principal.querySelectorAll("a.carte-lecon, a.annexe")].find(
+        (a) => a.getAttribute("href") === adresse
+      );
+      if (ligne) {
+        ligne.classList.add("ligne--revient");
+        // Retirée une fois éteinte : sinon, toucher aussitôt la même ligne ne l'allumerait pas
+        // (l'animation finie garde la main sur la teinte).
+        const retirer = () => ligne.classList.remove("ligne--revient");
+        ligne.addEventListener("animationend", retirer, { once: true });
+        setTimeout(retirer, 1000);
+      }
     }
     if (anime) {
       principal.classList.add("ecran--entre");

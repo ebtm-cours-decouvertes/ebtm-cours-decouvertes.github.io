@@ -16,6 +16,14 @@
   --teinte: #f3e8f4;
   /* Voile posé sur un bloc déjà teinté quand on le touche. */
   --pression: rgba(43, 31, 46, 0.07);
+  /* Marque que l'iPhone pose sur un bouton touché : mauve, au lieu de son gris par défaut
+     (demande de Sébastien, 21 novembre 2026 : « il est gris, c'est pas dans l'esprit du site »). */
+  --toucher: rgba(152, 40, 152, 0.16);
+  /* Fenêtres du bas : montée et descente, même chemin, même courbe (démarrage net, arrivée très
+     douce). Rythme « Lent », choisi par Sébastien sur vidéo le 21 novembre 2026, parmi trois. */
+  --feuille-ouverture: 720ms;
+  --feuille-fermeture: 480ms;
+  --feuille-courbe: cubic-bezier(0.32, 0.72, 0, 1);
   --ok: #2b7449;
   --ok-fond: #e6f4ec;
   --danger: #b3261e;
@@ -46,6 +54,7 @@
   --bord-actif: #7b7280;
   --teinte: #2c2130;
   --pression: rgba(255, 255, 255, 0.08);
+  --toucher: rgba(217, 155, 217, 0.22);
   --ok: #7fd39f;
   --ok-fond: #1f3527;
   --danger: #f28b82;
@@ -95,6 +104,7 @@
 html {
   font-size: calc(100% * var(--echelle));
   -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: var(--toucher);
 }
 
 body {
@@ -1441,7 +1451,22 @@ a[href^="#/"] {
   display: flex;
   align-items: flex-end;
   justify-content: center;
+  /* Le voile s'assombrit pendant que la fenêtre monte, s'éclaircit pendant qu'elle descend.
+     app.js pose « feuille--ouverte » une image après l'avoir rendue visible, et ne la cache
+     qu'une fois la descente finie. Une fenêtre refermée en pleine montée repart de là où elle
+     est : une transition CSS reprend depuis la position affichée. */
+  background: rgba(28, 18, 30, 0);
+  transition: background-color var(--feuille-fermeture) ease;
+}
+
+/* Pendant la descente, la fenêtre ne retient plus les touchers : la page derrière répond déjà. */
+.feuille:not(.feuille--ouverte) {
+  pointer-events: none;
+}
+
+.feuille.feuille--ouverte {
   background: rgba(28, 18, 30, 0.55);
+  transition-duration: var(--feuille-ouverture);
 }
 
 .feuille__carte {
@@ -1454,6 +1479,14 @@ a[href^="#/"] {
   border-radius: 18px 18px 0 0;
   padding: 1rem 1rem calc(1rem + env(safe-area-inset-bottom));
   box-shadow: 0 -6px 30px rgba(43, 31, 46, 0.25);
+  transform: translate3d(0, 100%, 0);
+  transition: transform var(--feuille-fermeture) var(--feuille-courbe);
+  will-change: transform;
+}
+
+.feuille--ouverte .feuille__carte {
+  transform: none;
+  transition-duration: var(--feuille-ouverture);
 }
 
 .feuille__entete {
@@ -1535,9 +1568,21 @@ a[href^="#/"] {
     align-items: center;
   }
 
+  /* Au centre d'un grand écran, la fenêtre monte de quelques pixels en apparaissant. */
   .feuille__carte {
     border-radius: 18px;
     max-height: 78vh;
+    opacity: 0;
+    transform: translate3d(0, 24px, 0) scale(0.98);
+    transition:
+      transform var(--feuille-fermeture) var(--feuille-courbe),
+      opacity var(--feuille-fermeture) ease;
+  }
+
+  .feuille--ouverte .feuille__carte {
+    opacity: 1;
+    transform: none;
+    transition-duration: var(--feuille-ouverture);
   }
 }
 
@@ -1693,6 +1738,33 @@ a[href^="#/"] {
 @media (prefers-reduced-motion: no-preference) {
   .ecran--entre {
     animation: ecran-entre 240ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+
+  /* Au retour, la ligne d'où l'on venait s'allume puis s'éteint doucement (app.js, lignesQuittees). */
+  .carte-lecon.ligne--revient::before {
+    animation: ligne-revient 600ms 150ms ease-out both;
+  }
+
+  .annexe.ligne--revient {
+    animation: annexe-revient 600ms 150ms ease-out both;
+  }
+}
+
+@keyframes ligne-revient {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes annexe-revient {
+  from {
+    background-color: var(--pression);
+  }
+  to {
+    background-color: transparent;
   }
 }
 
