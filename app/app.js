@@ -789,46 +789,20 @@
   }
 
   // ---------------------------------------------------------------------------
-  // La barre s'efface pendant la lecture
+  // La barre du haut pendant la lecture
   // ---------------------------------------------------------------------------
 
-  // La barre suit le doigt, elle ne bascule pas d'un état à l'autre. C'est ce que spécifie
-  // Material Design pour une barre supérieure (« enterAlways ») : elle se rétracte dès que la
-  // page descend, revient dès qu'elle remonte, proportionnellement au geste. Un seuil suivi
-  // d'une animation, ce qu'on faisait avant, met un décalage entre le doigt et l'écran.
-  //
-  // La durée et la courbe du mouvement sont dans style.css (« .barre », --barre-mouvement).
+  // La barre reste en place et opaque : on ne voit rien passer derrière le bandeau violet
+  // (demande de Sébastien, 21 novembre 2026). Elle s'effaçait pendant la lecture ; le texte
+  // passait alors sous l'heure, où iOS 27 le montrait flouté. Une ombre seule dit qu'elle
+  // passe au-dessus du texte, dès le premier pixel de défilement.
   const ALIGNEMENT_MS = 120; // au-delà, on considère que le doigt s'est arrêté
-  const SEUIL_FLOTTANT = 4; // au premier pixel de lecture, la barre passe en translucide
+  const SEUIL_OMBRE = 4;
 
-  let derniereY = 0;
   let minuterieAlignement = null;
-  // On efface la barre sur un écran de lecture, jamais sur un écran de navigation : dans une
-  // leçon la place rendue au texte se ressent, sur l'accueil on perdrait le logo et l'accès aux
-  // réglages sans rien gagner. Le fond translucide, lui, s'applique partout.
-  let barreEffacable = false;
-
-  // Sur iOS, le défilement est piloté par un processus séparé du script. Déplacer la barre à
-  // chaque événement de défilement la laisse toujours en retard d'une image sur le contenu :
-  // c'est la saccade constatée à l'essai. On bascule donc entre deux états, et c'est une
-  // transition CSS — confiée au compositeur, donc indépendante du script — qui fait le
-  // mouvement. Le geste perd en fidélité ce qu'il gagne en fluidité, et sur un téléphone la
-  // fluidité prime.
-  const COURSE_MASQUER = 16; // descente franche avant d'effacer
-  const COURSE_MONTRER = 10; // il en faut moins pour rappeler la barre
-
-  let course = 0; // distance parcourue depuis le dernier changement de sens
-
-  function montrerBarre() {
-    barre.classList.remove("barre--masquee");
-  }
 
   function reposerBarre() {
-    montrerBarre();
     barre.classList.remove("barre--flottante");
-    derniereY = 0;
-    course = 0;
-    barreEffacable = false;
     lectureEnCours = null;
   }
 
@@ -894,42 +868,14 @@
     if (!cible) return; // le contenu a changé depuis : on repart du haut, sans bruit
     const y = cible.getBoundingClientRect().top + window.scrollY - hauteurBarre - 8;
     window.scrollTo(0, Math.max(0, y));
-    derniereY = Math.max(0, window.scrollY);
   }
 
   function surDefilement() {
-    const y = Math.max(0, window.scrollY);
-    barre.classList.toggle("barre--flottante", y > SEUIL_FLOTTANT);
-
-    // Posé avant toute sortie : même quand la barre n'a plus à bouger, la lecture avance.
+    barre.classList.toggle("barre--flottante", window.scrollY > SEUIL_OMBRE);
+    // La lecture avance : on retient où l'on en est une fois le doigt arrêté.
     clearTimeout(minuterieAlignement);
     minuterieAlignement = setTimeout(auRepos, ALIGNEMENT_MS);
-
-    if (!barreEffacable) return;
-
-    const delta = y - derniereY;
-    derniereY = y;
-    if (delta === 0) return;
-
-    if (y <= 0) {
-      course = 0;
-      montrerBarre();
-      return;
-    }
-
-    // Changer de sens remet le compteur à zéro : la barre répond aussitôt au geste inverse.
-    if (delta > 0 !== course > 0) course = 0;
-    course += delta;
-
-    if (course > COURSE_MASQUER) {
-      barre.classList.add("barre--masquee");
-      course = 0;
-    } else if (course < -COURSE_MONTRER) {
-      montrerBarre();
-      course = 0;
-    }
   }
-
 
   window.addEventListener("scroll", surDefilement, { passive: true });
 
@@ -1269,8 +1215,6 @@
       `Leçon ${lecon.numero} · ${lecon.titre}`,
       { garderOnglets: Boolean(rangeeEnPlace) }
     );
-
-    barreEffacable = true;
 
     // Dans une leçon, la flèche de retour prend la place du logo, comme dans toute application.
     zoneNavigation.innerHTML = RETOUR;
@@ -1696,9 +1640,8 @@
       texte.titre
     );
 
-    // Un document est un écran de lecture, comme une leçon : la barre s'efface à la descente,
-    // et l'application retient où l'on s'est arrêté.
-    barreEffacable = true;
+    // Un document est un écran de lecture, comme une leçon : l'application retient où l'on
+    // s'est arrêté.
     zoneNavigation.innerHTML = RETOUR_DOCUMENTS;
     titreBarre.textContent = texte.titre;
     reprendreLecture(`document/${slug}`);

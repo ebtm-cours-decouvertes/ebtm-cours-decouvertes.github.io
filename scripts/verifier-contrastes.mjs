@@ -71,43 +71,6 @@ for (const [nom, avant, arriere, seuil] of PAIRES) {
   }
 }
 
-// La barre devient translucide dès que la lecture commence : le texte défile dessous. On la
-// compose donc avec ce qui peut passer derrière — le texte courant, le pire cas — avant de
-// mesurer ses propres couleurs. Le flou n'entre pas dans le calcul : il n'apporte aucune
-// garantie, seule l'opacité en donne une.
-function melange(hexAvant, hexArriere, alpha) {
-  const canaux = (hex) => {
-    const n = hex.replace("#", "");
-    return [0, 2, 4].map((i) => parseInt(n.slice(i, i + 2), 16));
-  };
-  const [a, b] = [canaux(hexAvant), canaux(hexArriere)];
-  return "#" + a.map((v, i) => Math.round(v * alpha + b[i] * (1 - alpha)).toString(16).padStart(2, "0")).join("");
-}
-
-const TEXTES_BARRE = [
-  ["texte violet de la rangée d’onglets", "violet"],
-  ["texte adouci de la barre", "texte-doux"],
-  ["texte courant de la barre", "encre"],
-];
-
-for (const [theme, table] of [["clair", clair], ["sombre", sombre]]) {
-  const parts = table["barre-flottante"].match(/rgba?\(([^)]+)\)/);
-  if (!parts) {
-    echecs++;
-    console.log(`✗ ${theme.padEnd(7)} --barre-flottante illisible`);
-    continue;
-  }
-  const [r, v, b, alpha] = parts[1].split(",").map((n) => parseFloat(n));
-  const teinte = "#" + [r, v, b].map((n) => Math.round(n).toString(16).padStart(2, "0")).join("");
-  const compose = melange(teinte, table.encre, alpha);
-  for (const [nom, jeton] of TEXTES_BARRE) {
-    const rapport = contraste(table[jeton], compose);
-    const ok = rapport >= 4.5;
-    if (!ok) echecs++;
-    console.log(`${ok ? "  " : "✗ "}${theme.padEnd(7)} ${nom.padEnd(32)} ${rapport.toFixed(2)} (min 4.5)`);
-  }
-}
-
 console.log(
   echecs
     ? `\n${echecs} contraste(s) sous le seuil.`

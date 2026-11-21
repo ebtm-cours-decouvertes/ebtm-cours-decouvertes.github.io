@@ -27,8 +27,6 @@
   /* Arrivée d'un écran ouvert depuis une liste (même courbe que les fenêtres du bas). Rythme
      « Lent », choisi par Sébastien sur vidéo le 21 novembre 2026, parmi trois (0,36 / 0,48 / 0,60 s). */
   --ecran-entree: 600ms;
-  /* Barre du haut d'une leçon qui s'efface à la lecture et revient à la remontée (« .barre »). */
-  --barre-mouvement: 480ms;
   /* Bandeau de l'accueil, « Dégradé de la croix » : du violet des lettres du logo au rose de sa
      croix (relevés sur le logo : #862292, #ee206c), assombris pour porter du blanc. Choisi par
      Sébastien sur captures le 21 novembre 2026, parmi quatre bandeaux. */
@@ -41,9 +39,6 @@
   --ok-fond: #e6f4ec;
   --danger: #b3261e;
   --danger-doux: #f7e3e1;
-  /* Fond de la barre pendant la lecture. L'opacité est le plus bas que le contraste
-     permette : verifier-contrastes.mjs compose ce fond avec le texte qui passe dessous. */
-  --barre-flottante: rgba(255, 255, 255, 0.86);
   --echelle: 1;
   --rayon: 14px;
   --ombre: 0 1px 2px rgba(43, 31, 46, 0.06), 0 4px 14px rgba(43, 31, 46, 0.06);
@@ -72,9 +67,6 @@
   --ok-fond: #1f3527;
   --danger: #f28b82;
   --danger-doux: #3a2422;
-  /* En sombre, le violet clair des titres n'a pas de marge de contraste : la barre y reste
-     presque opaque, et c'est le flou seul qui donne la profondeur. Mesuré, pas supposé. */
-  --barre-flottante: rgba(34, 26, 37, 0.96);
   --ombre: none;
   --bandeau-debut: #3a1a3d;
   --bandeau-milieu: #4a173f;
@@ -180,11 +172,14 @@ body::after {
 body::before {
   content: "";
   position: fixed;
-  top: 0;
+  /* Elle monte aussi au-dessus de l'écran : sous iOS 27, la zone de l'heure montre en flou ce
+     qui s'y trouve, c'est-à-dire le texte qui vient de défiler hors de l'écran (vu sur le
+     simulateur, le 21 novembre 2026). La bande le couvre. */
+  top: -240px;
   right: 0;
   left: 0;
   z-index: 25;
-  height: max(12px, env(safe-area-inset-top));
+  height: calc(240px + max(12px, env(safe-area-inset-top)));
   background-color: var(--bandeau-debut);
   pointer-events: none;
 }
@@ -248,42 +243,12 @@ button {
   /* translate3d, même à zéro, place la barre sur sa propre couche graphique : sans cela,
      WebKit la redessine à chaque image et elle scintille. */
   transform: translate3d(0, 0, 0);
-  will-change: transform;
-  /* Le mouvement est confié à cette transition, donc au compositeur, et non au script. C'est
-     ce qui le rend fluide sur iOS, où le défilement est piloté hors du fil principal.
-     Rythme « Très douce » : la barre part et revient en 0,48 s, avec la courbe des fenêtres du
-     bas. Choisi par Sébastien sur vidéo le 21 novembre 2026, parmi « Aujourd'hui » (0,10 s /
-     0,25 s, « disparaît très vite, ça fait pas très beau »), « Fixe », « Douce » (0,32 / 0,38 s).
-     Ce réglage a déjà fait des allers-retours (suivi, 2 septembre 2026) : le relire avant d'y
-     toucher. */
-  /* En redescendant, elle ne réapparaît qu'une fois sortie de la zone de l'heure (voir plus bas). */
-  transition: transform var(--barre-mouvement) var(--feuille-courbe), background-color 0.25s ease-out,
-    opacity 0.2s ease-out 0.24s;
 }
 
-/* Sous iOS 27, ce qui dépasse en haut de la page s'affiche flouté sous l'heure : la barre qui
-   monte s'y voyait traverser la zone de l'heure, onglets compris (vidéo de Sébastien sur son
-   iPhone, 21 novembre 2026, 22 h 42 ; déjà vu une fois rangée sur le simulateur). Elle s'efface
-   donc en fondu dès le début de sa montée, avant d'atteindre la zone, et ne réapparaît en
-   redescendant qu'après l'avoir quittée. Transparente et non cachée : elle reste lisible par un
-   lecteur d'écran. */
-.barre--masquee {
-  transform: translate3d(0, -100%, 0);
-  opacity: 0;
-  transition: transform var(--barre-mouvement) var(--feuille-courbe), background-color 0.25s ease-out,
-    opacity 0.16s ease-out;
-}
-
-/* Dès que la lecture commence, la barre cesse d'être un bandeau opaque et se pose au-dessus
-   du texte : fond translucide et flou. Le flou vient en plus de l'opacité, jamais à sa place :
-   c'est l'opacité seule qui garantit le contraste, un navigateur qui ignore le flou reste bon. */
+/* La barre reste en place et entièrement opaque : on ne voit rien passer derrière (demande de
+   Sébastien, 21 novembre 2026 ; elle s'effaçait pendant la lecture et devenait translucide).
+   Dès qu'on défile, une ombre dit seule qu'elle passe au-dessus du texte. */
 .barre--flottante {
-  background: var(--barre-flottante);
-  -webkit-backdrop-filter: blur(18px) saturate(1.6);
-  backdrop-filter: blur(18px) saturate(1.6);
-  /* La profondeur vient de l'ombre, pas d'une transparence plus poussée : baisser l'opacité
-     mangerait le contraste du titre sans rien montrer de plus, le contenu qui passe dessous
-     étant lui-même clair. L'ombre ne coûte rien à la lisibilité. */
   border-bottom-color: transparent;
   box-shadow: 0 1px 3px rgba(43, 31, 46, 0.05), 0 6px 20px rgba(43, 31, 46, 0.09);
 }
@@ -296,8 +261,7 @@ button {
 
 /* L'en-tête de chaque écran est un bandeau en dégradé, du violet des lettres du logo au rose de
    sa croix (« Dégradé de la croix », choisi par Sébastien le 21 novembre 2026) ; logo, titre et
-   boutons y sont en blanc. Il reste opaque quand la page défile : seule la rangée des onglets,
-   dessous, devient translucide. Sur tous les écrans, pour que la couleur sous l'heure ne change
+   boutons y sont en blanc. Sur tous les écrans, pour que la couleur sous l'heure ne change
    jamais d'un écran à l'autre. Son sommet est du violet uni de la bande de l'heure (voir
    « body::before »), puis le dégradé prend le relais : aucune ligne à la jonction. Le contenu
    commence sous la bande (moins la marge intérieure de l'en-tête). */
