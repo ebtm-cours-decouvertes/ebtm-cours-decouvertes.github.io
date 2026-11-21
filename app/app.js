@@ -797,9 +797,7 @@
   // page descend, revient dès qu'elle remonte, proportionnellement au geste. Un seuil suivi
   // d'une animation, ce qu'on faisait avant, met un décalage entre le doigt et l'écran.
   //
-  // Durées et courbes reprises des jetons Material 3 : 100 ms pour ce qui sort, 250 ms pour ce
-  // qui entre, avec les courbes « emphasized ». Elles ne servent qu'à l'alignement final, une
-  // fois le défilement arrêté : pendant le geste, aucune transition.
+  // La durée et la courbe du mouvement sont dans style.css (« .barre », --barre-mouvement).
   const ALIGNEMENT_MS = 120; // au-delà, on considère que le doigt s'est arrêté
   const SEUIL_FLOTTANT = 4; // au premier pixel de lecture, la barre passe en translucide
 

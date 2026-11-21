@@ -27,6 +27,8 @@
   /* Arrivée d'un écran ouvert depuis une liste (même courbe que les fenêtres du bas). Rythme
      « Lent », choisi par Sébastien sur vidéo le 21 novembre 2026, parmi trois (0,36 / 0,48 / 0,60 s). */
   --ecran-entree: 600ms;
+  /* Barre du haut d'une leçon qui s'efface à la lecture et revient à la remontée (« .barre »). */
+  --barre-mouvement: 480ms;
   --ok: #2b7449;
   --ok-fond: #e6f4ec;
   --danger: #b3261e;
@@ -183,13 +185,16 @@ button {
   will-change: transform;
   /* Le mouvement est confié à cette transition, donc au compositeur, et non au script. C'est
      ce qui le rend fluide sur iOS, où le défilement est piloté hors du fil principal.
-     Durées et courbes des jetons Material 3 : ce qui sort part vite, ce qui entre se pose. */
-  transition: transform 250ms cubic-bezier(0.05, 0.7, 0.1, 1), background-color 0.25s ease-out;
+     Rythme « Très douce » : la barre part et revient en 0,48 s, avec la courbe des fenêtres du
+     bas. Choisi par Sébastien sur vidéo le 21 novembre 2026, parmi « Aujourd'hui » (0,10 s /
+     0,25 s, « disparaît très vite, ça fait pas très beau »), « Fixe », « Douce » (0,32 / 0,38 s).
+     Ce réglage a déjà fait des allers-retours (suivi, 2 septembre 2026) : le relire avant d'y
+     toucher. */
+  transition: transform var(--barre-mouvement) var(--feuille-courbe), background-color 0.25s ease-out;
 }
 
 .barre--masquee {
   transform: translate3d(0, -100%, 0);
-  transition: transform 100ms cubic-bezier(0.3, 0, 0.8, 0.15), background-color 0.25s ease-out;
 }
 
 /* Dès que la lecture commence, la barre cesse d'être un bandeau opaque et se pose au-dessus
