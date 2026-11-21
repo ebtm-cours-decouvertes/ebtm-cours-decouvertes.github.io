@@ -2119,9 +2119,13 @@
     }
   }
 
-  // L'application replace elle-même la lecture en haut de page à chaque écran :
-  // laisser le navigateur restaurer une ancienne position donnerait un départ au milieu du texte.
-  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+  // Le défilement reste confié au navigateur (« auto », la valeur par défaut). L'application
+  // replace elle-même chaque écran (haut de page, liste à sa place, reprise de la lecture),
+  // mais ne passe plus le réglage en « manual » : avec « manual », Safari d'iPhone n'a plus
+  // d'image de la page précédente à montrer pendant le geste de retour et montre une page
+  // blanche (relevé par Sébastien le 21 novembre 2026 sur certaines leçons ; même cause
+  // rapportée chez Gatsby, vue-router et Next.js, où retirer « manual » a supprimé le blanc).
+  if ("scrollRestoration" in history) history.scrollRestoration = "auto";
 
   // Le choix d'un onglet est noté dès le toucher : la bulle part tout de suite, sans attendre
   // que la page soit reconstruite.
