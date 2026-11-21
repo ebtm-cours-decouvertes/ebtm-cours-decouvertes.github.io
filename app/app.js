@@ -756,17 +756,51 @@
 
   // « garderOnglets » laisse la barre d'onglets en place : d'un onglet à l'autre de la même
   // leçon, c'est la même rangée, et sa pastille peut donc glisser sans interruption.
+  // Au geste de retour, l'iPhone montre une photo de l'écran précédent puis la retire dès que la
+  // page a redessiné : un écran reconstruit de zéro à cet instant apparaissait blanc une ou deux
+  // images, logo absent (vidéo de Sébastien sur son iPhone, 21 novembre 2026, 23 h 17 ; même
+  // cause décrite chez Next.js : nielsreijnders.nl/blog/ios-back-swipe-image-flicker). Le logo
+  // est donc créé une seule fois, et un écran de liste quitté est gardé tel quel : au retour,
+  // si son contenu n'a pas changé, ce sont les mêmes éléments qui reviennent.
+  let retourVersListe = false; // posé par le routeur : voir « Retour vers une liste »
+  let logo = null;
+  function elementLogo() {
+    if (!logo) {
+      const modele = document.createElement("template");
+      modele.innerHTML = LOGO.replace("__SRC__", sourceLogo()).replace("__SRC_SOMBRE__", sourceLogoSombre());
+      logo = modele.content.firstElementChild;
+    }
+    return logo;
+  }
+  const ecransGardes = new Map(); // clé d'écran → { html, noeuds }
+  let ecranAffiche = null; // { cle, html } de l'écran présent dans « principal »
+  function garderEcranQuitte() {
+    if (!ecranAffiche || !LISTES.has(ecranAffiche.cle)) return;
+    const noeuds = document.createDocumentFragment();
+    noeuds.append(...principal.childNodes);
+    noeuds.querySelectorAll(".ligne--touchee, .ligne--revient").forEach((ligne) => {
+      ligne.classList.remove("ligne--touchee", "ligne--revient");
+    });
+    ecransGardes.set(ecranAffiche.cle, { html: ecranAffiche.html, noeuds });
+  }
+
   function afficherDans(contenuHtml, titreDocument, { garderOnglets = false } = {}) {
     if (!garderOnglets) zoneOnglets.innerHTML = "";
-    zoneNavigation.innerHTML = LOGO.replace("__SRC__", sourceLogo()).replace("__SRC_SOMBRE__", sourceLogoSombre());
+    zoneNavigation.replaceChildren(elementLogo());
     titreBarre.textContent = NOM_APPLICATION;
     // Le partage n'appartient qu'à la liste des leçons : chaque écran l'éteint, elle le rallume.
     boutonPartage.hidden = true;
     barre.classList.remove("barre--accueil");
     reposerBarre();
-    principal.innerHTML = contenuHtml;
+    const cle = ecranCourant ? ecranCourant.cle : null;
+    garderEcranQuitte();
+    const garde = ecransGardes.get(cle);
+    ecransGardes.delete(cle);
+    if (garde && garde.html === contenuHtml) principal.replaceChildren(garde.noeuds);
+    else principal.innerHTML = contenuHtml;
+    ecranAffiche = { cle, html: contenuHtml };
     document.title = titreDocument ? `${titreDocument} — Cours découvertes` : "Cours découvertes";
-    window.scrollTo(0, 0);
+    if (!retourVersListe) window.scrollTo(0, 0);
     const titre = principal.querySelector("h1");
     if (titre) {
       titre.setAttribute("tabindex", "-1");
@@ -2106,10 +2140,14 @@
     }
   }
 
-  async function router() {
+  let cheminRoute = null;
+  async function router(evenement) {
+    const chemin = location.hash.replace(/^#/, "") || "/";
+    // « popstate » et « hashchange » annoncent le même changement : le premier arrivé le traite.
+    if (evenement && chemin === cheminRoute) return;
+    cheminRoute = chemin;
     // Avant de reconstruire l'écran, dont les champs seront remplis depuis l'enregistrement.
     enregistrerReponseEnAttente();
-    const chemin = location.hash.replace(/^#/, "") || "/";
     const jeton = ++navigation;
     const { ecran, sens, retour } = changementDEcran(chemin);
     const anime = sens === "avant" && !mouvementReduit.matches;
@@ -2134,13 +2172,21 @@
       poserCalque();
       principal.classList.add("ecran--attente");
     }
+    // Retour vers une liste : l'iPhone remet lui-même la page à sa place. La faire défiler en
+    // plus (en haut, puis à sa place) faisait voir, après le geste de retour, une image blanche
+    // ou une liste à moitié dessinée (vidéo de Sébastien, 21 novembre 2026, 23 h 17). WebKit
+    // attend que la position soit rétablie pour retirer sa photo de l'écran précédent
+    // (ViewGestureController, « ScrollPositionRestoration ») : un défilement de plus arrive
+    // après. On ne replace donc la page que si elle n'est pas à sa place.
+    retourVersListe = retour && LISTES.has(ecran.cle) && positionsQuittees.has(ecran.cle);
     await afficherChemin(chemin);
+    retourVersListe = false;
     if (jeton !== navigation) return;
 
     principal.classList.remove(...CLASSES_ECRAN);
     if (retour && LISTES.has(ecran.cle) && positionsQuittees.has(ecran.cle)) {
       const y = positionsQuittees.get(ecran.cle);
-      window.scrollTo(0, y);
+      if (Math.abs(window.scrollY - y) > 2) window.scrollTo(0, y);
       // Une seconde fois à l'image suivante, au cas où le navigateur replacerait la page
       // après nous ; sans effet si elle est déjà à sa place.
       requestAnimationFrame(() => {
@@ -2230,6 +2276,10 @@
     cible.click();
   });
 
+  // Au retour en arrière, « popstate » arrive avant « hashchange » : l'écran est reconstruit au
+  // plus tôt. Vérifié avec le logo unique, les listes gardées et le défilement laissé à l'iPhone
+  // (« Retour vers une liste ») : ensemble, plus d'image blanche après le geste de retour.
+  window.addEventListener("popstate", router);
   window.addEventListener("hashchange", router);
   router();
 
