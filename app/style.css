@@ -256,19 +256,22 @@ button {
      0,25 s, « disparaît très vite, ça fait pas très beau »), « Fixe », « Douce » (0,32 / 0,38 s).
      Ce réglage a déjà fait des allers-retours (suivi, 2 septembre 2026) : le relire avant d'y
      toucher. */
+  /* En redescendant, elle ne réapparaît qu'une fois sortie de la zone de l'heure (voir plus bas). */
   transition: transform var(--barre-mouvement) var(--feuille-courbe), background-color 0.25s ease-out,
-    opacity 0s linear 0s;
+    opacity 0.2s ease-out 0.24s;
 }
 
-/* Rangée au-dessus de la page, la barre devient transparente une fois arrivée : sous iOS 27, ce
-   qui dépasse en haut de la page s'affiche flouté sous l'heure (onglets vus derrière l'heure sur
-   le simulateur, le 21 novembre 2026). Transparente et non cachée : elle reste lisible par un
-   lecteur d'écran. Elle redevient visible dès qu'elle repart. */
+/* Sous iOS 27, ce qui dépasse en haut de la page s'affiche flouté sous l'heure : la barre qui
+   monte s'y voyait traverser la zone de l'heure, onglets compris (vidéo de Sébastien sur son
+   iPhone, 21 novembre 2026, 22 h 42 ; déjà vu une fois rangée sur le simulateur). Elle s'efface
+   donc en fondu dès le début de sa montée, avant d'atteindre la zone, et ne réapparaît en
+   redescendant qu'après l'avoir quittée. Transparente et non cachée : elle reste lisible par un
+   lecteur d'écran. */
 .barre--masquee {
   transform: translate3d(0, -100%, 0);
   opacity: 0;
   transition: transform var(--barre-mouvement) var(--feuille-courbe), background-color 0.25s ease-out,
-    opacity 0s linear var(--barre-mouvement);
+    opacity 0.16s ease-out;
 }
 
 /* Dès que la lecture commence, la barre cesse d'être un bandeau opaque et se pose au-dessus
@@ -460,10 +463,11 @@ button {
   font-size: 1.05rem;
 }
 
-/* Sur l'accueil, rien sous le bandeau : pas de filet. */
+/* Sur l'accueil, rien sous le bandeau : ni filet, ni la bande translucide d'un pixel qu'il
+   laissait, à travers laquelle on voyait passer le texte (vidéo de Sébastien, 22 h 45). */
 .barre--accueil,
 .barre--accueil.barre--flottante {
-  border-bottom-color: transparent;
+  border-bottom: 0;
 }
 
 /* Le partage est collé à la roue : l'écart entre les éléments de la barre est annulé. */

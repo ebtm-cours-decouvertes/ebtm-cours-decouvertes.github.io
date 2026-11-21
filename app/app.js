@@ -2172,6 +2172,7 @@
     const anime = sens === "avant" && !mouvementReduit.matches;
 
     principal.classList.remove(...CLASSES_ECRAN);
+    principal.style.clipPath = "";
     retirerCalque();
     const ligne = ligneDepart;
     ligneDepart = null;
@@ -2219,11 +2220,18 @@
       }
     }
     if (anime) {
+      // Une leçon rouverte là où on s'était arrêté de lire a déjà du texte au-dessus de l'écran.
+      // Pendant la glissade, l'écran forme un bloc à part, et iOS 27 en affichait cette partie
+      // floutée sous l'heure (vidéo de Sébastien sur son iPhone, 21 novembre 2026, 22 h 44 ;
+      // reproduit sur le simulateur). On la coupe le temps de la glissade.
+      const depasse = -principal.getBoundingClientRect().top;
+      principal.style.clipPath = depasse > 0 ? `inset(${Math.ceil(depasse)}px 0 0 0)` : "";
       principal.classList.add("ecran--entre");
       if (calque) calque.classList.add("calque-quitte--part");
       await attendre(dureeEntree() + 40);
       if (jeton === navigation) {
         principal.classList.remove(...CLASSES_ECRAN);
+        principal.style.clipPath = "";
         retirerCalque();
       }
     }
