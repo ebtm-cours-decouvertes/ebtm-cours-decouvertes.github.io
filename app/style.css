@@ -29,6 +29,14 @@
   --ecran-entree: 600ms;
   /* Barre du haut d'une leçon qui s'efface à la lecture et revient à la remontée (« .barre »). */
   --barre-mouvement: 480ms;
+  /* Bandeau de l'accueil, « Dégradé de la croix » : du violet des lettres du logo au rose de sa
+     croix (relevés sur le logo : #862292, #ee206c), assombris pour porter du blanc. Choisi par
+     Sébastien sur captures le 21 novembre 2026, parmi quatre bandeaux. */
+  --bandeau-debut: #6e1c70;
+  --bandeau-milieu: #8a1a6e;
+  --bandeau-fin: #b0185f;
+  --bandeau: linear-gradient(90deg, var(--bandeau-debut) 0%, var(--bandeau-milieu) 55%, var(--bandeau-fin) 100%);
+  --sur-bandeau: #ffffff;
   --ok: #2b7449;
   --ok-fond: #e6f4ec;
   --danger: #b3261e;
@@ -68,6 +76,9 @@
      presque opaque, et c'est le flou seul qui donne la profondeur. Mesuré, pas supposé. */
   --barre-flottante: rgba(34, 26, 37, 0.96);
   --ombre: none;
+  --bandeau-debut: #3a1a3d;
+  --bandeau-milieu: #4a173f;
+  --bandeau-fin: #5e1443;
 }
 
 /* Les figures du livret, elles, sont imprimées sur blanc : on leur laisse leur papier plutôt
@@ -112,14 +123,79 @@ html {
   -webkit-tap-highlight-color: var(--toucher);
 }
 
+/* Le haut de l'écran. Dans l'application installée sur iPhone, la page passe sous l'heure
+   (« black-translucent », index.html) : le bandeau de la barre y monte. C'est le fond de la
+   page qu'iOS regarde pour écrire l'heure : sur fond violet, il l'écrit en blanc, sans voile ;
+   sur fond blanc, il posait un voile pâle et l'écrivait en noir. Le fond de la page (html) est
+   donc le violet du début du bandeau, et le contenu est posé sur une nappe blanche fixée
+   derrière lui (« body::after »), qui couvre aussi ce qu'on aperçoit en tirant la page au-delà
+   de ses bords. Méthode éprouvée sur l'application du groupe de jeunes (GDJ-EBTM, suivi du
+   12 novembre 2026), demandée ici par Sébastien le 21 novembre 2026. Body reste sans fond : le
+   sien se peindrait par-dessus la nappe (ordre de peinture CSS), le texte serait sur violet. */
+html {
+  background: var(--fond);
+}
+
+/* Le violet seulement dans l'application installée, la seule où la page passe sous l'heure.
+   Dans Safari, iOS 26 teinte aussi le bas de l'écran, derrière la barre d'adresse, avec le
+   fond de la page : en violet, une bande violette y apparaissait (vu sur le simulateur, le
+   21 novembre 2026 ; un filet blanc fixé contre le bord n'y changeait rien). */
+@media (display-mode: standalone) {
+  html {
+    background: var(--bandeau-debut);
+  }
+}
+
 body {
   margin: 0;
   min-height: 100vh;
-  background: var(--fond);
   color: var(--encre);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: var(--fond);
+  pointer-events: none;
+}
+
+/* Depuis iOS 26, le système fond et floute ce qui passe sous l'heure, et ce fondu déborde de
+   la zone de l'heure : mesuré sur GDJ-EBTM (simulateur, iOS 27), environ 1,6 fois sa hauteur.
+   Le logo et le titre de la barre commencent sous cette ligne, sinon ils sont floutés.
+   « animation-timeline » sert de repère : Safari le connaît depuis iOS 26 (et Chrome, où la
+   zone de l'heure vaut zéro). */
+:root {
+  --sous-heure: env(safe-area-inset-top);
+}
+
+@supports (animation-timeline: scroll()) {
+  :root {
+    --sous-heure: calc(env(safe-area-inset-top) * 1.6);
+  }
+}
+
+/* Sous l'heure, une bande au dégradé du bandeau, toujours là. Quand la barre s'efface dans une
+   leçon, elle se range dessous, et le texte défile sous une bande violette au lieu de passer
+   sous l'heure. Vu sur le simulateur (iPhone 17 Pro, iOS 26.5, application installée, le
+   21 novembre 2026) : sans elle, le texte passait sous l'heure, écrite en noir par-dessus, sans
+   le fondu violet qu'iOS 27 pose sur GDJ-EBTM. Même dégradé que l'en-tête : quand la barre est
+   là, rien ne se voit de la jonction. Elle ne mesure rien hors de l'application installée
+   (Safari, Chrome, Android : zone de l'heure nulle). */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 25;
+  height: env(safe-area-inset-top);
+  background: var(--bandeau);
+  pointer-events: none;
 }
 
 a {
@@ -178,7 +254,6 @@ button {
   z-index: 20;
   background: var(--carte);
   border-bottom: 1px solid var(--bord);
-  padding-top: env(safe-area-inset-top);
   /* translate3d, même à zéro, place la barre sur sa propre couche graphique : sans cela,
      WebKit la redessine à chaque image et elle scintille. */
   transform: translate3d(0, 0, 0);
@@ -217,12 +292,44 @@ button {
   box-shadow: none;
 }
 
-.barre--flottante .entete {
-  background: transparent;
+/* L'en-tête de chaque écran est un bandeau en dégradé, du violet des lettres du logo au rose de
+   sa croix (« Dégradé de la croix », choisi par Sébastien le 21 novembre 2026), qui monte sous
+   l'heure de l'iPhone ; logo, titre et boutons y sont en blanc. Il reste opaque quand la page
+   défile : seule la rangée des onglets, dessous, devient translucide. Sur tous les écrans, pour
+   que la couleur sous l'heure ne change jamais d'un écran à l'autre. */
+.entete {
+  background: var(--bandeau);
+  /* Le contenu commence sous le fondu du système (moins la marge intérieure de l'en-tête). */
+  padding-top: max(env(safe-area-inset-top), calc(var(--sous-heure) - 0.6rem));
 }
 
-.entete {
-  background: var(--carte);
+.entete .marque__titre,
+.entete .bouton-barre,
+.entete .bouton-retour {
+  color: var(--sur-bandeau);
+}
+
+/* Le logo en blanc : on part de la version détourée (celle du livret a un fond blanc). */
+.entete .marque__logo--clair {
+  display: none;
+}
+
+.entete .marque__logo--sombre {
+  display: block;
+  filter: brightness(0) invert(1);
+}
+
+/* Le cadre de focus magenta se perdrait dans le dégradé : il passe en blanc sur le bandeau. */
+.entete :focus-visible {
+  outline-color: var(--sur-bandeau);
+}
+
+@media (hover: hover) {
+  .entete .bouton-barre:hover,
+  .entete .bouton-retour:hover {
+    background: rgba(255, 255, 255, 0.16);
+    color: var(--sur-bandeau);
+  }
 }
 
 .entete__contenu {
@@ -286,10 +393,10 @@ button {
   flex: 1;
   min-width: 0;
   margin: 0;
-  color: var(--violet);
-  font-weight: 700;
+  color: var(--sur-bandeau);
+  font-weight: 600;
   font-size: 1.2rem;
-  letter-spacing: 0.01em;
+  letter-spacing: -0.005em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -351,9 +458,9 @@ button {
   font-size: 1.05rem;
 }
 
-/* Sur l'accueil, la page est du même blanc que la barre : pas de filet entre les deux. En
-   sombre la barre et la page n'ont pas la même teinte, la limite se voit sans filet. */
-.barre--accueil {
+/* Sur l'accueil, rien sous le bandeau : pas de filet. */
+.barre--accueil,
+.barre--accueil.barre--flottante {
   border-bottom-color: transparent;
 }
 

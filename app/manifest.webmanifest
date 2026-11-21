@@ -9,7 +9,7 @@
   "scope": "./",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#982898",
+  "theme_color": "#6e1c70",
   "prefer_related_applications": false,
   "icons": [
     {

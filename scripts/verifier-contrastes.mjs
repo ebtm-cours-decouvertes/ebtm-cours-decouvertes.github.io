@@ -54,6 +54,10 @@ const PAIRES = [
   ["avertissement sur fond", "danger", "fond", 4.5],
   ["bordure d’un champ", "bord-actif", "carte", 3],
   ["bordure d’un champ sur fond", "bord-actif", "fond", 3],
+  // Bandeau de l'accueil : le nom et les icônes en blanc, mesurés aux trois points du dégradé.
+  ["nom sur bandeau, à gauche", "sur-bandeau", "bandeau-debut", 4.5],
+  ["nom sur bandeau, au milieu", "sur-bandeau", "bandeau-milieu", 4.5],
+  ["icônes sur bandeau, à droite", "sur-bandeau", "bandeau-fin", 4.5],
 ];
 
 let echecs = 0;
@@ -81,7 +85,7 @@ function melange(hexAvant, hexArriere, alpha) {
 }
 
 const TEXTES_BARRE = [
-  ["titre de la barre", "violet"],
+  ["texte violet de la rangée d’onglets", "violet"],
   ["texte adouci de la barre", "texte-doux"],
   ["texte courant de la barre", "encre"],
 ];
