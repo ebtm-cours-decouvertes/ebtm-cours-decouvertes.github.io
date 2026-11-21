@@ -1958,7 +1958,10 @@
   //     retour ramène à la liste, depuis n'importe quel onglet.
   // L'application tient la liste des écrans de l'historique (`pile`, indexée par le rang que
   // chaque entrée porte), gardée pour la séance dans sessionStorage.
-  const DUREE_ENTREE = 240; // ms, à garder égale à celle de la feuille de style
+  // Durée de l'arrivée d'un écran : lue dans la feuille de style (--ecran-entree).
+  function dureeEntree() {
+    return parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--ecran-entree")) || 0;
+  }
   // Au toucher d'une ligne, dans cet ordre :
   //   1. l'adresse change tout de suite (le lien suit son cours normal) ; Safari photographie
   //      la liste à cet instant, avant tout allumage (WebKit prend sa photo « juste avant que
@@ -1979,7 +1982,7 @@
       setTimeout(suite, 50);
     });
   const mouvementReduit = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const CLASSES_ECRAN = ["ecran--entre"];
+  const CLASSES_ECRAN = ["ecran--attente", "ecran--entre"];
   const CLE_PILE = "cours-decouvertes-pile";
   let pile = [];
   try {
@@ -2052,9 +2055,13 @@
       evenement.preventDefault();
       return;
     }
-    // Avancer : le lien suit son cours. La ligne touchée est notée, le routeur l'allumera
-    // une fois l'adresse changée.
+    // Avancer : le lien suit son cours. La ligne touchée est notée ; allumée sous le doigt,
+    // elle le reste jusqu'à l'arrivée du nouvel écran (le routeur la reprend en main).
     ligneDepart = lien.closest("a.carte-lecon, a.annexe");
+    if (ligneDepart && ligneDepart === ligneAppuyee) {
+      clearTimeout(extinctionAppui);
+      ligneAppuyee = null;
+    }
   });
 
   function changementDEcran(chemin) {
@@ -2090,10 +2097,60 @@
     lignesQuittees.set(ecranCourant.cle, ligne.getAttribute("href"));
   });
 
-  // Un seul allumage, au clic (voir DUREE_ALLUMAGE). Il y en avait un second pendant l'appui,
-  // qui s'éteignait au lever du doigt juste avant que le clic rallume la ligne : la ligne
-  // clignotait deux fois (filmé par Sébastien sur son iPhone, 21 novembre 2026). Rien ne
-  // s'allume donc pendant un défilement, ni pendant un appui : seulement quand on a touché.
+  // Sous le doigt, la ligne s'allume (teinte, et elle s'enfonce à peine) et reste allumée
+  // jusqu'à l'arrivée de l'écran ouvert : jamais éteinte puis rallumée entre les deux, ce qui
+  // donnait le double clignotement filmé par Sébastien (21 novembre 2026). Elle attend 70 ms,
+  // le temps de savoir si le doigt glisse, et s'éteint dès que le navigateur fait défiler
+  // (pointercancel, scroll) : rien ne reste allumé pendant un défilement. Un toucher plus bref
+  // est allumé par le routeur. Doigt levé sans ouvrir de lien : elle s'éteint.
+  const DELAI_APPUI = 70;
+  let attenteAppui = null;
+  let extinctionAppui = null;
+  let ligneAppuyee = null;
+  function eteindreAppui() {
+    clearTimeout(attenteAppui);
+    clearTimeout(extinctionAppui);
+    if (ligneAppuyee) ligneAppuyee.classList.remove("ligne--touchee");
+    ligneAppuyee = null;
+  }
+  principal.addEventListener("pointerdown", (evenement) => {
+    eteindreAppui();
+    const ligne = evenement.target.closest("a.carte-lecon, a.annexe");
+    if (!ligne || evenement.button) return;
+    attenteAppui = setTimeout(() => {
+      ligneAppuyee = ligne;
+      ligne.classList.add("ligne--touchee");
+    }, DELAI_APPUI);
+  });
+  window.addEventListener("pointerup", () => {
+    clearTimeout(attenteAppui);
+    // Le clic suit le lever du doigt de quelques millisecondes et garde la ligne allumée.
+    clearTimeout(extinctionAppui);
+    extinctionAppui = setTimeout(eteindreAppui, 300);
+  });
+  window.addEventListener("pointercancel", eteindreAppui);
+  window.addEventListener("scroll", eteindreAppui, { passive: true });
+
+  // Pendant l'arrivée d'un écran, une copie de l'écran quitté reste dessous, immobile, et
+  // s'efface pendant que le nouveau se pose par-dessus : un fondu de l'un à l'autre, sans
+  // jamais passer par une page blanche (relevé par Sébastien le 21 novembre 2026). La copie est
+  // décorative : cachée aux lecteurs d'écran, inerte, sans identifiants.
+  let calque = null;
+  function retirerCalque() {
+    if (calque) calque.remove();
+    calque = null;
+  }
+  function poserCalque() {
+    retirerCalque();
+    calque = document.createElement("div");
+    calque.className = "calque-quitte";
+    calque.setAttribute("aria-hidden", "true");
+    calque.inert = true;
+    calque.style.top = `${principal.getBoundingClientRect().top}px`;
+    for (const enfant of principal.children) calque.append(enfant.cloneNode(true));
+    calque.querySelectorAll("[id]").forEach((noeud) => noeud.removeAttribute("id"));
+    principal.before(calque);
+  }
 
   async function afficherChemin(chemin) {
     try {
@@ -2120,15 +2177,23 @@
     const anime = sens === "avant" && !mouvementReduit.matches;
 
     principal.classList.remove(...CLASSES_ECRAN);
+    retirerCalque();
     const ligne = ligneDepart;
     ligneDepart = null;
     if (sens === "avant" && ligne && principal.contains(ligne)) {
-      // Une image d'attente : la photo de Safari est prise avant que la ligne s'allume.
-      await prochaineImage();
-      if (jeton !== navigation) return;
-      ligne.classList.add("ligne--touchee");
+      if (!ligne.classList.contains("ligne--touchee")) {
+        // Toucher trop bref pour avoir allumé la ligne sous le doigt : on l'allume ici.
+        await prochaineImage();
+        if (jeton !== navigation) return;
+        ligne.classList.add("ligne--touchee");
+      }
       await attendre(DUREE_ALLUMAGE);
       if (jeton !== navigation) return;
+    }
+    if (anime) {
+      // L'écran quitté, copié dessous ; le vrai reste invisible le temps d'être reconstruit.
+      poserCalque();
+      principal.classList.add("ecran--attente");
     }
     await afficherChemin(chemin);
     if (jeton !== navigation) return;
@@ -2160,8 +2225,12 @@
     }
     if (anime) {
       principal.classList.add("ecran--entre");
-      await attendre(DUREE_ENTREE + 40);
-      if (jeton === navigation) principal.classList.remove(...CLASSES_ECRAN);
+      if (calque) calque.classList.add("calque-quitte--part");
+      await attendre(dureeEntree() + 40);
+      if (jeton === navigation) {
+        principal.classList.remove(...CLASSES_ECRAN);
+        retirerCalque();
+      }
     }
   }
 

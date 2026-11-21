@@ -24,6 +24,9 @@
   --feuille-ouverture: 720ms;
   --feuille-fermeture: 480ms;
   --feuille-courbe: cubic-bezier(0.32, 0.72, 0, 1);
+  /* Arrivée d'un écran ouvert depuis une liste (même courbe que les fenêtres du bas). Rythme
+     « Lent », choisi par Sébastien sur vidéo le 21 novembre 2026, parmi trois (0,36 / 0,48 / 0,60 s). */
+  --ecran-entree: 600ms;
   --ok: #2b7449;
   --ok-fond: #e6f4ec;
   --danger: #b3261e;
@@ -485,10 +488,19 @@ a[href^="#/"] {
   }
 }
 
-/* Au toucher, la ligne s'allume un instant (« ligne--touchee », posé par app.js juste après
-   le changement d'adresse), puis le nouvel écran la remplace. La teinte déborde un peu des deux
-   côtés, coins arrondis, et recouvre les deux filets qui l'encadrent. Pas de « :active » :
-   il restait allumé pendant un défilement commencé sur la ligne. */
+/* Sous le doigt, la ligne se teinte et s'enfonce à peine (« ligne--touchee », posé par app.js),
+   et reste ainsi jusqu'à l'arrivée de l'écran ouvert. La teinte déborde un peu des deux côtés,
+   coins arrondis, et recouvre les deux filets qui l'encadrent. Pas de « :active » : il restait
+   allumé pendant un défilement commencé sur la ligne. */
+.carte-lecon {
+  transition: transform 220ms ease-out;
+}
+
+.carte-lecon.ligne--touchee {
+  transform: scale(0.985);
+  transition-duration: 80ms;
+}
+
 .carte-lecon::before {
   content: "";
   position: absolute;
@@ -1730,14 +1742,45 @@ a[href^="#/"] {
 
 /* ---------- Changement d'écran ---------- */
 
-/* En avançant, le nouvel écran remplace aussitôt l'ancien et se pose en glissant de quelques
-   pixels depuis la droite (240 ms). Il part d'une opacité de 0,4, pas de zéro : aucun instant
-   blanc entre deux écrans (relevé par Sébastien le 21 novembre 2026). En revenant, rien ne
-   bouge : l'écran précédent réapparaît tel qu'on l'a laissé. app.js pose la classe et la
-   retire ; la durée y est répétée. Rien ne joue quand le lecteur a demandé moins de mouvement. */
+/* En avançant, le nouvel écran se pose en fondu par-dessus une copie immobile de l'écran
+   quitté (« calque-quitte », posé par app.js), qui s'efface dessous : jamais de page blanche
+   (relevé par Sébastien le 21 novembre 2026). Il glisse aussi de quelques pixels depuis la
+   droite. En revenant, rien ne bouge : l'écran précédent réapparaît tel qu'on l'a laissé.
+   Rien ne joue quand le lecteur a demandé moins de mouvement. */
+.calque-quitte {
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 0;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 1rem 1rem 0;
+  pointer-events: none;
+}
+
+main.ecran--attente,
+main.ecran--entre {
+  position: relative;
+  z-index: 1;
+}
+
+main.ecran--attente {
+  opacity: 0;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .ecran--entre {
-    animation: ecran-entre 240ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    animation: ecran-entre var(--ecran-entree) var(--feuille-courbe) both;
+  }
+
+  .calque-quitte--part {
+    animation: calque-quitte calc(var(--ecran-entree) * 0.6) ease-out both;
+  }
+
+  /* La ligne quittée revient de son état « enfoncé », celui de la photo que l'iPhone montre
+     pendant le geste de retour. */
+  .carte-lecon.ligne--revient {
+    animation: ligne-revient-forme 600ms 150ms ease-out both;
   }
 
   /* Au retour, la ligne d'où l'on venait s'allume puis s'éteint doucement (app.js, lignesQuittees). */
@@ -1770,8 +1813,20 @@ a[href^="#/"] {
 
 @keyframes ecran-entre {
   from {
-    opacity: 0.4;
-    transform: translate3d(18px, 0, 0);
+    opacity: 0;
+    transform: translate3d(24px, 0, 0);
+  }
+}
+
+@keyframes calque-quitte {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes ligne-revient-forme {
+  from {
+    transform: scale(0.985);
   }
 }
 
