@@ -27,6 +27,10 @@
   /* Arrivée d'un écran ouvert depuis une liste (même courbe que les fenêtres du bas). Rythme
      « Lent », choisi par Sébastien sur vidéo le 21 novembre 2026, parmi trois (0,36 / 0,48 / 0,60 s). */
   --ecran-entree: 600ms;
+  /* Rangée d'onglets d'une leçon qui se range sous le bandeau à la lecture et revient à la
+     remontée. Rythme « Très douce », choisi par Sébastien sur vidéo le 21 novembre 2026, parmi
+     « Aujourd'hui » (0,10 / 0,25 s), « Douce » (0,32 / 0,38 s) et « Fixe ». */
+  --barre-mouvement: 480ms;
   /* Bandeau de l'accueil, « Dégradé de la croix » : du violet des lettres du logo au rose de sa
      croix (relevés sur le logo : #862292, #ee206c), assombris pour porter du blanc. Choisi par
      Sébastien sur captures le 21 novembre 2026, parmi quatre bandeaux. */
@@ -257,6 +261,67 @@ button {
 :root[data-apparence="sombre"] .barre--flottante {
   border-bottom-color: var(--bord);
   box-shadow: none;
+}
+
+/* Dans une leçon, la rangée des onglets se range sous le bandeau violet quand on descend dans
+   le texte, et revient dès qu'on remonte (remise à la demande de Sébastien, 21 novembre 2026).
+   Seule la rangée bouge : le bandeau reste en place et opaque, et rien ne passe dans la zone de
+   l'heure. C'est la barre entière qui partait avant, et iOS 27 la montrait alors floutée sous
+   l'heure ; une rangée qui reste sous le bandeau ne peut pas y arriver.
+   La barre elle-même devient transparente : chaque partie porte son fond, et l'endroit libéré
+   par la rangée laisse voir le texte et le laisse toucher. Le filet et l'ombre passent sous la
+   rangée, pour la suivre. */
+.barre--onglets,
+.barre--onglets.barre--flottante {
+  background: transparent;
+  border-bottom-color: transparent;
+  box-shadow: none;
+  pointer-events: none;
+}
+
+/* Rien ne dépasse au-dessus de la barre, même quand le bandeau est moins haut que la rangée
+   (hors application installée) ; l'ombre, en dessous, reste visible. */
+.barre--onglets {
+  clip-path: inset(0 0 -40px 0);
+}
+
+.barre--onglets > * {
+  pointer-events: auto;
+}
+
+.barre--onglets .entete {
+  position: relative;
+  z-index: 1;
+}
+
+.barre--onglets #zone-onglets {
+  position: relative;
+  background: var(--carte);
+  border-bottom: 1px solid var(--bord);
+  /* Le mouvement est confié au compositeur (transition sur transform), pas au script : sur
+     iOS le défilement tourne hors du fil principal, et un déplacement image par image depuis
+     le script restait en retard d'une image. */
+  transition: transform var(--barre-mouvement) var(--feuille-courbe);
+}
+
+.barre--onglets.barre--flottante #zone-onglets {
+  border-bottom-color: transparent;
+  box-shadow: 0 1px 3px rgba(43, 31, 46, 0.05), 0 6px 20px rgba(43, 31, 46, 0.09);
+}
+
+:root[data-apparence="sombre"] .barre--onglets.barre--flottante #zone-onglets {
+  border-bottom-color: var(--bord);
+  box-shadow: none;
+}
+
+.barre--onglets-rangees #zone-onglets {
+  transform: translate3d(0, -100%, 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .barre--onglets #zone-onglets {
+    transition: none;
+  }
 }
 
 /* L'en-tête de chaque écran est un bandeau en dégradé, du violet des lettres du logo au rose de

@@ -835,8 +835,36 @@
 
   let minuterieAlignement = null;
 
+  // Dans une leçon, seule la rangée des onglets se range sous le bandeau quand on descend, et
+  // revient quand on remonte (style.css, « .barre--onglets »). On bascule entre deux états et
+  // c'est une transition CSS qui fait le mouvement : sur iOS, suivre le doigt depuis le script
+  // laissait la rangée en retard d'une image sur le texte.
+  const COURSE_RANGER = 16; // descente franche avant de ranger la rangée
+  const COURSE_MONTRER = 10; // il en faut moins pour la rappeler
+  let ongletsRangeables = false;
+  let derniereY = 0;
+  let course = 0; // distance parcourue depuis le dernier changement de sens
+
+  function montrerOnglets() {
+    barre.classList.remove("barre--onglets-rangees");
+  }
+
+  // Appelé par l'écran d'une leçon, une fois sa rangée d'onglets en place.
+  function rendreOngletsRangeables() {
+    ongletsRangeables = Boolean(zoneOnglets.querySelector(".onglets"));
+    barre.classList.toggle("barre--onglets", ongletsRangeables);
+    derniereY = Math.max(0, window.scrollY);
+    course = 0;
+  }
+
+  // Le clavier ou un lecteur d'écran qui arrive sur un onglet le trouve toujours visible.
+  zoneOnglets.addEventListener("focusin", montrerOnglets);
+
   function reposerBarre() {
-    barre.classList.remove("barre--flottante");
+    barre.classList.remove("barre--flottante", "barre--onglets", "barre--onglets-rangees");
+    ongletsRangeables = false;
+    derniereY = 0;
+    course = 0;
     lectureEnCours = null;
   }
 
@@ -905,10 +933,31 @@
   }
 
   function surDefilement() {
-    barre.classList.toggle("barre--flottante", window.scrollY > SEUIL_OMBRE);
+    const y = Math.max(0, window.scrollY);
+    barre.classList.toggle("barre--flottante", y > SEUIL_OMBRE);
     // La lecture avance : on retient où l'on en est une fois le doigt arrêté.
     clearTimeout(minuterieAlignement);
     minuterieAlignement = setTimeout(auRepos, ALIGNEMENT_MS);
+
+    if (!ongletsRangeables) return;
+    const delta = y - derniereY;
+    derniereY = y;
+    if (delta === 0) return;
+    if (y <= 0) {
+      course = 0;
+      montrerOnglets();
+      return;
+    }
+    // Changer de sens remet le compteur à zéro : la rangée répond aussitôt au geste inverse.
+    if (delta > 0 !== course > 0) course = 0;
+    course += delta;
+    if (course > COURSE_RANGER) {
+      barre.classList.add("barre--onglets-rangees");
+      course = 0;
+    } else if (course < -COURSE_MONTRER) {
+      montrerOnglets();
+      course = 0;
+    }
   }
 
   window.addEventListener("scroll", surDefilement, { passive: true });
@@ -1281,6 +1330,7 @@
     // Après les onglets et le calcul de la hauteur de barre : la position à restaurer se mesure
     // sous la barre complète, sinon elle est décalée de la hauteur des onglets.
     reprendreLecture(`${numero}/${onglet}`);
+    rendreOngletsRangeables();
   }
 
   function boutonOnglet(numero, id, libelle, compte, actif) {
