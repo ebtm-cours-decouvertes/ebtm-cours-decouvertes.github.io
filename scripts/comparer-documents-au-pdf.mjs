@@ -3,6 +3,10 @@
 // d'origine (source/foi-et-pratiques-ebtm.pdf). Ces textes doivent rester tels qu'imprimés :
 // une lettre, un chiffre ou un signe de ponctuation qui diffère arrête le contrôle.
 //
+// Seule exception : les fautes d'orthographe listées dans scripts/corrections-documents.mjs,
+// corrigées à la demande de Sébastien. Le script les défait avant de comparer, et s'arrête si
+// l'une d'elles ne se retrouve pas exactement une fois.
+//
 // Ne sont pas comparés, parce qu'ils relèvent de la mise en page et non du texte : les
 // espaces et retours à la ligne, les numéros de page, les puces des listes, et le trait
 // d'union d'un mot coupé en fin de ligne (le script accepte qu'il soit gardé ou retiré ;
@@ -16,6 +20,7 @@ import { execFileSync } from "node:child_process";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { CORRECTIONS, retablir } from "./corrections-documents.mjs";
 
 const racine = join(dirname(fileURLToPath(import.meta.url)), "..");
 const pdf = join(racine, "source", "foi-et-pratiques-ebtm.pdf");
@@ -78,7 +83,7 @@ let erreurs = 0;
 let total = 0;
 
 for (const fichier of readdirSync(dossier).filter((f) => f.endsWith(".json")).sort()) {
-  const document = JSON.parse(readFileSync(join(dossier, fichier), "utf8"));
+  const document = retablir(JSON.parse(readFileSync(join(dossier, fichier), "utf8")));
   const [premiere, derniere] = document.pages.split("-").map(Number);
   const source = textePdf(premiere, derniere);
   let i = 0;
@@ -116,4 +121,7 @@ if (erreurs) {
   console.error(`\n${erreurs} document(s) différent(s) du PDF.`);
   process.exit(1);
 }
-console.log(`\nOK — les documents sont identiques au PDF (${total} caractères).`);
+console.log(
+  `\nOK — les documents sont identiques au PDF (${total} caractères), ` +
+    `aux ${CORRECTIONS.length} fautes d’orthographe corrigées près.`
+);

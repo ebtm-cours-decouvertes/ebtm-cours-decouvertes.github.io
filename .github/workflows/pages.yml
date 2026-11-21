@@ -12,6 +12,13 @@ permissions:
   pages: write
   id-token: write
 
+# Ce fichier vit dans deux dépôts : le dépôt public, d'où le site est servi, et le dépôt de
+# travail privé, qui n'est pas un site. Dans le dépôt de travail, seuls les contrôles tournent :
+# y déposer et y publier un paquet échouait à chaque sauvegarde. La condition désigne le dépôt
+# à écarter, et non le dépôt à servir : si elle se trompait de nom, le dépôt de travail
+# recommencerait à échouer, ce qui se voit, mais le site continuerait d'être publié.
+# Le nom du dépôt de travail est écrit trois fois plus bas, à l'identique.
+
 # Une seule mise en ligne à la fois ; on ne coupe pas celle qui est en cours.
 concurrency:
   group: pages
@@ -37,13 +44,16 @@ jobs:
       # de l'outil : https://github.com/actions/deploy-pages/issues/451. Avec deux travaux,
       # plusieurs secondes les séparent. C'est la disposition des modèles de GitHub.
       - uses: actions/configure-pages@v5
+        if: github.repository != 'ebtm-cours-decouvertes/cours-decouvertes-travail'
       - uses: actions/upload-pages-artifact@v5
+        if: github.repository != 'ebtm-cours-decouvertes/cours-decouvertes-travail'
         with:
           path: app
 
   # Second temps : la publication du paquet, et rien d'autre.
   publier:
     needs: verifier
+    if: github.repository != 'ebtm-cours-decouvertes/cours-decouvertes-travail'
     runs-on: ubuntu-latest
     environment:
       name: github-pages

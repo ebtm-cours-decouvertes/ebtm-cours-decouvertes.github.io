@@ -128,7 +128,8 @@ for (const fichier of fichiers) {
 
 // Les documents de l'église (app/contenu/documents/*.json) : confession de foi, statuts,
 // règlement intérieur, principes ecclésiastiques. Leur texte est repris du PDF tel qu'imprimé,
-// fautes et apostrophes comprises : on ne contrôle ici que la structure. La fidélité au PDF
+// apostrophes comprises, aux seules fautes d'orthographe près (scripts/corrections-documents.mjs) :
+// on ne contrôle ici que la structure. La fidélité au PDF
 // se contrôle à part, avec scripts/comparer-documents-au-pdf.mjs.
 const dossierDocuments = join(racine, "app", "contenu", "documents");
 const fichiersDocuments = existsSync(dossierDocuments)

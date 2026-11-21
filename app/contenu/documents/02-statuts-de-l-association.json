@@ -103,7 +103,7 @@
       "blocs": [
         {
           "type": "paragraphe",
-          "texte": "L’association est administrée par un Conseil composé du (des) pasteur(s), le premier d’entre eux étant aussi le Président de l’association, et des anciens. Le pasteur, Président de l’association et le Conseil choisissent parmi l’ensemble des membres de l’association un Bureau composé d’un Vice-Président, d’un Secrétaire, d’un Trésorier et d’un Trésorier Adjoint. Ce Bureau est présenté en Assemblée Générale et ratifié membre par membre par bulletin secret et à la majorité des deux tiers. Les mandats des membres du bureau ont une durée de 3ans et sont reconductibles."
+          "texte": "L’association est administrée par un Conseil composé du (des) pasteur(s), le premier d’entre eux étant aussi le Président de l’association, et des anciens. Le pasteur, Président de l’association et le Conseil choisissent parmi l’ensemble des membres de l’association un Bureau composé d’un Vice-Président, d’un Secrétaire, d’un Trésorier et d’un Trésorier Adjoint. Ce Bureau est présenté en Assemblée Générale et ratifié membre par membre par bulletin secret et à la majorité des deux tiers. Les mandats des membres du bureau ont une durée de 3 ans et sont reconductibles."
         }
       ]
     },
@@ -116,7 +116,7 @@
         },
         {
           "type": "paragraphe",
-          "texte": "Le Conseil peut convoquer une Assemblée Générale Extraordinaire pour voter en ce qui concerne la radiation éventuelle d‘un diacre. La majorité simple des membres présents ou représentés est alors habilitée à valider cette action. Cette Assemblée sera convoquée au moins 15 jours avant la date du vote."
+          "texte": "Le Conseil peut convoquer une Assemblée Générale Extraordinaire pour voter en ce qui concerne la radiation éventuelle d’un diacre. La majorité simple des membres présents ou représentés est alors habilitée à valider cette action. Cette Assemblée sera convoquée au moins 15 jours avant la date du vote."
         }
       ]
     },
@@ -125,7 +125,7 @@
       "blocs": [
         {
           "type": "paragraphe",
-          "texte": "Chaque pasteur ou ancien est présenté en son temps à l’église par le Conseil, et élu par l’Assemblée Générale de l’église, au scrutin secret et à la majorité des trois-quarts des membres présents ou représentés. Cette Assemblée Générale sera convoquée 15 jours au moins avant 1’élection."
+          "texte": "Chaque pasteur ou ancien est présenté en son temps à l’église par le Conseil, et élu par l’Assemblée Générale de l’église, au scrutin secret et à la majorité des trois-quarts des membres présents ou représentés. Cette Assemblée Générale sera convoquée 15 jours au moins avant l’élection."
         },
         {
           "type": "paragraphe",

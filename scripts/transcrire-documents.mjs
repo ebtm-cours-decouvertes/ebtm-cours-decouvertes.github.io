@@ -2,11 +2,13 @@
 // Transcrit les quatre documents de « La foi et les pratiques » (source/foi-et-pratiques-ebtm.pdf)
 // vers app/contenu/documents/*.json, sans retaper un mot à la main.
 //
-// Le texte est repris tel qu'imprimé, fautes comprises : c'est une demande de Sébastien
-// (21 novembre 2026, « ne rien modifier surtout »). Le script ne touche qu'à la structure :
-// il reconnaît les titres à leur police, recolle les lignes d'un paragraphe et les mots coupés
-// en fin de ligne. Les deux tables ci-dessous sont les seules décisions prises à la main ;
-// elles ont été arrêtées en relisant les 28 pages en image.
+// Le texte est repris tel qu'imprimé : c'est une demande de Sébastien (21 novembre 2026,
+// « ne rien modifier surtout »), précisée le même jour : « il faut qu'il soit identique, juste
+// les fautes d'orthographe ». Le script ne touche donc qu'à la structure (il reconnaît les
+// titres à leur police, recolle les lignes d'un paragraphe et les mots coupés en fin de ligne),
+// puis applique la liste des fautes d'orthographe de scripts/corrections-documents.mjs, et rien
+// d'autre. Les deux tables ci-dessous sont les seules décisions de structure prises à la
+// main ; elles ont été arrêtées en relisant les 28 pages en image.
 //
 // Demande l'outil « pdftohtml » (Poppler). Après l'avoir lancé :
 //   node scripts/generer-index.mjs && node scripts/comparer-documents-au-pdf.mjs
@@ -15,6 +17,7 @@ import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "nod
 import { tmpdir } from "node:os";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { CORRECTIONS, corriger } from "./corrections-documents.mjs";
 
 const racine = join(dirname(fileURLToPath(import.meta.url)), "..");
 const pdf = join(racine, "source", "foi-et-pratiques-ebtm.pdf");
@@ -262,12 +265,13 @@ function niveauDuGras(document, texte) {
 const pages = lirePages();
 mkdirSync(sortie, { recursive: true });
 for (const document of DOCUMENTS) {
-  const transcrit = transcrire(document, pages);
+  const transcrit = corriger(transcrire(document, pages));
   const fichier = `${String(document.numero).padStart(2, "0")}-${document.slug}.json`;
   writeFileSync(join(sortie, fichier), JSON.stringify(transcrit, null, 2) + "\n");
   const nbBlocs = transcrit.sections.reduce((n, s) => n + s.blocs.length, 0);
   console.log(`${fichier} : ${transcrit.sections.length} titre(s), ${nbBlocs} bloc(s).`);
 }
+console.log(`${CORRECTIONS.length} faute(s) d’orthographe corrigée(s), voir scripts/corrections-documents.mjs.`);
 if (bavard) {
   console.log(`\n${coupures.length} mots recollés en fin de ligne :`);
   for (const c of coupures) console.log(`  ${c}`);

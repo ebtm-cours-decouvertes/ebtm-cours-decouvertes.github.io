@@ -89,7 +89,8 @@ sans reformulation ; seules la structure et les coupures de ligne changent.
 
 Confession de foi, statuts, règlement intérieur, principes ecclésiastiques. Ces fichiers sont
 produits par `scripts/transcrire-documents.mjs` et ne s'éditent pas à la main : leur texte
-reste celui du PDF, fautes comprises.
+reste celui du PDF, aux seules fautes d'orthographe près, listées dans
+`scripts/corrections-documents.mjs`.
 
 ```json
 {
