@@ -1127,9 +1127,6 @@
 
   async function afficherAccueil() {
     const liste = await chargerIndex();
-    const total = liste.lecons.length;
-    const terminees = liste.lecons.filter((l) => etat.terminees[l.numero]).length;
-    const pourcentage = total ? Math.round((terminees / total) * 100) : 0;
 
     const cartes = liste.lecons
       .map((lecon) => {
@@ -1160,6 +1157,10 @@
       })
       .join("");
 
+    // Pas de ligne « Ma progression » au-dessus de la liste : la coche de chaque leçon terminée
+    // et le compte de questions sous chaque leçon disent déjà où l'on en est (retirée le
+    // 21 novembre 2026, décision prise sur l'application elle-même).
+    //
     // Trois écrans possibles, dans cet ordre : l'ordinateur est renvoyé vers le téléphone,
     // l'arrivée par QR code montre l'installation, sinon c'est la liste des leçons.
     if (surOrdinateur() && !derogationOrdinateur()) {
@@ -1178,10 +1179,6 @@
         <h1 class="visuellement-cache">Cours découvertes</h1>
         ${stockageIndisponible ? avertissementStockage() : ""}
         ${inviteInstallation()}
-        <section class="progression" aria-label="Avancement">
-          <p class="progression__titre">Ma progression</p>
-          <p class="progression__detail">${terminees} / ${total} leçon${total > 1 ? "s" : ""}</p>
-        </section>
         <ul class="liste-lecons">${cartes}</ul>
         <div class="annexes">
           ${
