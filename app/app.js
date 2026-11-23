@@ -751,8 +751,11 @@
   // recalculée seulement quand la barre change vraiment.
   let hauteurBarre = 0;
 
+  // Hauteur exacte, décimales comprises : « offsetHeight » l'arrondit au point entier (MDN,
+  // « Determining the dimensions of elements »). Arrondie, elle laissait une fente de moins d'un
+  // point entre la barre et la page (147,61 contre 148, mesuré le 23 novembre 2026).
   function ajusterHauteurBarre() {
-    hauteurBarre = barre.offsetHeight;
+    hauteurBarre = barre.getBoundingClientRect().height;
     document.body.style.paddingTop = `${hauteurBarre}px`;
   }
   window.addEventListener("resize", ajusterHauteurBarre);

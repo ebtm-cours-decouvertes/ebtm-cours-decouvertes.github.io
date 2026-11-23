@@ -327,6 +327,13 @@ html:has(main.ecran--entre) .barre--onglets #zone-onglets {
     background-color 0s;
 }
 
+/* Même chose pour la bordure transparente d'un point au bas de la barre : pendant la glissade,
+   elle prend le fond de la page, pour que rien de ce qui passe dessous ne s'y voie. */
+html:has(main.ecran--attente) .barre--onglets,
+html:has(main.ecran--entre) .barre--onglets {
+  border-bottom-color: var(--fond);
+}
+
 /* Un toucher sur le fond de la pastille (::before) compte pour la rangée : il ne traverse pas
    jusqu'au texte caché dessous. */
 .barre--onglets .onglets::before,
@@ -1963,8 +1970,29 @@ html:has(main.ecran--entre) body {
   main.ecran--entre {
     background: var(--fond);
     min-height: 100dvh;
-    box-shadow: -12px 0 32px rgba(28, 18, 30, 0.1);
     animation: ecran-entre var(--ecran-entree) var(--feuille-courbe) both;
+  }
+
+  /* L'ombre de l'écran qui arrive est un élément à part, collé à son bord gauche et de sa
+     hauteur, qui ne s'assombrit que vers la gauche : la façon d'Ionic (ios.transition.ts,
+     « .transition-shadow », version 9.0.13). Elle ne peut ainsi déborder ni au-dessus ni en
+     dessous de l'écran. Posée sur l'écran entier (« box-shadow »), elle débordait de tous côtés,
+     passait sous la barre et s'y voyait en trait gris (vidéos de Sébastien, 23 novembre 2026,
+     11 h 44 et 11 h 56). Même dégradé que l'ancienne ombre, mesurée de -12 px, flou de 32 px. */
+  main.ecran--entre::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 100%;
+    width: 44px;
+    background: linear-gradient(
+      to left,
+      rgba(28, 18, 30, 0.08),
+      rgba(28, 18, 30, 0.035) 45%,
+      rgba(28, 18, 30, 0)
+    );
+    pointer-events: none;
   }
 
   .calque-quitte--part {
