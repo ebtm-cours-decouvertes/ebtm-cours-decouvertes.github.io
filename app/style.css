@@ -46,6 +46,12 @@
   --echelle: 1;
   --rayon: 14px;
   --ombre: 0 1px 2px rgba(43, 31, 46, 0.06), 0 4px 14px rgba(43, 31, 46, 0.06);
+  /* Limite de la barre du haut quand le texte passe dessous : une ombre en clair, un filet en
+     sombre (une ombre ne s'y voit pas). Le mode sombre change ces deux valeurs, jamais les règles
+     de la barre : une règle préfixée par l'apparence pèse plus lourd que les règles propres à un
+     écran et les écrasait (filet resté fixe sous les onglets rangés, vidéo du 23 novembre 2026). */
+  --barre-filet-flottant: transparent;
+  --barre-ombre-flottante: 0 1px 3px rgba(43, 31, 46, 0.05), 0 6px 20px rgba(43, 31, 46, 0.09);
   /* L'application reste claire quel que soit le réglage du téléphone. Le mode sombre est un
      choix explicite du lecteur, jamais une conséquence du réglage de son appareil. */
   color-scheme: light;
@@ -72,6 +78,8 @@
   --danger: #f28b82;
   --danger-doux: #3a2422;
   --ombre: none;
+  --barre-filet-flottant: var(--bord);
+  --barre-ombre-flottante: none;
   --bandeau-debut: #3a1a3d;
   --bandeau-milieu: #4a173f;
   --bandeau-fin: #5e1443;
@@ -251,16 +259,10 @@ button {
 
 /* La barre reste en place et entièrement opaque : on ne voit rien passer derrière (demande de
    Sébastien, 21 novembre 2026 ; elle s'effaçait pendant la lecture et devenait translucide).
-   Dès qu'on défile, une ombre dit seule qu'elle passe au-dessus du texte. */
+   Dès qu'on défile, une ombre (un filet en sombre) dit seule qu'elle passe au-dessus du texte. */
 .barre--flottante {
-  border-bottom-color: transparent;
-  box-shadow: 0 1px 3px rgba(43, 31, 46, 0.05), 0 6px 20px rgba(43, 31, 46, 0.09);
-}
-
-/* En sombre, une ombre ne se voit pas : c'est le filet qui marque la limite. */
-:root[data-apparence="sombre"] .barre--flottante {
-  border-bottom-color: var(--bord);
-  box-shadow: none;
+  border-bottom-color: var(--barre-filet-flottant);
+  box-shadow: var(--barre-ombre-flottante);
 }
 
 /* Dans une leçon, la rangée des onglets se range sous le bandeau violet quand on descend dans
@@ -305,13 +307,8 @@ button {
 }
 
 .barre--onglets.barre--flottante #zone-onglets {
-  border-bottom-color: transparent;
-  box-shadow: 0 1px 3px rgba(43, 31, 46, 0.05), 0 6px 20px rgba(43, 31, 46, 0.09);
-}
-
-:root[data-apparence="sombre"] .barre--onglets.barre--flottante #zone-onglets {
-  border-bottom-color: var(--bord);
-  box-shadow: none;
+  border-bottom-color: var(--barre-filet-flottant);
+  box-shadow: var(--barre-ombre-flottante);
 }
 
 .barre--onglets-rangees #zone-onglets {
