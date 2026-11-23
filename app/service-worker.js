@@ -7,7 +7,7 @@
  * ci-dessous force le renouvellement complet du cache à la prochaine visite.
  */
 
-const VERSION = "2026-11-23-5";
+const VERSION = "2026-11-23-6";
 const CACHE = `cours-decouvertes-${VERSION}`;
 
 const FICHIERS = [
@@ -15,6 +15,8 @@ const FICHIERS = [
   "./index.html",
   "./style.css",
   "./app.js",
+  "./polices/fraunces.woff2",
+  "./polices/nunito.woff2",
   "./manifest.webmanifest",
   "./icones/logo-ebtm.png",
   "./icones/logo-ebtm-mot.png",

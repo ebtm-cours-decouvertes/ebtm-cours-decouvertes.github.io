@@ -17,6 +17,11 @@
     <link rel="manifest" href="manifest.webmanifest" />
     <link rel="icon" href="icones/icone.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" sizes="180x180" href="icones/icone-180.png" />
+    <!-- Les deux polices sont demandées dès maintenant, avant la lecture du style : le texte
+         s'affiche plus tôt dans sa vraie police (MDN, « rel=preload » ; « crossorigin » est exigé
+         pour une police, même hébergée ici). -->
+    <link rel="preload" href="polices/nunito.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="polices/fraunces.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
