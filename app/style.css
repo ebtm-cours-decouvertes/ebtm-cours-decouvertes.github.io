@@ -820,20 +820,24 @@ a[href^="#/"] {
    Le bandeau est dessiné par un pseudo-élément calé sur les marges intérieures du conteneur.
    Un onglet n'a pas besoin de contour, son libellé suffit à l'identifier ; c'est l'état choisi
    qui doit trancher à 3 pour 1 sur le bandeau (WCAG 1.4.11, « Understanding Non-text
-   Contrast », page du 4 octobre 2026), ce que mesure verifier-contrastes.mjs. */
+   Contrast », page du 4 octobre 2026), ce que mesure verifier-contrastes.mjs.
+   Même écart au-dessus et au-dessous de la rangée (demande de Sébastien, 23 novembre 2026 : elle
+   touchait le bandeau violet). Il n'y avait rien au-dessus du temps de l'en-tête blanc, qui
+   faisait lui-même l'écart. */
 .onglets {
+  --onglets-ecart: 0.6rem;
   position: relative;
   max-width: 720px;
   margin: 0 auto;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  padding: 0 1rem 0.6rem;
+  padding: var(--onglets-ecart) 1rem;
 }
 
 .onglets::before {
   content: "";
   position: absolute;
-  inset: 0 1rem 0.6rem;
+  inset: var(--onglets-ecart) 1rem;
   background: var(--teinte);
   border-radius: 13px;
 }
