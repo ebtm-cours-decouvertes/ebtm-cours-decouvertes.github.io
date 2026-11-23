@@ -551,17 +551,38 @@ html:has(main.ecran--entre) .barre--onglets {
   }
 }
 
-/* Sur la liste des leçons, l'icône de partage prend 44 px à côté de la roue. Le titre y passe
-   de 1,2 à 1,05 rem pour ne pas être coupé, choix validé le 16 novembre 2026 : mesuré,
-   « Cours découvertes » demande 177 px à sa taille d'origine et il n'en reste que 162 sur un
-   écran de 360 px. L'écart entre les éléments est resserré pour tenir aussi en sombre, où le
-   logo porte un fond blanc plus large. Sur un écran de 320 px, le titre reste coupé. */
+/* Bandeau de l'accueil « Logo et filet », choisi par Sébastien sur maquettes le 23 novembre 2026,
+   titre dans la police des titres : un fin trait blanc sépare le logo du titre, et le partage
+   et les réglages sont posés dans des ronds blancs translucides. */
 .barre--accueil .entete__contenu {
-  gap: 0.5rem;
+  gap: 0.6rem;
 }
 
 .barre--accueil .marque__titre {
-  font-size: 1.05rem;
+  font-family: var(--police-titres);
+  font-weight: 600;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  padding-left: 0.7rem;
+  border-left: 1.5px solid rgba(255, 255, 255, 0.55);
+}
+
+.barre--accueil .bouton-barre {
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+/* Sur les écrans de moins de 390 px (360 px courant sur Android), le titre serait coupé :
+   il se resserre un peu. Mesuré : entier à 375 et 360 px ; coupé à 320 px, comme avant. */
+@media (max-width: 389px) {
+  .barre--accueil .entete__contenu {
+    gap: 0.45rem;
+  }
+
+  .barre--accueil .marque__titre {
+    font-size: 1rem;
+    padding-left: 0.55rem;
+  }
 }
 
 /* Sur l'accueil, rien sous le bandeau : ni filet, ni la bande translucide d'un pixel qu'il
@@ -571,9 +592,9 @@ html:has(main.ecran--entre) .barre--onglets {
   border-bottom: 0;
 }
 
-/* Le partage est collé à la roue : l'écart entre les éléments de la barre est annulé. */
-.barre--accueil #ouvrir-partage {
-  margin-right: -0.5rem;
+/* Dans leurs ronds, les deux boutons ne sont plus tirés vers le bord. */
+.barre--accueil #ouvrir-reglages {
+  margin-right: 0;
 }
 
 /* ---------- Structure des pages ---------- */
