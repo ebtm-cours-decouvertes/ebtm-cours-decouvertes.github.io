@@ -52,6 +52,9 @@
      écran et les écrasait (filet resté fixe sous les onglets rangés, vidéo du 23 novembre 2026). */
   --barre-filet-flottant: transparent;
   --barre-ombre-flottante: 0 1px 3px rgba(43, 31, 46, 0.05), 0 6px 20px rgba(43, 31, 46, 0.09);
+  /* Pastille des onglets d'une leçon, qui flotte au-dessus du texte : une ombre douce en clair,
+     un contour fin en sombre (la dernière valeur trace un trait d'un pixel qui suit l'arrondi). */
+  --onglets-ombre: 0 1px 3px rgba(43, 31, 46, 0.1), 0 6px 18px rgba(43, 31, 46, 0.16);
   /* L'application reste claire quel que soit le réglage du téléphone. Le mode sombre est un
      choix explicite du lecteur, jamais une conséquence du réglage de son appareil. */
   color-scheme: light;
@@ -80,6 +83,7 @@
   --ombre: none;
   --barre-filet-flottant: var(--bord);
   --barre-ombre-flottante: none;
+  --onglets-ombre: 0 0 0 1px var(--bord);
   --bandeau-debut: #3a1a3d;
   --bandeau-milieu: #4a173f;
   --bandeau-fin: #5e1443;
@@ -271,8 +275,10 @@ button {
    l'heure. C'est la barre entière qui partait avant, et iOS 27 la montrait alors floutée sous
    l'heure ; une rangée qui reste sous le bandeau ne peut pas y arriver.
    La barre elle-même devient transparente : chaque partie porte son fond, et l'endroit libéré
-   par la rangée laisse voir le texte et le laisse toucher. Le filet et l'ombre passent sous la
-   rangée, pour la suivre. */
+   par la rangée laisse voir le texte et le laisse toucher.
+   La rangée flotte (« Flottante avec ombre », choisie par Sébastien sur captures le 23 novembre
+   2026) : plus de bande ni de filet derrière la pastille, le texte passe autour d'elle et se
+   touche autour d'elle ; seule la pastille, opaque, porte une ombre (un contour fin en sombre). */
 .barre--onglets,
 .barre--onglets.barre--flottante {
   background: transparent;
@@ -298,17 +304,23 @@ button {
 
 .barre--onglets #zone-onglets {
   position: relative;
-  background: var(--carte);
-  border-bottom: 1px solid var(--bord);
+  /* Les touchers passent à travers la zone, sauf sur la pastille et ses onglets. */
+  pointer-events: none;
   /* Le mouvement est confié au compositeur (transition sur transform), pas au script : sur
      iOS le défilement tourne hors du fil principal, et un déplacement image par image depuis
      le script restait en retard d'une image. */
   transition: transform var(--barre-mouvement) var(--feuille-courbe);
 }
 
-.barre--onglets.barre--flottante #zone-onglets {
-  border-bottom-color: var(--barre-filet-flottant);
-  box-shadow: var(--barre-ombre-flottante);
+/* Un toucher sur le fond de la pastille (::before) compte pour la rangée : il ne traverse pas
+   jusqu'au texte caché dessous. */
+.barre--onglets .onglets::before,
+.barre--onglets .onglet {
+  pointer-events: auto;
+}
+
+.barre--onglets .onglets::before {
+  box-shadow: var(--onglets-ombre);
 }
 
 .barre--onglets-rangees #zone-onglets {
@@ -893,8 +905,28 @@ a[href^="#/"] {
    découpage se recalculait à chaque image, en même temps que la page, et le mouvement sautait
    ou paraissait plat. À ne pas refaire.
 
-   « --bulle-x » est la distance, mesurée par app.js, entre le bord du bandeau et le bouton
+   « --bulle-x » est la distance, mesurée par app.js, entre le bord de son cadre et le bouton
    choisi ; la largeur et la hauteur sont celles du bouton. */
+.bandeau-cadre {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* Onglets d'une leçon : le cadre épouse la pastille et retient la bulle dedans. En arrivant sur
+   l'onglet du bord, son rebond la faisait déborder de la pastille (8 points, vu par Sébastien le
+   23 novembre 2026) ; il est désormais coupé au bord, le mouvement reste le même à l'intérieur.
+   Le cadre ne bouge pas : seule la bulle s'anime, comme avant (rien à recalculer à chaque
+   image, contrairement au « clip-path » écarté plus bas). « isolation » en fait une couche à
+   part, parade recommandée pour que Safari coupe bien un élément animé dans un cadre arrondi
+   (bug WebKit 68196, corrigé, et 231360). */
+.onglets > .bandeau-cadre {
+  inset: var(--onglets-ecart) 1rem;
+  border-radius: 13px;
+  overflow: hidden;
+  isolation: isolate;
+}
+
 .bandeau-bulle {
   position: absolute;
   top: 0;

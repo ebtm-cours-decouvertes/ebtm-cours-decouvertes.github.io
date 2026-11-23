@@ -370,8 +370,14 @@
     // Cachée tant qu'aucun choix n'est posé.
     bulle.hidden = true;
     rangee.classList.add("bandeau--equipe");
+    // La bulle vit dans un cadre. Il couvre toute la rangée, sauf là où la feuille de style le
+    // resserre pour retenir le rebond de la bulle dans son bandeau (onglets d'une leçon).
+    const cadreBulle = document.createElement("span");
+    cadreBulle.className = "bandeau-cadre";
+    cadreBulle.setAttribute("aria-hidden", "true");
+    cadreBulle.append(bulle);
     // En tête de rangée : elle se dessine ainsi sous les boutons, sans réglage de plan.
-    rangee.prepend(bulle);
+    rangee.prepend(cadreBulle);
     let place = -1;
     let cadre = null;
     let largeurConnue = rangee.offsetWidth;
@@ -382,7 +388,7 @@
     // lues avec leurs décimales : arrondies, la bulle déborderait d'un filet.
     const mesurer = (index) => {
       const bouton = boutons[index].getBoundingClientRect();
-      const bandeau = rangee.getBoundingClientRect();
+      const bandeau = cadreBulle.getBoundingClientRect();
       return {
         x: bouton.left - bandeau.left,
         y: bouton.top - bandeau.top,
