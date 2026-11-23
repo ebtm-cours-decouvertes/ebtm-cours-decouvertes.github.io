@@ -309,7 +309,22 @@ button {
   /* Le mouvement est confié au compositeur (transition sur transform), pas au script : sur
      iOS le défilement tourne hors du fil principal, et un déplacement image par image depuis
      le script restait en retard d'une image. */
-  transition: transform var(--barre-mouvement) var(--feuille-courbe);
+  transition:
+    transform var(--barre-mouvement) var(--feuille-courbe),
+    background-color 0.2s ease-out;
+}
+
+/* Pendant la glissade d'un écran (style.css, « Changement d'écran »), la zone de la rangée
+   reprend le fond de la page : sinon on voyait, autour de la pastille, la copie de l'écran quitté
+   et l'ombre de l'écran qui arrive (vidéo de Sébastien, 23 novembre 2026, 11 h 44). Le fond
+   s'efface ensuite en 0,2 s ; en haut de page, il a la couleur de ce qu'il cachait. Il arrive,
+   lui, sans fondu : une transition se lit sur l'état d'arrivée, d'où le « 0s » ici. */
+html:has(main.ecran--attente) .barre--onglets #zone-onglets,
+html:has(main.ecran--entre) .barre--onglets #zone-onglets {
+  background-color: var(--fond);
+  transition:
+    transform var(--barre-mouvement) var(--feuille-courbe),
+    background-color 0s;
 }
 
 /* Un toucher sur le fond de la pastille (::before) compte pour la rangée : il ne traverse pas
