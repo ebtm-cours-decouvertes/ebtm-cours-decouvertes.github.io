@@ -530,7 +530,6 @@ html:has(main.ecran--entre) .barre--onglets {
   flex: 1;
   min-width: 0;
   margin: 0;
-  transition: opacity 180ms ease;
   color: var(--sur-bandeau);
   font-weight: 600;
   font-size: 1.2rem;
@@ -538,18 +537,6 @@ html:has(main.ecran--entre) .barre--onglets {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-/* Le grand titre de la page est visible : la barre ne le répète pas (app.js, « comme sur
-   l'iPhone ») ; il revient quand le grand titre passe sous la barre. */
-.barre--titre-replie .marque__titre {
-  opacity: 0;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .marque__titre {
-    transition: none;
-  }
 }
 
 /* Sous 360 pixels, « Cours découvertes » déborderait : mesuré, 176 px pour 158 disponibles. */
@@ -1794,6 +1781,12 @@ a[href^="#/"] {
   transition-duration: var(--feuille-ouverture);
 }
 
+/* Une note rouverte au retour d'une leçon est déjà en place : ni montée, ni voile qui fonce. */
+.feuille.feuille--aussitot,
+.feuille.feuille--aussitot .feuille__carte {
+  transition: none;
+}
+
 .feuille__entete {
   display: flex;
   align-items: center;
@@ -2269,13 +2262,6 @@ a[href^="#/"] {
   background: var(--note-encourage);
 }
 
-.note-fenetre__intitule {
-  margin: 0.2rem 0 -0.4rem;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--texte-doux);
-}
-
 .note-fenetre__choix {
   display: flex;
   flex-wrap: wrap;
@@ -2347,17 +2333,6 @@ a[href^="#/"] {
   display: block;
   width: 1rem;
   height: 1rem;
-}
-
-.page-titre--dossier {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-}
-
-.page-titre--dossier .pastille {
-  width: 0.95rem;
-  height: 0.95rem;
 }
 
 .liste-notes {

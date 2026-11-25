@@ -333,21 +333,33 @@
   function feuilleOuverte(fenetre) {
     return fenetre.classList.contains("feuille--ouverte");
   }
-  function montrerFeuille(fenetre) {
+  // « aussitot » : la fenêtre est déjà en place, sans monter (une note rouverte au retour).
+  function montrerFeuille(fenetre, { aussitot = false } = {}) {
     // Une fenêtre (verset, réglages) passe devant la barre des choix d'une note : la barre se
     // retire, elle reviendra à la fermeture si le passage est encore sélectionné.
     if (autourDesFeuilles) autourDesFeuilles.ouverture();
     clearTimeout(minuteriesFeuilles.get(fenetre));
+    if (aussitot) fenetre.classList.add("feuille--aussitot");
     if (fenetre.hidden) {
       fenetre.hidden = false;
       void fenetre.offsetHeight; // la position de départ (en bas) est posée avant la montée
     }
     fenetre.classList.add("feuille--ouverte");
+    if (aussitot) {
+      void fenetre.offsetHeight;
+      // La descente, à la fermeture, reste animée.
+      requestAnimationFrame(() => requestAnimationFrame(() => fenetre.classList.remove("feuille--aussitot")));
+    }
   }
-  function cacherFeuille(fenetre) {
+  // « aussitot » : la fenêtre disparaît sans descendre, quand l'écran change juste après.
+  function cacherFeuille(fenetre, { aussitot = false } = {}) {
     if (autourDesFeuilles) autourDesFeuilles.fermeture();
     fenetre.classList.remove("feuille--ouverte");
     clearTimeout(minuteriesFeuilles.get(fenetre));
+    if (aussitot) {
+      fenetre.hidden = true;
+      return;
+    }
     minuteriesFeuilles.set(
       fenetre,
       setTimeout(() => {
@@ -780,47 +792,8 @@
   function ajusterHauteurBarre() {
     hauteurBarre = barre.getBoundingClientRect().height;
     document.body.style.paddingTop = `${hauteurBarre}px`;
-    suivreGrandTitre();
   }
   window.addEventListener("resize", ajusterHauteurBarre);
-
-  // --- Le titre de la barre, comme sur l'iPhone ---------------------------------------------
-  // Le nom de l'écran ne s'écrit qu'une fois : en grand en haut de la page, la barre ne montre
-  // que la flèche ; quand le grand titre passe sous la barre en descendant, le petit titre y
-  // apparaît (« large title » des applications d'Apple : Notes, Mail, Réglages). Demandé par
-  // Sébastien le 25 novembre 2026 : « pourquoi le remettre ? ». Un IntersectionObserver prévient
-  // quand le titre passe sous la barre, sans rien mesurer pendant le défilement (MDN,
-  // « Intersection Observer API »). Écran sans grand titre visible (accueil) : rien ne change.
-  let observateurTitre = null;
-  // Pendant un changement d'écran, la page n'est pas encore à sa place (reprise de la lecture,
-  // liste rendue à sa position) : le titre attend la fin du changement (router), sinon il
-  // s'éteignait une image avant de revenir (agent de test, 25 novembre 2026).
-  let titreDiffere = false;
-  function montrerTitreBarre(oui) {
-    barre.classList.toggle("barre--titre-replie", !oui);
-    if (oui) titreBarre.removeAttribute("aria-hidden");
-    else titreBarre.setAttribute("aria-hidden", "true"); // le grand titre est déjà lu
-  }
-  function suivreGrandTitre() {
-    if (observateurTitre) observateurTitre.disconnect();
-    observateurTitre = null;
-    if (titreDiffere) return;
-    const grandTitre = principal.querySelector("h1.page-titre");
-    if (!grandTitre || !("IntersectionObserver" in window)) {
-      montrerTitreBarre(true);
-      return;
-    }
-    // État de départ posé tout de suite, sans fondu : sinon le titre de l'écran précédent
-    // apparaissait un instant dans la barre avant de s'effacer. Une seule mesure par écran.
-    titreBarre.style.transition = "none";
-    montrerTitreBarre(grandTitre.getBoundingClientRect().bottom <= hauteurBarre);
-    requestAnimationFrame(() => requestAnimationFrame(() => (titreBarre.style.transition = "")));
-    observateurTitre = new IntersectionObserver(
-      ([entree]) => montrerTitreBarre(!entree.isIntersecting && entree.boundingClientRect.top < hauteurBarre),
-      { rootMargin: `-${Math.round(hauteurBarre)}px 0px 0px 0px` }
-    );
-    observateurTitre.observe(grandTitre);
-  }
 
   // Le logo porte le nom de l'église, le titre celui du cours : les deux vont de pair.
   const NOM_APPLICATION = "Cours découvertes";
@@ -2583,7 +2556,9 @@
         <label class="visuellement-cache" for="note-ecrit">Ce que j’écris</label>
         <textarea id="note-ecrit" class="note-fenetre__ecrit" rows="3" autocomplete="off" autocapitalize="sentences"></textarea>
         <p class="question__etat note-fenetre__etat" aria-live="polite"></p>
-        <p class="note-fenetre__intitule" id="note-choix-titre">Type de note</p>
+        <!-- Lu par les lecteurs d'écran seulement : à l'écran, le titre de la fenêtre dit déjà le
+             type, et les pastilles se comprennent seules (Sébastien, 25 novembre 2026). -->
+        <p class="visuellement-cache" id="note-choix-titre">Type de note</p>
         <div class="note-fenetre__choix" role="group" aria-labelledby="note-choix-titre">
           ${ETIQUETTES.map(
             (e) =>
@@ -2667,7 +2642,7 @@
   // Sébastien le 25 novembre 2026) : la fenêtre propose « Voir dans la leçon », et la liste est
   // remise à jour en la fermant si la note a changé (texte, type, retrait).
   let noteDepuisListe = null; // { id, avant } ou null
-  function ouvrirNote(id, { ecrire = false, depuisListe = false } = {}) {
+  function ouvrirNote(id, { ecrire = false, depuisListe = false, aussitot = false } = {}) {
     const note = etat.notes[id];
     if (!note || !note.texte) return;
     cacherAnnonce();
@@ -2688,20 +2663,20 @@
     habillerFenetreNote(note);
     figerPage();
     suivreZoneVisible(true);
-    montrerFeuille(fenetreNote);
+    montrerFeuille(fenetreNote, { aussitot });
     neutraliserArrierePlan(true);
     ajusterHauteur(zoneEcrit);
     (ecrire ? zoneEcrit : fenetreNote.querySelector(".feuille__fermer")).focus({ preventScroll: true });
   }
 
-  function fermerNote({ rendreFocus = true } = {}) {
+  function fermerNote({ rendreFocus = true, aussitot = false } = {}) {
     enregistrerReponseEnAttente();
     const id = noteOuverte;
     // La zone d'écriture quitte le focus avant que la fenêtre se cache : cachée avec le clavier
     // encore ouvert, elle le gardait, et le toucher suivant servait à le fermer (perdu).
     if (document.activeElement === zoneEcrit) zoneEcrit.blur();
     suivreZoneVisible(false);
-    cacherFeuille(fenetreNote);
+    cacherFeuille(fenetreNote, { aussitot });
     neutraliserArrierePlan(false);
     libererPage();
     noteOuverte = null;
@@ -2762,9 +2737,17 @@
     }
     const voir = evenement.target.closest(".note-fenetre__voir");
     if (voir) {
-      // Le lien suit son cours : la leçon s'ouvre au passage, qui s'allume (montrerNoteDansLecon).
-      noteAMontrer = voir.dataset.allerNote;
-      fermerNote({ rendreFocus: false });
+      // La leçon s'ouvre au passage, qui s'allume (montrerNoteDansLecon). Au retour (flèche ou
+      // geste de l'iPhone), on retrouve la note ouverte, là où on l'avait laissée : elle est
+      // notée dans l'entrée d'historique de la liste, et le routeur la rouvre (demande de
+      // Sébastien, 25 novembre 2026). La fenêtre disparaît sans descendre : la leçon arrive
+      // aussitôt, sans fenêtre qui glisse par-dessus.
+      evenement.preventDefault();
+      const id = voir.dataset.allerNote;
+      noteAMontrer = id;
+      history.replaceState({ ...(history.state || {}), noteARouvrir: id }, "");
+      fermerNote({ rendreFocus: false, aussitot: true });
+      location.hash = voir.getAttribute("href");
       return;
     }
     const choix = evenement.target.closest("[data-choix-etiquette]");
@@ -2878,7 +2861,9 @@
       : "";
     afficherDans(
       html`
-        <h1 class="page-titre">Mes notes</h1>
+        <!-- Dans « Mes notes », le nom de l'écran n'est écrit qu'une fois, dans la barre violette
+             (choix de Sébastien, 25 novembre 2026) ; le titre reste pour les lecteurs d'écran. -->
+        <h1 class="visuellement-cache">Mes notes</h1>
         ${stockageIndisponible ? avertissementStockage() : ""}
         ${corps}
         ${corbeille}
@@ -2918,7 +2903,7 @@
       // L'essentiel seulement (Sébastien, 25 novembre 2026 : « trop d'informations qui se
       // répètent ») : ni surtitre, ni phrase d'explication.
       html`
-        <h1 class="page-titre">Récemment supprimées</h1>
+        <h1 class="visuellement-cache">Récemment supprimées</h1>
         ${lignes ? html`<ul class="liste-notes">${lignes}</ul>` : html`<p class="notes-vide">Plus aucune note ici.</p>`}
       `,
       "Récemment supprimées"
@@ -2983,17 +2968,17 @@
     afficherDans(
       html`
         <p class="surtitre">Mes notes · leçon ${lecon.numero}</p>
-        <h1 class="page-titre">${echapper(lecon.titre)}</h1>
+        <h1 class="visuellement-cache">${echapper(lecon.titre)}</h1>
         ${dossiers ? html`<ul class="liste-lecons">${dossiers}</ul>` : html`<p class="notes-vide">Plus aucune note dans cette leçon.</p>`}
       `,
       `Mes notes, leçon ${lecon.numero}`
     );
     zoneNavigation.innerHTML = retourNotes("/notes");
-    titreBarre.textContent = `Leçon ${lecon.numero}`;
+    titreBarre.textContent = lecon.titre;
   }
 
-  // Un dossier : ses notes dans l'ordre du texte. Toucher une ligne ramène au passage dans la
-  // leçon ; c'est là, en touchant le passage coloré, qu'on modifie ou retire la note.
+  // Un dossier : ses notes dans l'ordre du texte. Toucher une ligne ouvre la note (on la modifie
+  // ou la retire), d'où « Voir dans la leçon » mène au passage.
   function afficherDossier(lecon, etiquette, notes) {
     const siennes = notes
       .filter((n) => n.lecon === lecon.numero && n.etiquette === etiquette.cle)
@@ -3019,9 +3004,7 @@
     afficherDans(
       html`
         <p class="surtitre">Leçon ${lecon.numero} · ${echapper(lecon.titre)}</p>
-        <h1 class="page-titre page-titre--dossier">
-          <span class="pastille pastille--${etiquette.cle}" aria-hidden="true"></span>${etiquette.nom}
-        </h1>
+        <h1 class="visuellement-cache">${etiquette.nom}</h1>
         ${lignes ? html`<ul class="liste-notes">${lignes}</ul>` : html`<p class="notes-vide">Plus aucune note ici.</p>`}
       `,
       `${etiquette.nom}, leçon ${lecon.numero}`
@@ -3606,11 +3589,6 @@
     if (!loupe.hidden) fermerLoupe();
     cacherBarreNotes();
     if (!annonceGardee) cacherAnnonce();
-    // Le titre de la barre s'éteint sans fondu le temps de construire l'écran ; il est rétabli
-    // une fois la page à sa place (plus bas, suivreGrandTitre).
-    titreDiffere = true;
-    titreBarre.style.transition = "none";
-    montrerTitreBarre(false);
     const jeton = ++navigation;
     const { ecran, sens, retour } = changementDEcran(chemin);
     const anime = sens === "avant" && !mouvementReduit.matches;
@@ -3653,19 +3631,33 @@
       // Une seconde fois à l'image suivante, au cas où le navigateur replacerait la page
       // après nous ; sans effet si elle est déjà à sa place.
       requestAnimationFrame(() => {
-        if (jeton === navigation && Math.abs(window.scrollY - y) > 2) window.scrollTo(0, y);
+        if (jeton === navigation && pageFigee === null && Math.abs(window.scrollY - y) > 2) window.scrollTo(0, y);
       });
     }
-    // La page est à sa place : le titre de la barre suit maintenant le grand titre.
-    titreDiffere = false;
-    suivreGrandTitre();
+    // Retour d'une leçon ouverte par « Voir dans la leçon » : la note d'où l'on était parti se
+    // rouvre, déjà ouverte, si elle est encore dans ce dossier.
+    let rouverte = false;
+    const marque = retour && estListe(ecran.cle) && history.state && history.state.noteARouvrir;
+    if (marque) {
+      const { noteARouvrir, ...reste } = history.state;
+      history.replaceState(reste, "");
+      const note = etat.notes[noteARouvrir];
+      const ligneNote = [...principal.querySelectorAll("a.ligne-note[data-ouvrir-note]")].some(
+        (a) => a.dataset.ouvrirNote === noteARouvrir
+      );
+      if (note && note.texte && !estRetiree(note) && ligneNote) {
+        ouvrirNote(noteARouvrir, { depuisListe: true, aussitot: true });
+        rouverte = true;
+      }
+    }
     if (retour && lignesQuittees.has(ecran.cle)) {
       const adresse = lignesQuittees.get(ecran.cle);
       lignesQuittees.delete(ecran.cle);
       const ligne = [...principal.querySelectorAll("a.carte-lecon, a.annexe, a.ligne-note")].find(
         (a) => (a.dataset.ouvrirNote || a.dataset.allerNote || a.getAttribute("href")) === adresse
       );
-      if (ligne) {
+      // La note rouverte par-dessus : sa ligne ne s'allume pas.
+      if (ligne && !rouverte) {
         ligne.classList.add("ligne--revient");
         // Retirée une fois éteinte : sinon, toucher aussitôt la même ligne ne l'allumerait pas
         // (l'animation finie garde la main sur la teinte).
