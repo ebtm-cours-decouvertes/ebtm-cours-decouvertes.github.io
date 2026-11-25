@@ -751,7 +751,8 @@
       } catch {
         /* sans stockage, rien à effacer */
       }
-      fermerReglages();
+      // L'étape de la fenêtre quittée d'abord : c'est l'étape de l'écran que l'adresse marque.
+      await fermerReglages();
       history.replaceState(history.state, "", location.pathname + "?installer" + location.hash);
       afficherAccueil();
       return;
@@ -1140,24 +1141,27 @@
     zoneEffacement.innerHTML = BOUTON_EFFACER;
   }
 
-  function ouvrirReglages() {
+  function ouvrirReglages({ aussitot = false, parHistorique = false } = {}) {
     const bloc = reglages.querySelector("#reglage-installation");
     if (bloc) bloc.hidden = dejaInstallee();
     rafraichirReglages();
-    montrerFeuille(reglages);
+    if (!parHistorique) entrerFenetre({ type: "reglages" });
+    montrerFeuille(reglages, { aussitot });
     neutraliserArrierePlan(true);
     reglages.querySelector(".feuille__fermer").focus();
   }
 
-  function fermerReglages() {
-    cacherFeuille(reglages);
+  // Renvoie une promesse tenue une fois l'étape de la fenêtre quittée.
+  function fermerReglages({ aussitot = false, parHistorique = false } = {}) {
+    cacherFeuille(reglages, { aussitot });
     neutraliserArrierePlan(false);
     document.getElementById("ouvrir-reglages").focus();
+    return parHistorique ? Promise.resolve() : sortirFenetre();
   }
 
-  document.getElementById("ouvrir-reglages").addEventListener("click", ouvrirReglages);
+  document.getElementById("ouvrir-reglages").addEventListener("click", () => ouvrirReglages());
 
-  reglages.addEventListener("click", (evenement) => {
+  reglages.addEventListener("click", async (evenement) => {
     if (evenement.target === reglages || evenement.target.closest(".feuille__fermer")) {
       fermerReglages();
       return;
@@ -1195,7 +1199,9 @@
       etat = { ...ETAT_PAR_DEFAUT(), ...conserves };
       // Tout remplacer : l'effacement vaut aussi pour ce qu'une autre copie ouverte aurait écrit.
       enregistrerEtat(true);
-      fermerReglages();
+      // L'étape de la fenêtre quittée d'abord : sinon le retour arriverait après le changement
+      // d'adresse, et défairait celui-ci.
+      await fermerReglages();
       location.hash = "#/";
       router();
     }
@@ -1889,7 +1895,7 @@
     </div>`;
   document.body.appendChild(fenetrePartage);
 
-  function ouvrirPartage() {
+  function ouvrirPartage({ aussitot = false, parHistorique = false } = {}) {
     // Le lien partagé porte « ?installer », comme le QR code : qui le reçoit arrive sur
     // l'écran d'installation. L'adresse affichée reste sans ce marqueur, plus lisible.
     const adresse = location.origin + location.pathname;
@@ -1901,18 +1907,20 @@
     bouton.dataset.partage = adresse + "?installer";
     bouton.textContent = navigator.share ? "Partager le lien" : "Copier le lien";
     fenetrePartage.querySelector(".partage__etat").textContent = "";
-    montrerFeuille(fenetrePartage);
+    if (!parHistorique) entrerFenetre({ type: "partage" });
+    montrerFeuille(fenetrePartage, { aussitot });
     neutraliserArrierePlan(true);
     fenetrePartage.querySelector(".feuille__fermer").focus();
   }
 
-  function fermerPartage() {
-    cacherFeuille(fenetrePartage);
+  function fermerPartage({ aussitot = false, parHistorique = false } = {}) {
+    cacherFeuille(fenetrePartage, { aussitot });
     neutraliserArrierePlan(false);
     boutonPartage.focus();
+    if (!parHistorique) sortirFenetre();
   }
 
-  boutonPartage.addEventListener("click", ouvrirPartage);
+  boutonPartage.addEventListener("click", () => ouvrirPartage());
   fenetrePartage.addEventListener("click", (evenement) => {
     if (evenement.target === fenetrePartage || evenement.target.closest(".feuille__fermer")) fermerPartage();
   });
@@ -1958,7 +1966,8 @@
   document.body.appendChild(loupe);
   let declencheur = null;
 
-  function ouvrirLoupe(image) {
+  function ouvrirLoupe(image, { parHistorique = false } = {}) {
+    if (!parHistorique) entrerFenetre({ type: "loupe", src: image.src });
     const grande = loupe.querySelector("img");
     grande.src = image.src;
     grande.alt = image.alt;
@@ -1967,13 +1976,14 @@
     loupe.querySelector(".loupe__fermer").focus();
   }
 
-  function fermerLoupe() {
+  function fermerLoupe({ parHistorique = false } = {}) {
     loupe.hidden = true;
     neutraliserArrierePlan(false);
     if (declencheur) declencheur.focus();
+    if (!parHistorique) sortirFenetre();
   }
 
-  loupe.addEventListener("click", fermerLoupe);
+  loupe.addEventListener("click", () => fermerLoupe());
   document.addEventListener("keydown", (evenement) => {
     if (evenement.key === "Escape" && !loupe.hidden) fermerLoupe();
   });
@@ -2000,7 +2010,7 @@
   document.body.appendChild(feuille);
   let refDeclencheur = null;
 
-  function ouvrirVerset(reference) {
+  function ouvrirVerset(reference, { aussitot = false, parHistorique = false } = {}) {
     // L'attribut porte la forme échappée : on la ramène à la clé du fichier des versets.
     const cle = reference.replace(/&amp;/g, "&");
     // Les passages des leçons d'abord, puis ceux des documents de l'église.
@@ -2023,15 +2033,17 @@
       : html`<p class="texte-doux">Le texte de ce passage n’est pas disponible dans l’application.</p>`;
     feuille.querySelector(".feuille__source").textContent =
       (versets && versets.traduction) || (versetsDocuments && versetsDocuments.traduction) || "";
-    montrerFeuille(feuille);
+    if (!parHistorique) entrerFenetre({ type: "verset", ref: reference });
+    montrerFeuille(feuille, { aussitot });
     neutraliserArrierePlan(true);
     feuille.querySelector(".feuille__fermer").focus();
   }
 
-  function fermerVerset() {
-    cacherFeuille(feuille);
+  function fermerVerset({ aussitot = false, parHistorique = false } = {}) {
+    cacherFeuille(feuille, { aussitot });
     neutraliserArrierePlan(false);
     if (refDeclencheur) refDeclencheur.focus();
+    if (!parHistorique) sortirFenetre();
   }
 
   feuille.addEventListener("click", (evenement) => {
@@ -2642,7 +2654,7 @@
   // Sébastien le 25 novembre 2026) : la fenêtre propose « Voir dans la leçon », et la liste est
   // remise à jour en la fermant si la note a changé (texte, type, retrait).
   let noteDepuisListe = null; // { id, avant } ou null
-  function ouvrirNote(id, { ecrire = false, depuisListe = false, aussitot = false } = {}) {
+  function ouvrirNote(id, { ecrire = false, depuisListe = false, aussitot = false, parHistorique = false } = {}) {
     const note = etat.notes[id];
     if (!note || !note.texte) return;
     cacherAnnonce();
@@ -2661,6 +2673,8 @@
     fenetreNote.querySelector(".note-fenetre__etat").textContent = "";
     zoneRetrait.innerHTML = BOUTON_RETRAIT;
     habillerFenetreNote(note);
+    // L'étape d'historique d'abord : elle retient la hauteur de la page, que figerPage efface.
+    if (!parHistorique) entrerFenetre({ type: "note", id, depuisListe });
     figerPage();
     suivreZoneVisible(true);
     montrerFeuille(fenetreNote, { aussitot });
@@ -2669,8 +2683,9 @@
     (ecrire ? zoneEcrit : fenetreNote.querySelector(".feuille__fermer")).focus({ preventScroll: true });
   }
 
-  function fermerNote({ rendreFocus = true, aussitot = false } = {}) {
+  function fermerNote({ rendreFocus = true, aussitot = false, parHistorique = false } = {}) {
     enregistrerReponseEnAttente();
+    if (!parHistorique) sortirFenetre();
     const id = noteOuverte;
     // La zone d'écriture quitte le focus avant que la fenêtre se cache : cachée avec le clavier
     // encore ouvert, elle le gardait, et le toucher suivant servait à le fermer (perdu).
@@ -2737,17 +2752,11 @@
     }
     const voir = evenement.target.closest(".note-fenetre__voir");
     if (voir) {
-      // La leçon s'ouvre au passage, qui s'allume (montrerNoteDansLecon). Au retour (flèche ou
-      // geste de l'iPhone), on retrouve la note ouverte, là où on l'avait laissée : elle est
-      // notée dans l'entrée d'historique de la liste, et le routeur la rouvre (demande de
-      // Sébastien, 25 novembre 2026). La fenêtre disparaît sans descendre : la leçon arrive
-      // aussitôt, sans fenêtre qui glisse par-dessus.
-      evenement.preventDefault();
-      const id = voir.dataset.allerNote;
-      noteAMontrer = id;
-      history.replaceState({ ...(history.state || {}), noteARouvrir: id }, "");
-      fermerNote({ rendreFocus: false, aussitot: true });
-      location.hash = voir.getAttribute("href");
+      // La leçon s'ouvre au passage, qui s'allume (montrerNoteDansLecon). L'étape de la fenêtre
+      // reste dans l'historique : au retour (flèche ou geste), on retrouve la note ouverte, là
+      // où on l'avait laissée (demande de Sébastien, 25 novembre 2026). Le lien suit son cours ;
+      // le routeur fait disparaître la fenêtre d'un coup, sans qu'elle glisse sur la leçon.
+      noteAMontrer = voir.dataset.allerNote;
       return;
     }
     const choix = evenement.target.closest("[data-choix-etiquette]");
@@ -3422,6 +3431,130 @@
     return false;
   }
 
+  // ---------------------------------------------------------------------------
+  // Une fenêtre ouverte est une étape de l'historique
+  // ---------------------------------------------------------------------------
+  //
+  // Le geste de retour (ou le bouton retour) referme la fenêtre ouverte, sans quitter l'écran
+  // derrière : c'est ainsi qu'il se comporte dans les applications du téléphone, et c'est ce
+  // que recommande Chrome (« Platform controls dismiss dialog », developer.chrome.com : le
+  // retour du téléphone est un moyen attendu de fermer une fenêtre). Safari n'offre aucun moyen
+  // d'intercepter ce geste (CloseWatcher n'y existe pas, caniuse) : la seule façon est la
+  // méthode décrite sur modals.pages.dev. Ouvrir une fenêtre ajoute une étape d'historique
+  // (même adresse) ; la fermer par son bouton revient d'une étape, pour ne rien laisser en
+  // trop ; revenir sur cette étape la rouvre, déjà en place.
+  // Avant (vidéo de Sébastien, 25 novembre 2026, 23 h 09) : le geste de retour quittait
+  // l'écran, puis la fenêtre redescendait par-dessus l'écran suivant.
+  let fenetreActive = null; // { type, ... } de la fenêtre ouverte, ou null
+  let retourEnCours = null; // promesse : le retour d'une étape demandé par une fermeture
+
+  // À l'ouverture d'une fenêtre par le lecteur (pas par l'historique).
+  function entrerFenetre(fenetre) {
+    fenetreActive = fenetre;
+    const poser = () => {
+      const etape = { rang: rangCourant, fenetre, y: window.scrollY };
+      // Une fenêtre qui en remplace une autre prend sa place : une seule étape.
+      if (history.state && history.state.fenetre) {
+        history.replaceState(etape, "");
+        return;
+      }
+      etape.rang = rangCourant + 1;
+      history.pushState(etape, "");
+      rangCourant = etape.rang;
+      pile.length = rangCourant;
+      pile[rangCourant] = ecranCourant ? ecranCourant.cle : "/";
+      noterPile();
+    };
+    // Une fermeture vient de demander le retour d'une étape : on l'attend, sinon la nouvelle
+    // étape serait aussitôt défaite.
+    if (retourEnCours) retourEnCours.then(() => fenetreActive === fenetre && poser());
+    else poser();
+  }
+
+  // À la fermeture d'une fenêtre par le lecteur (bouton, fond, Échap) : on revient de l'étape
+  // qu'elle avait ajoutée. Renvoie une promesse tenue une fois revenu.
+  function sortirFenetre() {
+    fenetreActive = null;
+    if (retourEnCours) return retourEnCours;
+    if (!(history.state && history.state.fenetre)) return Promise.resolve();
+    retourEnCours = new Promise((suite) => {
+      const fin = () => {
+        window.removeEventListener("popstate", fin);
+        clearTimeout(secours);
+        retourEnCours = null;
+        suite();
+      };
+      // Le retour arrive par « popstate » ; au cas où il ne viendrait pas, on n'attend pas plus.
+      const secours = setTimeout(fin, 1000);
+      window.addEventListener("popstate", fin);
+    });
+    history.back();
+    return retourEnCours;
+  }
+
+  // Ferme sans animation la fenêtre ouverte, quand l'historique a déjà bougé (geste de retour,
+  // changement d'écran) : rien ne doit glisser par-dessus l'écran affiché. « memeEcran » : on
+  // reste sur l'écran (geste de retour sur la fenêtre) ; une note dont le type a changé met
+  // alors sa liste à jour, et le focus revient d'où la note a été ouverte.
+  function fermerFenetreActive({ memeEcran = false } = {}) {
+    const fenetre = fenetreActive;
+    fenetreActive = null;
+    if (!fenetre) return;
+    const options = { aussitot: true, parHistorique: true };
+    if (fenetre.type === "note") fermerNote({ ...options, rendreFocus: memeEcran });
+    else if (fenetre.type === "reglages") fermerReglages(options);
+    else if (fenetre.type === "verset") fermerVerset(options);
+    else if (fenetre.type === "partage") fermerPartage(options);
+    else if (fenetre.type === "loupe") fermerLoupe(options);
+  }
+
+  // Rouvre, déjà en place, la fenêtre de l'étape d'historique où l'on arrive. Renvoie faux si
+  // elle ne peut plus s'ouvrir (note retirée entre-temps, image ou référence absente).
+  function rouvrirFenetre(fenetre, y) {
+    if (typeof y === "number" && Math.abs(window.scrollY - y) > 2) window.scrollTo(0, y);
+    const options = { aussitot: true, parHistorique: true };
+    if (fenetre.type === "note") {
+      const note = etat.notes[fenetre.id];
+      if (!note || !note.texte || estRetiree(note)) return false;
+      ouvrirNote(fenetre.id, { ...options, depuisListe: Boolean(fenetre.depuisListe) });
+    } else if (fenetre.type === "reglages") {
+      ouvrirReglages(options);
+    } else if (fenetre.type === "partage") {
+      if (boutonPartage.hidden) return false;
+      ouvrirPartage(options);
+    } else if (fenetre.type === "verset") {
+      refDeclencheur = [...principal.querySelectorAll(".ref")].find((b) => b.dataset.ref === fenetre.ref) || null;
+      ouvrirVerset(fenetre.ref, options);
+    } else if (fenetre.type === "loupe") {
+      const bouton = [...principal.querySelectorAll(".figure__bouton")].find(
+        (b) => b.querySelector("img") && b.querySelector("img").src === fenetre.src
+      );
+      if (!bouton) return false;
+      declencheur = bouton;
+      ouvrirLoupe(bouton.querySelector("img"), options);
+    } else {
+      return false;
+    }
+    fenetreActive = fenetre;
+    return true;
+  }
+
+  // L'étape d'historique où l'on arrive décide de la fenêtre ouverte. « sens » : le pas fait
+  // dans l'historique (-1 en arrière, +1 en avant), pour sauter une étape devenue vide.
+  function suivreFenetreDeLEtape(sens) {
+    const etape = history.state || {};
+    const voulue = etape.fenetre || null;
+    if (fenetreActive && (!voulue || JSON.stringify(voulue) !== JSON.stringify(fenetreActive))) {
+      fermerFenetreActive({ memeEcran: true });
+    }
+    if (!voulue || fenetreActive) return;
+    if (!rouvrirFenetre(voulue, etape.y)) {
+      // Étape sans objet : la traverser, sinon le retour suivant ne changerait rien à l'écran.
+      history.replaceState({ ...etape, fenetre: undefined }, "");
+      if (sens) history.go(sens);
+    }
+  }
+
   // Tous les liens internes de l'application passent par ici.
   document.addEventListener("click", (evenement) => {
     const lien = evenement.target.closest('a[href^="#/"]');
@@ -3573,23 +3706,26 @@
   let cheminRoute = null;
   async function router(evenement) {
     const chemin = location.hash.replace(/^#/, "") || "/";
+    // Même écran, autre étape d'historique : une fenêtre s'ouvre ou se ferme, rien d'autre.
+    if (evenement && evenement.type === "popstate" && chemin === cheminRoute) {
+      const etape = history.state || {};
+      const avant = rangCourant;
+      if (typeof etape.rang === "number") rangCourant = etape.rang;
+      suivreFenetreDeLEtape(Math.sign(rangCourant - avant));
+      return;
+    }
     // « popstate » et « hashchange » annoncent le même changement : le premier arrivé le traite.
     if (evenement && chemin === cheminRoute) return;
     cheminRoute = chemin;
     // Avant de reconstruire l'écran, dont les champs seront remplis depuis l'enregistrement.
     enregistrerReponseEnAttente();
-    // Le retour du navigateur, fenêtre d'une note ouverte : elle se ferme (son texte est
-    // enregistré) au lieu de rester par-dessus le nouvel écran (agent de test, 25 novembre 2026).
-    if (feuilleOuverte(fenetreNote)) fermerNote({ rendreFocus: false });
-    // Même chose pour les autres fenêtres (réglages, verset, partage, image agrandie) : elles
-    // restaient ouvertes par-dessus l'écran suivant (agent de contre-vérification).
-    if (feuilleOuverte(reglages)) fermerReglages();
-    if (feuilleOuverte(feuille)) fermerVerset();
-    if (feuilleOuverte(fenetrePartage)) fermerPartage();
-    if (!loupe.hidden) fermerLoupe();
+    // L'écran change, une fenêtre ouverte : elle disparaît d'un coup (son texte est enregistré),
+    // sans redescendre par-dessus l'écran suivant.
+    fermerFenetreActive();
     cacherBarreNotes();
     if (!annonceGardee) cacherAnnonce();
     const jeton = ++navigation;
+    const rangAvant = rangCourant;
     const { ecran, sens, retour } = changementDEcran(chemin);
     const anime = sens === "avant" && !mouvementReduit.matches;
 
@@ -3634,22 +3770,11 @@
         if (jeton === navigation && pageFigee === null && Math.abs(window.scrollY - y) > 2) window.scrollTo(0, y);
       });
     }
-    // Retour d'une leçon ouverte par « Voir dans la leçon » : la note d'où l'on était parti se
-    // rouvre, déjà ouverte, si elle est encore dans ce dossier.
-    let rouverte = false;
-    const marque = retour && estListe(ecran.cle) && history.state && history.state.noteARouvrir;
-    if (marque) {
-      const { noteARouvrir, ...reste } = history.state;
-      history.replaceState(reste, "");
-      const note = etat.notes[noteARouvrir];
-      const ligneNote = [...principal.querySelectorAll("a.ligne-note[data-ouvrir-note]")].some(
-        (a) => a.dataset.ouvrirNote === noteARouvrir
-      );
-      if (note && note.texte && !estRetiree(note) && ligneNote) {
-        ouvrirNote(noteARouvrir, { depuisListe: true, aussitot: true });
-        rouverte = true;
-      }
-    }
+    // L'étape où l'on arrive avait une fenêtre ouverte (retour d'une leçon ouverte par « Voir
+    // dans la leçon », page rechargée) : elle se rouvre, déjà en place.
+    // Au chargement, on ne saute rien : il n'y a pas de pas fait dans l'historique.
+    suivreFenetreDeLEtape(evenement ? Math.sign(rangCourant - rangAvant) : 0);
+    const rouverte = fenetreActive !== null;
     if (retour && lignesQuittees.has(ecran.cle)) {
       const adresse = lignesQuittees.get(ecran.cle);
       lignesQuittees.delete(ecran.cle);
