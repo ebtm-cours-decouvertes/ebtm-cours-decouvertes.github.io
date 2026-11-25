@@ -854,7 +854,12 @@
     });
     // « Mes notes » : une ligne glissée ou le mode « Modifier » ne restent pas figés au retour.
     noeuds.querySelectorAll(".ligne-note-cadre").forEach((cadre) => {
-      cadre.classList.remove("ligne-note-cadre--ouverte", "ligne-note-cadre--glisse", "ligne-note-cadre--loin");
+      cadre.classList.remove(
+        "ligne-note-cadre--ouverte",
+        "ligne-note-cadre--glisse",
+        "ligne-note-cadre--loin",
+        "ligne-note-cadre--revele"
+      );
       const ligne = cadre.querySelector(".ligne-note");
       if (ligne) ligne.style.transform = ligne.style.transition = "";
       const retirer = cadre.querySelector(".ligne-note__retirer");
@@ -3004,15 +3009,35 @@
     else bouton.setAttribute("aria-hidden", "true");
   }
 
+  // Le bouton rouge n'est visible que si la ligne est ouverte ou en train de glisser ; il reste
+  // le temps que la ligne revienne (260 ms, style.css), puis se cache.
+  const minuteriesRetirer = new WeakMap();
+  function revelerRetirer(cadre) {
+    clearTimeout(minuteriesRetirer.get(cadre));
+    cadre.classList.add("ligne-note-cadre--revele");
+  }
+  function cacherRetirerApresRetour(cadre) {
+    clearTimeout(minuteriesRetirer.get(cadre));
+    minuteriesRetirer.set(
+      cadre,
+      setTimeout(() => {
+        if (!cadre.classList.contains("ligne-note-cadre--ouverte") && !cadre.classList.contains("ligne-note-cadre--glisse"))
+          cadre.classList.remove("ligne-note-cadre--revele");
+      }, 300)
+    );
+  }
+
   function fermerLigne() {
     if (!ligneOuverte) return;
     ligneOuverte.classList.remove("ligne-note-cadre--ouverte");
     rendreRetirerAtteignable(ligneOuverte, false);
+    cacherRetirerApresRetour(ligneOuverte);
     ligneOuverte = null;
   }
 
   function ouvrirLigne(cadre) {
     if (ligneOuverte && ligneOuverte !== cadre) fermerLigne();
+    revelerRetirer(cadre);
     cadre.classList.add("ligne-note-cadre--ouverte");
     rendreRetirerAtteignable(cadre, true);
     ligneOuverte = cadre;
@@ -3141,17 +3166,16 @@
   let glisse = null;
   principal.addEventListener("pointerdown", (evenement) => {
     if (evenement.pointerType === "mouse" || enModification()) return;
+    if (glisse) finirGlisse(true); // un glissement dont la fin s'est perdue : on le referme
     const ligne = evenement.target.closest(".ligne-note-cadre a.ligne-note");
     if (!ligne) return;
     const cadre = ligne.parentElement;
-    // Ouverte, la ligne a glissé de la largeur du bouton moins la marge du cadre (style.css).
-    const marge = parseFloat(getComputedStyle(cadre).paddingRight) || 0;
     glisse = {
       cadre,
       ligne,
       x0: evenement.clientX,
       y0: evenement.clientY,
-      depart: cadre === ligneOuverte ? -(LARGEUR_RETIRER - marge) : 0,
+      depart: cadre === ligneOuverte ? -LARGEUR_RETIRER : 0, // ouverte : décalée du bouton
       actif: false,
       x: 0,
       id: evenement.pointerId,
@@ -3170,6 +3194,7 @@
       // n'ouvre pas la ligne.
       if (Math.abs(dx) < 10 || Math.abs(dx) <= Math.abs(dy) * 2) return;
       glisse.actif = true;
+      revelerRetirer(glisse.cadre);
       glisse.cadre.classList.add("ligne-note-cadre--glisse");
       eteindreAppui();
       if (ligneOuverte && ligneOuverte !== glisse.cadre) fermerLigne();
@@ -3184,6 +3209,13 @@
     glisse.x = Math.max(-largeur, Math.min(0, glisse.depart + dx));
     glisse.ligne.style.transition = "none";
     glisse.ligne.style.transform = `translateX(${glisse.x}px)`;
+    // Le rouge suit le doigt : il remplit tout l'espace découvert, sans blanc entre la ligne et
+    // lui (vidéo de Sébastien, 25 novembre 2026), comme dans Mail.
+    const retirer = glisse.cadre.querySelector(".ligne-note__retirer");
+    if (retirer) {
+      retirer.style.transition = "none";
+      retirer.style.width = `${Math.max(LARGEUR_RETIRER, -glisse.x)}px`;
+    }
     glisse.cadre.classList.toggle("ligne-note-cadre--loin", glisse.x < -largeur * 0.6);
   });
   function finirGlisse(annule) {
@@ -3193,6 +3225,9 @@
     if (!actif) return;
     clicIgnoreJusqua = performance.now() + 400;
     ligne.style.transition = "";
+    const retirer = cadre.querySelector(".ligne-note__retirer");
+    // Le rouge revient à sa largeur au même rythme que la ligne (style.css).
+    if (retirer) retirer.style.width = retirer.style.transition = "";
     const largeur = cadre.getBoundingClientRect().width;
     if (!annule && x < -largeur * 0.6) {
       // Glissée jusqu'au bout : retirée sans autre geste, comme dans Mail. Le rouge reste
@@ -3205,6 +3240,7 @@
     ligne.style.transform = "";
     if (!annule && x < -LARGEUR_RETIRER / 2) ouvrirLigne(cadre);
     else if (cadre === ligneOuverte) fermerLigne();
+    else cacherRetirerApresRetour(cadre);
   }
   principal.addEventListener("pointerup", () => finirGlisse(false));
   principal.addEventListener("pointercancel", () => finirGlisse(true));

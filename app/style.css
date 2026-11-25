@@ -2429,10 +2429,13 @@ a[href^="#/"] {
   transition: transform 260ms var(--feuille-courbe);
 }
 
+/* Le bouton s'arrête au bord droit de la liste (aligné sur la flèche), pas dans la marge du
+   cadre : fermée, la ligne le couvre entièrement. Dans la marge, il se voyait en filet rouge
+   après la fermeture (vidéo de Sébastien, 25 novembre 2026). */
 .ligne-note__retirer {
   position: absolute;
   top: 0;
-  right: 0;
+  right: 0.75rem;
   bottom: 1px;
   width: 88px;
   border: none;
@@ -2440,26 +2443,27 @@ a[href^="#/"] {
   color: var(--fond);
   font: inherit;
   font-weight: 700;
+  /* Même rythme que la ligne : en la relâchant, le rouge reste collé à elle. */
+  transition: width 260ms var(--feuille-courbe);
 }
 
 /* Caché tant que la ligne n'a pas glissé : sinon son bord rouge dépasse dans la marge du cadre.
-   Il ne disparaît qu'une fois la ligne revenue à sa place (même durée que son retour). */
-.liste-notes:not(.liste-notes--modification)
-  .ligne-note-cadre:not(.ligne-note-cadre--ouverte):not(.ligne-note-cadre--glisse)
-  .ligne-note__retirer {
+   « --revele » est posé et retiré par app.js (le retrait attend que la ligne soit revenue) :
+   l'ancien délai écrit ici en CSS laissait sur iPhone un filet rouge après la fermeture
+   (vidéo de Sébastien, 25 novembre 2026). */
+.liste-notes:not(.liste-notes--modification) .ligne-note-cadre:not(.ligne-note-cadre--revele) .ligne-note__retirer {
   visibility: hidden;
-  transition: visibility 0s linear 260ms;
 }
 
-/* La ligne s'arrête au bord du bouton : elle glisse de sa largeur moins la marge du cadre. */
+/* Ouverte, la ligne glisse de la largeur du bouton et s'arrête à son bord. */
 .ligne-note-cadre--ouverte .ligne-note {
-  transform: translateX(calc(-88px + 0.75rem));
+  transform: translateX(-88px);
 }
 
 /* « Modifier » : la ligne ne glisse pas, elle se resserre pour laisser la place à « Retirer »,
    et son texte reste entier ; la flèche s'efface, toucher la ligne n'ouvre plus la leçon. */
 .liste-notes--modification .ligne-note {
-  margin-right: calc(88px - 0.75rem);
+  margin-right: 88px;
 }
 
 .liste-notes--modification .ligne-note .carte-lecon__chevron {
@@ -2480,7 +2484,8 @@ a[href^="#/"] {
 
 @media (prefers-reduced-motion: reduce) {
   .ligne-note-cadre .ligne-note,
-  .ligne-note-cadre--retiree {
+  .ligne-note-cadre--retiree,
+  .ligne-note__retirer {
     transition: none;
   }
 }
