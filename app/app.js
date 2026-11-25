@@ -3859,6 +3859,125 @@
     cible.click();
   });
 
+  // ---------------------------------------------------------------------------
+  // Faire glisser une fenêtre vers le bas pour la fermer
+  // ---------------------------------------------------------------------------
+  //
+  // Le geste attendu sur iPhone : Apple (HIG, « Sheets ») note qu'on s'attend à faire glisser
+  // une fenêtre vers le bas pour la fermer plutôt qu'à toucher un bouton (demandé par Sébastien,
+  // 25 novembre 2026). La fenêtre suit le doigt et le voile s'éclaircit avec elle. Lâchée
+  // au-delà du quart de sa hauteur (seuil par défaut de Vaul, la référence de ce geste sur le
+  // web) ou lancée vers le bas, elle se ferme ; sinon elle remonte. On la prend par son haut,
+  // ou par son contenu quand celui-ci est remonté en haut ; jamais dans une zone d'écriture,
+  // où le doigt sélectionne du texte. « OK » et la croix restent : WCAG 2.5.7 demande un autre
+  // moyen qu'un glisser. Sur grand écran, la fenêtre est au centre : pas de geste.
+  // Événements tactiles, et non « pointer » : seul « touchmove » peut empêcher la page (ou le
+  // contenu de la fenêtre) de défiler pendant le geste.
+  const SEUIL_FERMETURE = 0.25; // part de la hauteur de la fenêtre
+  const VITESSE_FERMETURE = 0.4; // px/ms vers le bas au moment de lâcher : un « lancer »
+  const DEPART_GESTE = 8; // px avant de décider du sens du geste
+  const grandEcran = window.matchMedia("(min-width: 600px)");
+
+  function glisserPourFermer(fenetre, fermer) {
+    const carte = fenetre.querySelector(".feuille__carte");
+    let geste = null;
+    const vider = (duree) => {
+      // La transition CSS repart de la position affichée : la fenêtre part de sous le doigt.
+      carte.style.transition = fenetre.style.transition = "";
+      carte.style.transitionDuration = fenetre.style.transitionDuration = `${duree}ms`;
+      carte.style.transform = fenetre.style.backgroundColor = "";
+      setTimeout(() => {
+        carte.style.transitionDuration = fenetre.style.transitionDuration = "";
+      }, duree + 50);
+    };
+
+    carte.addEventListener(
+      "touchstart",
+      (evenement) => {
+        geste = null;
+        if (grandEcran.matches || evenement.touches.length !== 1 || !feuilleOuverte(fenetre)) return;
+        if (evenement.target.closest("textarea, input, select")) return;
+        const corps = carte.querySelector(".feuille__corps");
+        const toucher = evenement.touches[0];
+        geste = {
+          x: toucher.clientX,
+          y: toucher.clientY,
+          parLeHaut: !corps || !corps.contains(evenement.target),
+          corps,
+          etat: "attente",
+          traces: [],
+        };
+      },
+      { passive: true }
+    );
+
+    carte.addEventListener(
+      "touchmove",
+      (evenement) => {
+        if (!geste || geste.etat === "abandon") return;
+        const toucher = evenement.touches[0];
+        if (geste.etat === "attente") {
+          const dx = toucher.clientX - geste.x;
+          const dy = toucher.clientY - geste.y;
+          if (Math.abs(dx) < DEPART_GESTE && Math.abs(dy) < DEPART_GESTE) return;
+          const versLeBas = dy > 0 && dy > Math.abs(dx);
+          const enHaut = geste.parLeHaut || geste.corps.scrollTop <= 0;
+          if (!versLeBas || !enHaut) {
+            geste.etat = "abandon"; // un défilement, ou un geste de côté : pas pour nous
+            return;
+          }
+          geste.etat = "glisse";
+          geste.y = toucher.clientY;
+          geste.hauteur = carte.offsetHeight;
+          // Le voile tel qu'il est affiché (clair ou sombre), pour l'éclaircir à proportion.
+          const voile = getComputedStyle(fenetre).backgroundColor.match(/[\d.]+/g) || [];
+          geste.voile = voile.length >= 4 ? voile.slice(0, 3).join(", ") : null;
+          geste.opacite = voile.length >= 4 ? Number(voile[3]) : 0;
+          carte.style.transition = fenetre.style.transition = "none";
+        }
+        evenement.preventDefault();
+        const decalage = Math.max(0, toucher.clientY - geste.y);
+        geste.decalage = decalage;
+        carte.style.transform = `translate3d(0, ${decalage}px, 0)`;
+        if (geste.voile) {
+          const part = 1 - Math.min(1, decalage / geste.hauteur);
+          fenetre.style.backgroundColor = `rgba(${geste.voile}, ${(geste.opacite * part).toFixed(3)})`;
+        }
+        geste.traces.push({ y: toucher.clientY, t: evenement.timeStamp });
+        if (geste.traces.length > 8) geste.traces.shift();
+      },
+      { passive: false }
+    );
+
+    const finir = (annule) => {
+      const fin = geste;
+      geste = null;
+      if (!fin || fin.etat !== "glisse") return;
+      // Vitesse au moment de lâcher : sur les 100 dernières millisecondes.
+      const derniere = fin.traces[fin.traces.length - 1];
+      const recentes = derniere ? fin.traces.filter((p) => derniere.t - p.t <= 100) : [];
+      const premiere = recentes[0];
+      const vitesse = premiere && derniere.t > premiere.t ? (derniere.y - premiere.y) / (derniere.t - premiere.t) : 0;
+      const fermerLa =
+        !annule && fin.decalage > 0 && (fin.decalage > fin.hauteur * SEUIL_FERMETURE || vitesse > VITESSE_FERMETURE);
+      if (fermerLa) {
+        // Elle finit sa course à la vitesse du doigt, ni plus vite ni plus lentement.
+        const reste = fin.hauteur - fin.decalage;
+        vider(Math.round(Math.min(400, Math.max(180, reste / Math.max(vitesse, 0.8)))));
+        fermer();
+      } else {
+        vider(320);
+      }
+    };
+    carte.addEventListener("touchend", () => finir(false));
+    carte.addEventListener("touchcancel", () => finir(true));
+  }
+
+  glisserPourFermer(fenetreNote, () => fermerNote());
+  glisserPourFermer(reglages, () => fermerReglages());
+  glisserPourFermer(feuille, () => fermerVerset());
+  glisserPourFermer(fenetrePartage, () => fermerPartage());
+
   // Au retour en arrière, « popstate » arrive avant « hashchange » : l'écran est reconstruit au
   // plus tôt. Vérifié avec le logo unique, les listes gardées et le défilement laissé à l'iPhone
   // (« Retour vers une liste ») : ensemble, plus d'image blanche après le geste de retour.
