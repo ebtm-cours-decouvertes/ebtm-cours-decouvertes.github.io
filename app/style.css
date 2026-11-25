@@ -530,6 +530,7 @@ html:has(main.ecran--entre) .barre--onglets {
   flex: 1;
   min-width: 0;
   margin: 0;
+  transition: opacity 180ms ease;
   color: var(--sur-bandeau);
   font-weight: 600;
   font-size: 1.2rem;
@@ -537,6 +538,18 @@ html:has(main.ecran--entre) .barre--onglets {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* Le grand titre de la page est visible : la barre ne le répète pas (app.js, « comme sur
+   l'iPhone ») ; il revient quand le grand titre passe sous la barre. */
+.barre--titre-replie .marque__titre {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marque__titre {
+    transition: none;
+  }
 }
 
 /* Sous 360 pixels, « Cours découvertes » déborderait : mesuré, 176 px pour 158 disponibles. */
@@ -557,6 +570,15 @@ html:has(main.ecran--entre) .barre--onglets {
   display: grid;
   place-items: center;
   color: var(--texte-doux);
+}
+
+/* « Modifier » / « OK » dans un dossier de « Mes notes » : un mot plutôt qu'une icône. */
+.bouton-barre--texte {
+  width: auto;
+  min-width: max(2.75rem, 44px);
+  padding: 0 0.6rem;
+  font: inherit;
+  font-weight: 700;
 }
 
 /* Sans cette règle, « display: grid » l'emporterait sur l'attribut hidden. */
@@ -2152,6 +2174,18 @@ a[href^="#/"] {
   max-height: min(82vh, calc(100% - 0.75rem));
 }
 
+/* « OK » à la place de la croix (app.js) : un mot, à la couleur des actions. */
+.feuille__ok {
+  width: auto;
+  min-width: max(2.75rem, 44px);
+  padding: 0 0.6rem;
+  margin-right: -0.6rem;
+  color: var(--violet);
+  font: inherit;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
 /* Sous la partie visible, Safari laisse voir la page à travers sa barre d'adresse translucide,
    juste au-dessus du clavier : une bande de leçon restait visible entre la fenêtre et le clavier
    (iPhone virtuel, iOS 27, 25 novembre 2026). Sur téléphone, la fenêtre se prolonge donc vers le
@@ -2315,6 +2349,47 @@ a[href^="#/"] {
   padding: 0;
 }
 
+/* « Récemment supprimées » : même ligne qu'une note, l'origine au-dessus, « Récupérer » à droite. */
+.ligne-supprimee {
+  /* « Récupérer » passe sous le texte quand la place manque (texte très grand, petit écran). */
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.8rem;
+  padding: 1.05rem 0;
+  border-bottom: 1px solid var(--bord);
+}
+
+.ligne-supprimee__origine {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.85rem;
+  color: var(--texte-doux);
+}
+
+.ligne-supprimee__origine .pastille {
+  width: 0.6rem;
+  height: 0.6rem;
+}
+
+.ligne-supprimee > .ligne-note__texte {
+  flex: 1 1 13rem;
+}
+
+.bouton-recuperer {
+  margin-left: auto;
+  min-height: max(2.75rem, 44px);
+  padding: 0 0.6rem;
+  margin-right: -0.6rem;
+  border: none;
+  border-radius: 10px;
+  background: none;
+  color: var(--violet);
+  font: inherit;
+  font-weight: 700;
+}
+
 /* Une note : le passage entre guillemets, ce qu'on a écrit dessous, la flèche à droite. Toute
    la ligne mène au passage dans la leçon. Elle se touche comme une ligne de leçon. */
 .ligne-note {
@@ -2332,7 +2407,82 @@ a[href^="#/"] {
   -webkit-user-select: none;
   user-select: none;
   -webkit-touch-callout: none;
-  touch-action: manipulation;
+  /* Le glissement horizontal est pour l'application (retirer), le vertical pour la page. */
+  touch-action: pan-y;
+  /* Elle couvre le bouton « Retirer » posé dessous. */
+  background: var(--fond);
+}
+
+/* --- Retirer une note : glisser la ligne vers la gauche, ou « Modifier » (app.js) ---------- */
+/* Le cadre déborde de 0,75 rem de chaque côté pour garder la teinte du toucher (« ::before ») ;
+   il coupe ce qui sort, c'est-à-dire la ligne quand elle glisse. */
+.ligne-note-cadre {
+  position: relative;
+  margin: 0 -0.75rem;
+  padding: 0 0.75rem;
+  overflow: hidden;
+}
+
+.ligne-note-cadre .ligne-note {
+  /* Au-dessus du bouton « Retirer », qui vient après elle dans la page. */
+  z-index: 1;
+  transition: transform 260ms var(--feuille-courbe);
+}
+
+.ligne-note__retirer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 1px;
+  width: 88px;
+  border: none;
+  background: var(--danger);
+  color: var(--fond);
+  font: inherit;
+  font-weight: 700;
+}
+
+/* Caché tant que la ligne n'a pas glissé : sinon son bord rouge dépasse dans la marge du cadre.
+   Il ne disparaît qu'une fois la ligne revenue à sa place (même durée que son retour). */
+.liste-notes:not(.liste-notes--modification)
+  .ligne-note-cadre:not(.ligne-note-cadre--ouverte):not(.ligne-note-cadre--glisse)
+  .ligne-note__retirer {
+  visibility: hidden;
+  transition: visibility 0s linear 260ms;
+}
+
+/* La ligne s'arrête au bord du bouton : elle glisse de sa largeur moins la marge du cadre. */
+.ligne-note-cadre--ouverte .ligne-note {
+  transform: translateX(calc(-88px + 0.75rem));
+}
+
+/* « Modifier » : la ligne ne glisse pas, elle se resserre pour laisser la place à « Retirer »,
+   et son texte reste entier ; la flèche s'efface, toucher la ligne n'ouvre plus la leçon. */
+.liste-notes--modification .ligne-note {
+  margin-right: calc(88px - 0.75rem);
+}
+
+.liste-notes--modification .ligne-note .carte-lecon__chevron {
+  display: none;
+}
+
+/* Glissée au-delà des trois cinquièmes : « Retirer » s'étire sous le doigt, comme dans Mail. */
+.ligne-note-cadre--loin .ligne-note__retirer {
+  width: 100%;
+  text-align: right;
+  padding-right: 1.4rem;
+}
+
+/* La ligne retirée se replie ; la suivante remonte à sa place. */
+.ligne-note-cadre--retiree {
+  transition: height 240ms ease-in;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ligne-note-cadre .ligne-note,
+  .ligne-note-cadre--retiree {
+    transition: none;
+  }
 }
 
 .ligne-note__texte {

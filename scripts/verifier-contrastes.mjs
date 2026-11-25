@@ -60,6 +60,10 @@ const PAIRES = [
   ["passage noté « À vivre »", "encre", "note-vivre", 4.5],
   ["passage noté « Pour prier »", "encre", "note-prier", 4.5],
   ["passage noté « Ça m’encourage »", "encre", "note-encourage", 4.5],
+  // « Retirer » sous une ligne de « Mes notes » (texte à la couleur du fond, sur le rouge), et
+  // « OK » de la fenêtre d'une note (violet sur la carte).
+  ["bouton « Retirer »", "fond", "danger", 4.5],
+  ["« OK » de la fenêtre d’une note", "violet", "carte", 4.5],
   // Les pastilles de couleur des notes (barre des choix, fenêtre, « Mes notes ») : éléments
   // graphiques, 3 pour 1 sur la page, sur le choix enfoncé et sur le fond de leur passage.
   ["pastille « Pas compris » sur page", "point-comprends", "fond", 3],

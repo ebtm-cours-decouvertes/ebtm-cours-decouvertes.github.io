@@ -780,8 +780,47 @@
   function ajusterHauteurBarre() {
     hauteurBarre = barre.getBoundingClientRect().height;
     document.body.style.paddingTop = `${hauteurBarre}px`;
+    suivreGrandTitre();
   }
   window.addEventListener("resize", ajusterHauteurBarre);
+
+  // --- Le titre de la barre, comme sur l'iPhone ---------------------------------------------
+  // Le nom de l'écran ne s'écrit qu'une fois : en grand en haut de la page, la barre ne montre
+  // que la flèche ; quand le grand titre passe sous la barre en descendant, le petit titre y
+  // apparaît (« large title » des applications d'Apple : Notes, Mail, Réglages). Demandé par
+  // Sébastien le 25 novembre 2026 : « pourquoi le remettre ? ». Un IntersectionObserver prévient
+  // quand le titre passe sous la barre, sans rien mesurer pendant le défilement (MDN,
+  // « Intersection Observer API »). Écran sans grand titre visible (accueil) : rien ne change.
+  let observateurTitre = null;
+  // Pendant un changement d'écran, la page n'est pas encore à sa place (reprise de la lecture,
+  // liste rendue à sa position) : le titre attend la fin du changement (router), sinon il
+  // s'éteignait une image avant de revenir (agent de test, 25 novembre 2026).
+  let titreDiffere = false;
+  function montrerTitreBarre(oui) {
+    barre.classList.toggle("barre--titre-replie", !oui);
+    if (oui) titreBarre.removeAttribute("aria-hidden");
+    else titreBarre.setAttribute("aria-hidden", "true"); // le grand titre est déjà lu
+  }
+  function suivreGrandTitre() {
+    if (observateurTitre) observateurTitre.disconnect();
+    observateurTitre = null;
+    if (titreDiffere) return;
+    const grandTitre = principal.querySelector("h1.page-titre");
+    if (!grandTitre || !("IntersectionObserver" in window)) {
+      montrerTitreBarre(true);
+      return;
+    }
+    // État de départ posé tout de suite, sans fondu : sinon le titre de l'écran précédent
+    // apparaissait un instant dans la barre avant de s'effacer. Une seule mesure par écran.
+    titreBarre.style.transition = "none";
+    montrerTitreBarre(grandTitre.getBoundingClientRect().bottom <= hauteurBarre);
+    requestAnimationFrame(() => requestAnimationFrame(() => (titreBarre.style.transition = "")));
+    observateurTitre = new IntersectionObserver(
+      ([entree]) => montrerTitreBarre(!entree.isIntersecting && entree.boundingClientRect.top < hauteurBarre),
+      { rootMargin: `-${Math.round(hauteurBarre)}px 0px 0px 0px` }
+    );
+    observateurTitre.observe(grandTitre);
+  }
 
   // Le logo porte le nom de l'église, le titre celui du cours : les deux vont de pair.
   const NOM_APPLICATION = "Cours découvertes";
@@ -813,6 +852,20 @@
     noeuds.querySelectorAll(".ligne--touchee, .ligne--revient").forEach((ligne) => {
       ligne.classList.remove("ligne--touchee", "ligne--revient");
     });
+    // « Mes notes » : une ligne glissée ou le mode « Modifier » ne restent pas figés au retour.
+    noeuds.querySelectorAll(".ligne-note-cadre").forEach((cadre) => {
+      cadre.classList.remove("ligne-note-cadre--ouverte", "ligne-note-cadre--glisse", "ligne-note-cadre--loin");
+      const ligne = cadre.querySelector(".ligne-note");
+      if (ligne) ligne.style.transform = ligne.style.transition = "";
+      const retirer = cadre.querySelector(".ligne-note__retirer");
+      if (retirer) {
+        retirer.tabIndex = -1;
+        retirer.setAttribute("aria-hidden", "true");
+      }
+    });
+    noeuds.querySelectorAll(".liste-notes--modification").forEach((liste) => {
+      liste.classList.remove("liste-notes--modification");
+    });
     ecransGardes.set(ecranAffiche.cle, { html: ecranAffiche.html, noeuds });
   }
 
@@ -822,6 +875,12 @@
     titreBarre.textContent = NOM_APPLICATION;
     // Le partage n'appartient qu'à la liste des leçons : chaque écran l'éteint, elle le rallume.
     boutonPartage.hidden = true;
+    ligneOuverte = null;
+    // « Modifier » n'appartient qu'à un dossier de « Mes notes » (afficherDossier le rallume).
+    const modifier = document.getElementById("modifier-notes");
+    modifier.hidden = true;
+    modifier.setAttribute("aria-pressed", "false");
+    modifier.textContent = "Modifier";
     barre.classList.remove("barre--accueil");
     reposerBarre();
     const cle = ecranCourant ? ecranCourant.cle : null;
@@ -2045,12 +2104,40 @@
   // après la fusion des enregistrements (reporterChangements) : seules les notes complètes comptent.
   // Un enregistrement abîmé (type inconnu, leçon écrite en lettres ou qui n'existe pas) ne doit
   // pas fausser les compteurs : chaque note compte là où « Mes notes » peut la montrer.
-  function notesValides() {
+  function toutesLesNotes() {
     return Object.entries(etat.notes || {})
       .filter(([, n]) => n && typeof n.texte === "string" && n.texte && Number.isInteger(Number(n.lecon)))
       .map(([id, n]) => ({ ...n, id, lecon: Number(n.lecon), etiquette: etiquetteDe(n.etiquette).cle }))
       .filter((n) => !index || index.lecons.some((l) => l.numero === n.lecon));
   }
+  // Une note retirée n'est pas effacée : elle porte la date de son retrait (« retiree ») et passe
+  // dans « Récemment supprimées » pendant 30 jours, comme dans Notes d'Apple (support Apple,
+  // PH21257 : « up to 30 days before they're permanently removed »). Demandé par Sébastien le
+  // 25 novembre 2026. Partout ailleurs, elle n'existe plus.
+  const DUREE_CORBEILLE = 30 * 24 * 60 * 60 * 1000;
+  // Seule une vraie date compte : une valeur abîmée laisse la note parmi les notes actives.
+  const estRetiree = (n) => typeof n.retiree === "number" && Number.isFinite(n.retiree) && n.retiree > 0;
+  function notesValides() {
+    return toutesLesNotes().filter((n) => !estRetiree(n));
+  }
+  function notesRetirees() {
+    return toutesLesNotes()
+      .filter(estRetiree)
+      .sort((a, b) => b.retiree - a.retiree);
+  }
+  // À l'ouverture : les notes retirées depuis plus de 30 jours sont effacées pour de bon.
+  function viderCorbeilleAncienne() {
+    const limite = Date.now() - DUREE_CORBEILLE;
+    let change = false;
+    for (const [id, n] of Object.entries(etat.notes || {})) {
+      if (n && estRetiree(n) && n.retiree < limite) {
+        delete etat.notes[id];
+        change = true;
+      }
+    }
+    if (change) enregistrerEtat();
+  }
+  viderCorbeilleAncienne();
 
   // Place d'un bloc dans la leçon : l'introduction, puis les parties dans l'ordre.
   function rangDuBloc(adresse) {
@@ -2426,8 +2513,16 @@
   let minuterieAnnonce = null;
   let actionAnnonce = null;
 
+  // action : { libelle, faire, fin?, garder? }. « fin » est appelée quand le message s'en va
+  // sans avoir servi ; « garder » le laisse en place quand on change d'écran (un retrait de
+  // note doit rester annulable même si l'on quitte la liste : agent de test, 25 novembre 2026).
+  let finAnnonce = null;
+  let annonceGardee = false;
   function annoncer(texte, action) {
     clearTimeout(minuterieAnnonce);
+    if (finAnnonce && (!action || action.fin !== finAnnonce)) finAnnonce();
+    finAnnonce = action && action.fin ? action.fin : null;
+    annonceGardee = Boolean(action && action.garder);
     annonce.querySelector(".annonce__texte").textContent = texte;
     const bouton = annonce.querySelector(".annonce__bouton");
     actionAnnonce = action ? action.faire : null;
@@ -2435,19 +2530,25 @@
     if (action) bouton.textContent = action.libelle;
     annonce.inert = false;
     annonce.classList.add("annonce--visible");
-    minuterieAnnonce = setTimeout(cacherAnnonce, action ? 6000 : 3500);
+    // Avec une action (« Annuler ») : 4 s, choisies par Sébastien le 25 novembre 2026 parmi 4, 6
+    // et 8 s ; rien n'est perdu s'il disparaît (« Récemment supprimées »).
+    minuterieAnnonce = setTimeout(cacherAnnonce, action ? 4000 : 3500);
   }
 
-  function cacherAnnonce() {
+  function cacherAnnonce({ sansFin = false } = {}) {
     clearTimeout(minuterieAnnonce);
     annonce.classList.remove("annonce--visible");
     annonce.inert = true;
     actionAnnonce = null;
+    annonceGardee = false;
+    const fin = finAnnonce;
+    finAnnonce = null;
+    if (fin && !sansFin) fin();
   }
 
   annonce.querySelector(".annonce__bouton").addEventListener("click", () => {
     const faire = actionAnnonce;
-    cacherAnnonce();
+    cacherAnnonce({ sansFin: true });
     if (faire) faire();
   });
 
@@ -2462,7 +2563,11 @@
     <div class="feuille__carte" role="dialog" aria-modal="true" aria-labelledby="note-titre">
       <div class="feuille__entete">
         <p class="feuille__titre" id="note-titre"></p>
-        <button type="button" class="feuille__fermer" aria-label="Fermer">${CROIX}</button>
+        <!-- « OK » en haut à droite, comme les fenêtres de l'iPhone (Apple, Human Interface
+             Guidelines, « Sheets ») : ce qu'on écrit est enregistré pendant la frappe, comme dans
+             Notes ou Google Keep, et « OK » ferme. Il remplace la croix, qui laissait croire
+             qu'il fallait encore enregistrer (Sébastien, 25 novembre 2026). -->
+        <button type="button" class="feuille__fermer feuille__ok">OK</button>
       </div>
       <div class="feuille__corps feuille__corps--note">
         <p class="note-fenetre__lecon"></p>
@@ -2634,9 +2739,10 @@
     } else {
       const id = noteOuverte;
       enregistrerReponseEnAttente();
-      retirerNote(id);
+      // Retirée avant la fermeture : le focus, qui ne trouve plus le passage, va au texte de la leçon.
+      mettreDeCote(id);
+      peindreNotes();
       fermerNote();
-      annoncer("Note retirée.");
     }
   });
   document.addEventListener("keydown", (evenement) => {
@@ -2703,22 +2809,111 @@
         </li>`;
       })
       .join("");
+    const retirees = notesRetirees();
     const corps = notes.length
       ? html`<ul class="liste-lecons">${lignes}</ul>`
-      : html`<p class="notes-vide">
-          Vous n’avez encore rien noté. Sélectionnez un passage dans une leçon pour le noter.
-        </p>`;
+      : retirees.length
+        ? html`<p class="notes-vide">Aucune note pour l’instant.</p>`
+        : html`<p class="notes-vide">
+            Vous n’avez encore rien noté. Sélectionnez un passage dans une leçon pour le noter.
+          </p>`;
+    // En bas, comme le dossier de Notes d'Apple ; seulement s'il contient quelque chose.
+    const corbeille = retirees.length
+      ? html`<div class="annexes">
+          <a class="annexe" href="#/notes/supprimees">
+            <p class="annexe__titre">Récemment supprimées</p>
+            <span class="annexe__marque">${CHEVRON}</span>
+            <p class="annexe__detail">${nombreDeNotes(retirees.length)}</p>
+          </a>
+        </div>`
+      : "";
     afficherDans(
       html`
         <h1 class="page-titre">Mes notes</h1>
         ${stockageIndisponible ? avertissementStockage() : ""}
         ${corps}
+        ${corbeille}
       `,
       "Mes notes"
     );
     zoneNavigation.innerHTML = RETOUR;
     titreBarre.textContent = "Mes notes";
   }
+
+  // « Récemment supprimées » : les notes retirées depuis moins de 30 jours, la plus récente en
+  // haut. On ne les modifie pas ici (comme dans Notes) : « Récupérer » les remet à leur place.
+  async function afficherSupprimees() {
+    const liste = await chargerIndex();
+    const retirees = notesRetirees().filter((n) => liste.lecons.some((l) => l.numero === Number(n.lecon)));
+    const lignes = retirees
+      .map((note) => {
+        const etiquette = etiquetteDe(note.etiquette);
+        const ecrit = (note.ecrit || "").trim();
+        const passage = echapper(espacesSimples(note.texte));
+        return html`<li class="ligne-supprimee">
+          <span class="ligne-note__texte">
+            <span class="ligne-supprimee__origine"
+              ><span class="pastille pastille--${etiquette.cle}" aria-hidden="true"></span>Leçon ${Number(note.lecon)} ·
+              ${etiquette.nom}</span
+            >
+            <span class="ligne-note__passage">«\u00a0${passage}\u00a0»</span>
+            ${ecrit ? html`<span class="ligne-note__ecrit">${echapper(ecrit).replace(/\n/g, "<br>")}</span>` : ""}
+          </span>
+          <button type="button" class="bouton-recuperer" data-recuperer-note="${note.id}">
+            Récupérer<span class="visuellement-cache"> la note «\u00a0${passage}\u00a0»</span>
+          </button>
+        </li>`;
+      })
+      .join("");
+    afficherDans(
+      // L'essentiel seulement (Sébastien, 25 novembre 2026 : « trop d'informations qui se
+      // répètent ») : ni surtitre, ni phrase d'explication.
+      html`
+        <h1 class="page-titre">Récemment supprimées</h1>
+        ${lignes ? html`<ul class="liste-notes">${lignes}</ul>` : html`<p class="notes-vide">Plus aucune note ici.</p>`}
+      `,
+      "Récemment supprimées"
+    );
+    zoneNavigation.innerHTML = retourNotes("/notes");
+    titreBarre.textContent = "Récemment supprimées";
+  }
+
+  principal.addEventListener("click", (evenement) => {
+    const bouton = evenement.target.closest("[data-recuperer-note]");
+    if (!bouton) return;
+    const id = bouton.dataset.recupererNote;
+    const note = etat.notes[id];
+    if (!note || !note.texte || !estRetiree(note)) {
+      annoncer("Cette note n’existe plus.");
+      rafraichirNotes();
+      return;
+    }
+    // Jamais deux notes sur le même passage : s'il a été noté à nouveau entre-temps, on le dit
+    // (agent de test, 25 novembre 2026 : les deux se mêlaient dans la leçon).
+    const occupe = notesValides().some(
+      (n) => n.lecon === Number(note.lecon) && n.bloc === note.bloc && n.debut < note.fin && n.fin > note.debut
+    );
+    if (occupe) {
+      annoncer("Ce passage porte déjà une autre note : retirez-la d’abord.");
+      return;
+    }
+    const date = note.retiree;
+    delete note.retiree;
+    if (!enregistrerEtat()) {
+      note.retiree = date;
+      annoncer("Attention : cet appareil refuse d’enregistrer. La note reste ici.");
+      return;
+    }
+    // Une autre page ouverte a pu l'effacer entre-temps (fin des 30 jours) : la fusion des
+    // enregistrements ne laisse alors qu'un objet vide, qu'on enlève.
+    const apres = etat.notes[id];
+    if (!apres || !apres.texte) {
+      delete etat.notes[id];
+      enregistrerEtat();
+      annoncer("Cette note n’existe plus.");
+    } else annoncer("Note récupérée.");
+    rafraichirNotes();
+  });
 
   // Une leçon : un dossier par type de note qu'elle contient. Les types vides n'apparaissent pas.
   function afficherDossiersDeLecon(lecon, notes) {
@@ -2757,14 +2952,18 @@
     const lignes = siennes
       .map((note) => {
         const ecrit = (note.ecrit || "").trim();
-        return html`<li>
+        const passage = echapper(espacesSimples(note.texte));
+        return html`<li class="ligne-note-cadre">
           <a class="ligne-note" href="#/lecon/${lecon.numero}/lecture" data-aller-note="${note.id}">
             <span class="ligne-note__texte">
-              <span class="ligne-note__passage">«\u00a0${echapper(espacesSimples(note.texte))}\u00a0»</span>
+              <span class="ligne-note__passage">«\u00a0${passage}\u00a0»</span>
               ${ecrit ? html`<span class="ligne-note__ecrit">${echapper(ecrit).replace(/\n/g, "<br>")}</span>` : ""}
             </span>
             ${CHEVRON}
           </a>
+          <button type="button" class="ligne-note__retirer" data-retirer-note="${note.id}" tabindex="-1" aria-hidden="true">
+            Retirer<span class="visuellement-cache"> la note «\u00a0${passage}\u00a0»</span>
+          </button>
         </li>`;
       })
       .join("");
@@ -2780,7 +2979,237 @@
     );
     zoneNavigation.innerHTML = retourNotes(`/notes/${lecon.numero}`, `la leçon ${lecon.numero}`);
     titreBarre.textContent = etiquette.nom;
+    boutonModifier.hidden = !lignes;
   }
+
+  // --- Retirer une note depuis « Mes notes » ------------------------------------
+  // Les gestes des grandes applications (Mail, Notes, Gmail), demandés par Sébastien le 25 novembre
+  // 2026 : glisser une ligne vers la gauche découvre « Retirer » ; un glissement jusqu'au bout
+  // retire tout de suite ; « Modifier », dans la barre, découvre « Retirer » sur toutes les lignes.
+  // C'est aussi le chemin du clavier et des lecteurs d'écran : un geste de glissement doit
+  // toujours avoir un équivalent d'un seul toucher (W3C, WCAG 2.5.1 « Pointer Gestures »).
+  // Pas de question « Êtes-vous sûr ? » : le message du bas propose « Annuler », comme Gmail.
+  const LARGEUR_RETIRER = 88;
+  const boutonModifier = document.getElementById("modifier-notes");
+  let ligneOuverte = null; // le cadre dont « Retirer » est découvert par un glissement
+  let clicIgnoreJusqua = 0; // le clic qui suit un glissement ne doit pas ouvrir la leçon
+
+  const enModification = () => boutonModifier.getAttribute("aria-pressed") === "true";
+
+  function rendreRetirerAtteignable(cadre, oui) {
+    const bouton = cadre.querySelector(".ligne-note__retirer");
+    if (!bouton) return;
+    bouton.tabIndex = oui ? 0 : -1;
+    if (oui) bouton.removeAttribute("aria-hidden");
+    else bouton.setAttribute("aria-hidden", "true");
+  }
+
+  function fermerLigne() {
+    if (!ligneOuverte) return;
+    ligneOuverte.classList.remove("ligne-note-cadre--ouverte");
+    rendreRetirerAtteignable(ligneOuverte, false);
+    ligneOuverte = null;
+  }
+
+  function ouvrirLigne(cadre) {
+    if (ligneOuverte && ligneOuverte !== cadre) fermerLigne();
+    cadre.classList.add("ligne-note-cadre--ouverte");
+    rendreRetirerAtteignable(cadre, true);
+    ligneOuverte = cadre;
+  }
+
+  function basculerModification(oui) {
+    boutonModifier.setAttribute("aria-pressed", String(oui));
+    boutonModifier.textContent = oui ? "OK" : "Modifier";
+    fermerLigne();
+    const liste = principal.querySelector(".liste-notes");
+    if (!liste) return;
+    liste.classList.toggle("liste-notes--modification", oui);
+    liste.querySelectorAll(".ligne-note-cadre").forEach((cadre) => rendreRetirerAtteignable(cadre, oui));
+  }
+  boutonModifier.addEventListener("click", () => basculerModification(!enModification()));
+
+  // L'écran de « Mes notes » affiché, reconstruit (après « Annuler »), ou les passages de la leçon.
+  async function rafraichirNotes() {
+    const chemin = location.hash.replace(/^#/, "") || "/";
+    if (chemin === "/notes/supprimees") {
+      if (ecranAffiche) ecranAffiche.html = null;
+      await afficherSupprimees();
+      return;
+    }
+    const m = chemin.match(/^\/notes(?:\/(\d+)(?:\/([a-z]+))?)?\/?$/);
+    if (m) {
+      if (ecranAffiche) ecranAffiche.html = null;
+      await afficherNotes(m[1] ? Number(m[1]) : null, m[2] || null);
+    } else if (chemin === "/") {
+      // L'accueil compte les notes (« Mes notes, 3 notes · leçon 2 »).
+      if (ecranAffiche) ecranAffiche.html = null;
+      await afficherChemin("/");
+    } else peindreNotes();
+  }
+
+  // Les retraits faits pendant que « Annuler » est affiché s'additionnent : un seul « Annuler »
+  // les remet tous. Sinon le premier était perdu sans recours (agent de test, 25 novembre 2026).
+  const retraitsEnAttente = [];
+  const oublierRetraits = () => {
+    retraitsEnAttente.length = 0;
+  };
+
+  function retirerDepuisListe(cadre) {
+    const id = cadre.querySelector("[data-retirer-note]").dataset.retirerNote;
+    if (!etat.notes[id]) return;
+    mettreDeCote(id);
+    if (cadre === ligneOuverte) ligneOuverte = null;
+    // La page affichée ne correspond plus à son texte d'origine : elle ne doit pas être reprise
+    // telle quelle (garderEcranQuitte) quand on la reconstruit, après « Annuler » par exemple.
+    if (ecranAffiche) ecranAffiche.html = null;
+    // Le focus passe à la ligne suivante (ou précédente) : il ne doit pas tomber au début de la page.
+    const voisin = cadre.nextElementSibling || cadre.previousElementSibling;
+    const finir = () => {
+      cadre.remove();
+      const liste = principal.querySelector(".liste-notes");
+      if (liste && !liste.children.length) {
+        basculerModification(false);
+        rafraichirNotes();
+      } else if (voisin && voisin.isConnected) {
+        const cible = enModification() ? voisin.querySelector(".ligne-note__retirer") : voisin.querySelector(".ligne-note");
+        if (cible) cible.focus({ preventScroll: true });
+      }
+    };
+    if (mouvementReduit.matches) finir();
+    else {
+      // La ligne se replie, comme dans Mail : la suivante remonte à sa place.
+      cadre.style.height = `${cadre.getBoundingClientRect().height}px`;
+      void cadre.offsetHeight;
+      cadre.classList.add("ligne-note-cadre--retiree");
+      cadre.style.height = "0px";
+      setTimeout(finir, 260);
+    }
+  }
+
+  // Retire une note (glissement, « Modifier » ou fenêtre de la note) : elle passe dans
+  // « Récemment supprimées », et « Annuler » la remet tout de suite.
+  function mettreDeCote(id) {
+    const avant = etat.notes[id];
+    if (!avant) return;
+    etat.notes[id] = { ...avant, retiree: Date.now() };
+    if (!enregistrerEtat()) {
+      annoncer("Attention : cet appareil refuse d’enregistrer. La note reviendra.");
+      return;
+    }
+    retraitsEnAttente.push({ id, note: avant });
+    const nombre = retraitsEnAttente.length;
+    annoncer(nombre > 1 ? `${nombre} notes retirées.` : "Note retirée.", {
+      libelle: "Annuler",
+      fin: oublierRetraits,
+      garder: true,
+      faire: async () => {
+        const etaitEnModification = enModification();
+        if (!estObjet(etat.notes)) etat.notes = {};
+        for (const retrait of retraitsEnAttente) etat.notes[retrait.id] = retrait.note;
+        oublierRetraits();
+        enregistrerEtat();
+        await rafraichirNotes();
+        // « Annuler » en mode « Modifier » : on y reste, pour continuer à retirer.
+        if (etaitEnModification && !boutonModifier.hidden) basculerModification(true);
+      },
+    });
+  }
+
+  principal.addEventListener("click", (evenement) => {
+    const bouton = evenement.target.closest("[data-retirer-note]");
+    if (bouton) retirerDepuisListe(bouton.closest(".ligne-note-cadre"));
+  });
+
+  // Après un glissement, ou ligne ouverte : le toucher referme au lieu d'ouvrir la leçon.
+  principal.addEventListener(
+    "click",
+    (evenement) => {
+      if (evenement.target.closest("[data-retirer-note]")) return;
+      const ligne = evenement.target.closest(".ligne-note-cadre a.ligne-note");
+      if (performance.now() < clicIgnoreJusqua || (ligneOuverte && ligne) || (ligne && enModification())) {
+        evenement.preventDefault();
+        evenement.stopPropagation();
+        if (!enModification()) fermerLigne();
+      }
+    },
+    true
+  );
+
+  // Le glissement lui-même. Il ne démarre que si le doigt part nettement à l'horizontale :
+  // sinon c'est un défilement de la page, laissé au navigateur (« touch-action: pan-y »).
+  let glisse = null;
+  principal.addEventListener("pointerdown", (evenement) => {
+    if (evenement.pointerType === "mouse" || enModification()) return;
+    const ligne = evenement.target.closest(".ligne-note-cadre a.ligne-note");
+    if (!ligne) return;
+    const cadre = ligne.parentElement;
+    // Ouverte, la ligne a glissé de la largeur du bouton moins la marge du cadre (style.css).
+    const marge = parseFloat(getComputedStyle(cadre).paddingRight) || 0;
+    glisse = {
+      cadre,
+      ligne,
+      x0: evenement.clientX,
+      y0: evenement.clientY,
+      depart: cadre === ligneOuverte ? -(LARGEUR_RETIRER - marge) : 0,
+      actif: false,
+      x: 0,
+      id: evenement.pointerId,
+    };
+  });
+  principal.addEventListener("pointermove", (evenement) => {
+    if (!glisse || evenement.pointerId !== glisse.id) return;
+    const dx = evenement.clientX - glisse.x0;
+    const dy = evenement.clientY - glisse.y0;
+    if (!glisse.actif) {
+      if (Math.abs(dy) > 10 && Math.abs(dy) > Math.abs(dx)) {
+        glisse = null; // défilement vertical
+        return;
+      }
+      // Nettement horizontal (deux fois plus que vertical) : un défilement un peu oblique
+      // n'ouvre pas la ligne.
+      if (Math.abs(dx) < 10 || Math.abs(dx) <= Math.abs(dy) * 2) return;
+      glisse.actif = true;
+      glisse.cadre.classList.add("ligne-note-cadre--glisse");
+      eteindreAppui();
+      if (ligneOuverte && ligneOuverte !== glisse.cadre) fermerLigne();
+      try {
+        glisse.ligne.setPointerCapture(evenement.pointerId);
+      } catch {
+        /* sans capture, le glissement continue tant que le doigt reste sur la ligne */
+      }
+    }
+    // Vers la droite, la ligne ne dépasse pas sa place ; vers la gauche, jusqu'au bord.
+    const largeur = glisse.cadre.getBoundingClientRect().width;
+    glisse.x = Math.max(-largeur, Math.min(0, glisse.depart + dx));
+    glisse.ligne.style.transition = "none";
+    glisse.ligne.style.transform = `translateX(${glisse.x}px)`;
+    glisse.cadre.classList.toggle("ligne-note-cadre--loin", glisse.x < -largeur * 0.6);
+  });
+  function finirGlisse(annule) {
+    if (!glisse) return;
+    const { cadre, ligne, x, actif } = glisse;
+    glisse = null;
+    if (!actif) return;
+    clicIgnoreJusqua = performance.now() + 400;
+    ligne.style.transition = "";
+    const largeur = cadre.getBoundingClientRect().width;
+    if (!annule && x < -largeur * 0.6) {
+      // Glissée jusqu'au bout : retirée sans autre geste, comme dans Mail. Le rouge reste
+      // étalé sous elle pendant qu'elle se replie.
+      ligne.style.transform = `translateX(${-largeur}px)`;
+      retirerDepuisListe(cadre);
+      return;
+    }
+    cadre.classList.remove("ligne-note-cadre--glisse", "ligne-note-cadre--loin");
+    ligne.style.transform = "";
+    if (!annule && x < -LARGEUR_RETIRER / 2) ouvrirLigne(cadre);
+    else if (cadre === ligneOuverte) fermerLigne();
+  }
+  principal.addEventListener("pointerup", () => finirGlisse(false));
+  principal.addEventListener("pointercancel", () => finirGlisse(true));
+  // Comme dans Mail : faire défiler la page referme la ligne ouverte.
+  window.addEventListener("scroll", () => fermerLigne(), { passive: true });
 
   principal.addEventListener("click", (evenement) => {
     const aller = evenement.target.closest("[data-aller-note]");
@@ -2894,6 +3323,7 @@
     if (/^\/documents\/[a-z0-9-]+/.test(chemin)) return { cle: chemin.replace(/\/$/, ""), niveau: 2 };
     if (/^\/documents\/?$/.test(chemin)) return { cle: "/documents", niveau: 1 };
     if (chemin === "/a-propos") return { cle: "/a-propos", niveau: 1 };
+    if (/^\/notes\/supprimees\/?$/.test(chemin)) return { cle: "/notes/supprimees", niveau: 2 };
     const notes = chemin.match(/^\/notes(?:\/(\d+)(?:\/([a-z]+))?)?\/?$/);
     if (notes) {
       const [, numero, type] = notes;
@@ -3058,6 +3488,7 @@
       const lecon = chemin.match(/^\/lecon\/(\d+)(?:\/(lecture|versets|questions))?\/?$/);
       if (lecon) return await afficherLecon(Number(lecon[1]), lecon[2]);
       if (chemin === "/a-propos") return await afficherAPropos();
+      if (/^\/notes\/supprimees\/?$/.test(chemin)) return await afficherSupprimees();
       const notes = chemin.match(/^\/notes(?:\/(\d+)(?:\/([a-z]+))?)?\/?$/);
       if (notes) return await afficherNotes(notes[1] ? Number(notes[1]) : null, notes[2] || null);
       if (chemin === "/documents" || chemin === "/documents/") return await afficherDocuments();
@@ -3090,7 +3521,12 @@
     if (feuilleOuverte(fenetrePartage)) fermerPartage();
     if (!loupe.hidden) fermerLoupe();
     cacherBarreNotes();
-    cacherAnnonce();
+    if (!annonceGardee) cacherAnnonce();
+    // Le titre de la barre s'éteint sans fondu le temps de construire l'écran ; il est rétabli
+    // une fois la page à sa place (plus bas, suivreGrandTitre).
+    titreDiffere = true;
+    titreBarre.style.transition = "none";
+    montrerTitreBarre(false);
     const jeton = ++navigation;
     const { ecran, sens, retour } = changementDEcran(chemin);
     const anime = sens === "avant" && !mouvementReduit.matches;
@@ -3136,6 +3572,9 @@
         if (jeton === navigation && Math.abs(window.scrollY - y) > 2) window.scrollTo(0, y);
       });
     }
+    // La page est à sa place : le titre de la barre suit maintenant le grand titre.
+    titreDiffere = false;
+    suivreGrandTitre();
     if (retour && lignesQuittees.has(ecran.cle)) {
       const adresse = lignesQuittees.get(ecran.cle);
       lignesQuittees.delete(ecran.cle);
