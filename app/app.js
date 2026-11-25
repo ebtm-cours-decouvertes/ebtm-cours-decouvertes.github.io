@@ -2577,6 +2577,8 @@
       <div class="feuille__corps feuille__corps--note">
         <p class="note-fenetre__lecon"></p>
         <blockquote class="note-fenetre__passage"></blockquote>
+        <!-- Seulement quand la note est ouverte depuis « Mes notes » : dans la leçon, on y est. -->
+        <a class="note-fenetre__voir" href="#/" data-aller-note="" hidden>Voir dans la leçon</a>
         <!-- La zone d'écriture d'abord : plus bas, le clavier du téléphone la recouvrirait. -->
         <label class="visuellement-cache" for="note-ecrit">Ce que j’écris</label>
         <textarea id="note-ecrit" class="note-fenetre__ecrit" rows="3" autocomplete="off" autocapitalize="sentences"></textarea>
@@ -2661,11 +2663,20 @@
     zoneEcrit.placeholder = etiquette.invite;
   }
 
-  function ouvrirNote(id, { ecrire = false } = {}) {
+  // Ouverte depuis « Mes notes » (toucher une ligne, comme dans Notes ou YouVersion, demandé par
+  // Sébastien le 25 novembre 2026) : la fenêtre propose « Voir dans la leçon », et la liste est
+  // remise à jour en la fermant si la note a changé (texte, type, retrait).
+  let noteDepuisListe = null; // { id, avant } ou null
+  function ouvrirNote(id, { ecrire = false, depuisListe = false } = {}) {
     const note = etat.notes[id];
     if (!note || !note.texte) return;
     cacherAnnonce();
     noteOuverte = id;
+    noteDepuisListe = depuisListe ? { id, avant: JSON.stringify(note) } : null;
+    const voir = fenetreNote.querySelector(".note-fenetre__voir");
+    voir.hidden = !depuisListe;
+    voir.href = `#/lecon/${Number(note.lecon)}/lecture`;
+    voir.dataset.allerNote = id;
     const lecon = index && index.lecons.find((l) => l.numero === Number(note.lecon));
     fenetreNote.querySelector(".note-fenetre__lecon").textContent = lecon
       ? `Leçon ${lecon.numero} · ${lecon.titre}`
@@ -2694,7 +2705,33 @@
     neutraliserArrierePlan(false);
     libererPage();
     noteOuverte = null;
-    if (rendreFocus) rendreFocusAuPassage(id);
+    const depuisListe = noteDepuisListe;
+    noteDepuisListe = null;
+    if (!rendreFocus) return;
+    if (!depuisListe) {
+      rendreFocusAuPassage(id);
+      return;
+    }
+    // Retour à la liste : reconstruite seulement si la note a changé, à la même hauteur ;
+    // le focus revient sur sa ligne (ou sur le titre si elle a quitté ce dossier).
+    const y = window.scrollY;
+    const changee = JSON.stringify(etat.notes[id]) !== depuisListe.avant;
+    const lignes = () => [...principal.querySelectorAll("a.ligne-note[data-ouvrir-note]")];
+    const rang = lignes().findIndex((a) => a.dataset.ouvrirNote === id);
+    // La ligne de la note ; si elle a quitté le dossier, celle qui a pris sa place.
+    const remettreFocus = () => {
+      const toutes = lignes();
+      const ligne = toutes.find((a) => a.dataset.ouvrirNote === id) || toutes[Math.min(Math.max(rang, 0), toutes.length - 1)];
+      if (ligne) ligne.focus({ preventScroll: true });
+    };
+    if (!changee) {
+      remettreFocus();
+      return;
+    }
+    rafraichirNotes().then(() => {
+      window.scrollTo(0, Math.min(y, document.documentElement.scrollHeight - window.innerHeight));
+      remettreFocus();
+    });
   }
 
   // Ce qu'on écrit est enregistré pendant la frappe, comme les réponses aux questions.
@@ -2721,6 +2758,13 @@
   fenetreNote.addEventListener("click", (evenement) => {
     if (evenement.target === fenetreNote || evenement.target.closest(".feuille__fermer")) {
       fermerNote();
+      return;
+    }
+    const voir = evenement.target.closest(".note-fenetre__voir");
+    if (voir) {
+      // Le lien suit son cours : la leçon s'ouvre au passage, qui s'allume (montrerNoteDansLecon).
+      noteAMontrer = voir.dataset.allerNote;
+      fermerNote({ rendreFocus: false });
       return;
     }
     const choix = evenement.target.closest("[data-choix-etiquette]");
@@ -2959,7 +3003,7 @@
         const ecrit = (note.ecrit || "").trim();
         const passage = echapper(espacesSimples(note.texte));
         return html`<li class="ligne-note-cadre">
-          <a class="ligne-note" href="#/lecon/${lecon.numero}/lecture" data-aller-note="${note.id}">
+          <a class="ligne-note" href="#/lecon/${lecon.numero}/lecture" data-ouvrir-note="${note.id}" aria-haspopup="dialog">
             <span class="ligne-note__texte">
               <span class="ligne-note__passage">«\u00a0${passage}\u00a0»</span>
               ${ecrit ? html`<span class="ligne-note__ecrit">${echapper(ecrit).replace(/\n/g, "<br>")}</span>` : ""}
@@ -3247,12 +3291,14 @@
   // Comme dans Mail : faire défiler la page referme la ligne ouverte.
   window.addEventListener("scroll", () => fermerLigne(), { passive: true });
 
+  // Toucher une ligne d'un dossier ouvre la note sur place ; « Voir dans la leçon », dans la
+  // fenêtre, mène au passage. Le lien garde son adresse pour qui l'ouvrirait autrement.
   principal.addEventListener("click", (evenement) => {
-    const aller = evenement.target.closest("[data-aller-note]");
-    if (aller) {
-      // Le lien suit son cours ; la leçon, une fois affichée, descend jusqu'au passage.
-      noteAMontrer = aller.dataset.allerNote;
-    }
+    const ligne = evenement.target.closest("a.ligne-note[data-ouvrir-note]");
+    if (!ligne || evenement.defaultPrevented) return;
+    evenement.preventDefault();
+    evenement.stopPropagation();
+    ouvrirNote(ligne.dataset.ouvrirNote, { depuisListe: true });
   });
 
   // Le passage noté vient au premier tiers de l'écran et s'allume un instant.
@@ -3457,10 +3503,12 @@
     if (!ecranCourant) return;
     // La position se note ici, au toucher, et non au changement d'adresse : filmé sur iPhone
     // virtuel, Safari avait déjà ramené la page en haut quand l'adresse changeait.
-    positionsQuittees.set(ecranCourant.cle, window.scrollY);
+    // Une ligne de note ouvre d'abord sa fenêtre, qui immobilise la page (figerPage) : la
+    // hauteur à retenir est celle d'avant (agent de test, 25 novembre 2026).
+    positionsQuittees.set(ecranCourant.cle, pageFigee !== null ? pageFigee : window.scrollY);
     // Les lignes d'un dossier de notes mènent toutes à la même leçon : elles se reconnaissent
     // à leur note.
-    lignesQuittees.set(ecranCourant.cle, ligne.dataset.allerNote || ligne.getAttribute("href"));
+    lignesQuittees.set(ecranCourant.cle, ligne.dataset.ouvrirNote || ligne.dataset.allerNote || ligne.getAttribute("href"));
   });
 
   // Sous le doigt, la ligne s'allume (teinte, et elle s'enfonce à peine) et reste allumée
@@ -3615,7 +3663,7 @@
       const adresse = lignesQuittees.get(ecran.cle);
       lignesQuittees.delete(ecran.cle);
       const ligne = [...principal.querySelectorAll("a.carte-lecon, a.annexe, a.ligne-note")].find(
-        (a) => (a.dataset.allerNote || a.getAttribute("href")) === adresse
+        (a) => (a.dataset.ouvrirNote || a.dataset.allerNote || a.getAttribute("href")) === adresse
       );
       if (ligne) {
         ligne.classList.add("ligne--revient");

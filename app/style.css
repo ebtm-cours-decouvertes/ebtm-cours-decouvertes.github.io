@@ -2218,6 +2218,23 @@ a[href^="#/"] {
   line-height: 1.55;
 }
 
+/* « Voir dans la leçon » (note ouverte depuis « Mes notes ») : un lien, à la couleur des actions. */
+.note-fenetre__voir {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  min-height: max(2.75rem, 44px);
+  margin: -0.5rem 0;
+  color: var(--violet);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.note-fenetre__voir[hidden] {
+  display: none;
+}
+
 .note-fenetre__lecon {
   margin: 0;
   font-size: 0.85rem;
