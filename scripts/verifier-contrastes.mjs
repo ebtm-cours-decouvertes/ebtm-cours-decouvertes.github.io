@@ -54,6 +54,31 @@ const PAIRES = [
   ["avertissement sur fond", "danger", "fond", 4.5],
   ["bordure d’un champ", "bord-actif", "carte", 3],
   ["bordure d’un champ sur fond", "bord-actif", "fond", 3],
+  // Mes notes : le texte d'un passage noté, sur le fond de son choix.
+  ["passage noté « Pas compris »", "encre", "note-comprends", 4.5],
+  ["passage noté « Ma question »", "encre", "note-question", 4.5],
+  ["passage noté « À vivre »", "encre", "note-vivre", 4.5],
+  ["passage noté « Pour prier »", "encre", "note-prier", 4.5],
+  ["passage noté « Ça m’encourage »", "encre", "note-encourage", 4.5],
+  // Les pastilles de couleur des notes (barre des choix, fenêtre, « Mes notes ») : éléments
+  // graphiques, 3 pour 1 sur la page, sur le choix enfoncé et sur le fond de leur passage.
+  ["pastille « Pas compris » sur page", "point-comprends", "fond", 3],
+  ["pastille « Pas compris » choix enfoncé", "point-comprends", "teinte", 3],
+  ["pastille « Pas compris » sur passage", "point-comprends", "note-comprends", 3],
+  ["pastille « Ma question » sur page", "point-question", "fond", 3],
+  ["pastille « Ma question » choix enfoncé", "point-question", "teinte", 3],
+  ["pastille « Ma question » sur passage", "point-question", "note-question", 3],
+  ["pastille « À vivre » sur page", "point-vivre", "fond", 3],
+  ["pastille « À vivre » choix enfoncé", "point-vivre", "teinte", 3],
+  ["pastille « À vivre » sur passage", "point-vivre", "note-vivre", 3],
+  ["pastille « Pour prier » sur page", "point-prier", "fond", 3],
+  ["pastille « Pour prier » choix enfoncé", "point-prier", "teinte", 3],
+  ["pastille « Pour prier » sur passage", "point-prier", "note-prier", 3],
+  ["pastille « Ça m’encourage » sur page", "point-encourage", "fond", 3],
+  ["pastille « Ça m’encourage » choix enfoncé", "point-encourage", "teinte", 3],
+  ["pastille « Ça m’encourage » sur passage", "point-encourage", "note-encourage", 3],
+  // Le petit message du bas : couleurs du texte et du fond inversées.
+  ["message du bas", "fond", "encre", 4.5],
   // Bandeau de l'accueil : le nom et les icônes en blanc, mesurés aux trois points du dégradé.
   ["nom sur bandeau, à gauche", "sur-bandeau", "bandeau-debut", 4.5],
   ["nom sur bandeau, au milieu", "sur-bandeau", "bandeau-milieu", 4.5],
@@ -67,7 +92,7 @@ for (const [nom, avant, arriere, seuil] of PAIRES) {
     const ok = rapport >= seuil;
     if (!ok) echecs++;
     const marque = ok ? "  " : "✗ ";
-    console.log(`${marque}${theme.padEnd(7)} ${nom.padEnd(32)} ${rapport.toFixed(2)} (min ${seuil})`);
+    console.log(`${marque}${theme.padEnd(7)} ${nom.padEnd(42)} ${rapport.toFixed(2)} (min ${seuil})`);
   }
 }
 

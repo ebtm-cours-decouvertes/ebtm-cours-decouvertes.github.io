@@ -22,6 +22,9 @@
     taillePolice: 0, // -1, 0, 1, 2
     apparence: "clair", // « clair », « sombre » ou « systeme »
     lectures: {}, // { "6/lecture": 12 } — le bloc qui était en haut de l'écran
+    // Passages notés dans les leçons, rangés par identifiant (voir « Mes notes ») :
+    // { "n…": { lecon, bloc, debut, fin, texte, etiquette, ecrit, cree } }
+    notes: {},
   });
 
   // L'enregistrement tel que cette copie de l'application l'a lu ou écrit en dernier.
@@ -304,6 +307,14 @@
   }
 
   const principal = document.getElementById("principal");
+  // « Aller au contenu » (index.html) : l'adresse « #principal » passait par le routeur, qui ne
+  // la connaît pas, et ramenait à l'accueil au lieu du texte de la page (agent de
+  // contre-vérification, 25 novembre 2026). Le lien donne donc le focus lui-même, sans
+  // toucher à l'adresse.
+  document.querySelector(".saut").addEventListener("click", (evenement) => {
+    evenement.preventDefault();
+    principal.focus();
+  });
 
   // Neutralise l'arrière-plan quand une fenêtre est ouverte : le clavier n'en sort plus et les
   // lecteurs d'écran n'annoncent plus ce qui est derrière. « inert » fait les deux d'un coup.
@@ -312,6 +323,8 @@
   // d'en bas ; à la fermeture, on retire la classe et on ne cache la fenêtre qu'une fois la
   // descente finie. Rouverte pendant sa descente, elle remonte depuis là où elle est.
   const minuteriesFeuilles = new WeakMap();
+  // Branché plus bas par « Mes notes » (la barre des choix), défini plus loin dans ce fichier.
+  let autourDesFeuilles = null;
   const moinsDeMouvement = window.matchMedia("(prefers-reduced-motion: reduce)");
   function dureeFermetureFeuille() {
     if (moinsDeMouvement.matches) return 0;
@@ -321,6 +334,9 @@
     return fenetre.classList.contains("feuille--ouverte");
   }
   function montrerFeuille(fenetre) {
+    // Une fenêtre (verset, réglages) passe devant la barre des choix d'une note : la barre se
+    // retire, elle reviendra à la fermeture si le passage est encore sélectionné.
+    if (autourDesFeuilles) autourDesFeuilles.ouverture();
     clearTimeout(minuteriesFeuilles.get(fenetre));
     if (fenetre.hidden) {
       fenetre.hidden = false;
@@ -329,6 +345,7 @@
     fenetre.classList.add("feuille--ouverte");
   }
   function cacherFeuille(fenetre) {
+    if (autourDesFeuilles) autourDesFeuilles.fermeture();
     fenetre.classList.remove("feuille--ouverte");
     clearTimeout(minuteriesFeuilles.get(fenetre));
     minuteriesFeuilles.set(
@@ -340,7 +357,9 @@
   }
 
   function neutraliserArrierePlan(actif) {
-    for (const zone of [document.getElementById("barre"), document.getElementById("principal")]) {
+    // Le lien « Aller au contenu » aussi : sans lui, la tabulation sortait de la fenêtre.
+    const zones = [document.getElementById("barre"), document.getElementById("principal"), document.querySelector(".saut")];
+    for (const zone of zones) {
       if (!zone) continue;
       zone.inert = actif;
       if (actif) zone.setAttribute("aria-hidden", "true");
@@ -462,6 +481,10 @@
     <img class="marque__logo marque__logo--sombre" src="__SRC_SOMBRE__" alt="EBTM" width="500" height="273" /></a>`;
   const RETOUR = `<a class="bouton-retour" href="#/" aria-label="Retour à toutes les leçons">←</a>`;
   const RETOUR_DOCUMENTS = `<a class="bouton-retour" href="#/documents" aria-label="Retour aux documents">←</a>`;
+  // « data-retour » : la flèche remonte dans l'historique si l'écran de « Mes notes » visé y
+  // est juste avant, comme le geste de retour de l'iPhone (voir « Une seule règle pour revenir »).
+  const retourNotes = (cle, nom = "mes notes") =>
+    `<a class="bouton-retour" href="#${cle}" data-retour aria-label="Retour à ${nom}">←</a>`;
 
   // ---------------------------------------------------------------------------
   // Proposer l'installation sur l'écran d'accueil
@@ -784,7 +807,7 @@
   const ecransGardes = new Map(); // clé d'écran → { html, noeuds }
   let ecranAffiche = null; // { cle, html } de l'écran présent dans « principal »
   function garderEcranQuitte() {
-    if (!ecranAffiche || !LISTES.has(ecranAffiche.cle)) return;
+    if (!ecranAffiche || !estListe(ecranAffiche.cle)) return;
     const noeuds = document.createDocumentFragment();
     noeuds.append(...principal.childNodes);
     noeuds.querySelectorAll(".ligne--touchee, .ligne--revient").forEach((ligne) => {
@@ -942,6 +965,8 @@
   }
 
   function surDefilement() {
+    // Page immobilisée sous la fenêtre d'une note : ce n'est pas le lecteur qui défile.
+    if (pageFigee !== null) return;
     const y = Math.max(0, window.scrollY);
     barre.classList.toggle("barre--flottante", y > SEUIL_OMBRE);
     // La lecture avance : on retient où l'on en est une fois le doigt arrêté.
@@ -1061,7 +1086,7 @@
 
   // En deux temps : un toucher malheureux ne doit pas pouvoir tout perdre.
   const CONFIRMATION_EFFACER =
-    '<p class="reglage__avertissement">Êtes-vous sûr ? Toutes vos réponses, les versets cochés ' +
+    '<p class="reglage__avertissement">Êtes-vous sûr ? Toutes vos réponses, vos notes, les versets cochés ' +
     "et les leçons terminées seront effacés de cet appareil. C’est définitif, et ils ne sont " +
     "enregistrés nulle part ailleurs.</p>" +
     '<div class="reglage__confirmation">' +
@@ -1219,6 +1244,11 @@
         ${inviteInstallation()}
         <ul class="liste-lecons">${cartes}</ul>
         <div class="annexes">
+          <a class="annexe" href="#/notes">
+            <p class="annexe__titre">Mes notes</p>
+            <span class="annexe__marque">${CHEVRON}</span>
+            <p class="annexe__detail">${resumeNotes(liste)}</p>
+          </a>
           ${
             (liste.documents || []).length
               ? html`<a class="annexe" href="#/documents">
@@ -1286,7 +1316,7 @@
       html`
         ${enTete}
 
-        <section id="panneau-lecture" class="panneau" role="tabpanel" aria-labelledby="onglet-lecture" ${onglet !== "lecture" ? "hidden" : ""}>
+        <section id="panneau-lecture" class="panneau" role="tabpanel" aria-labelledby="onglet-lecture" data-lecon="${numero}" ${onglet !== "lecture" ? "hidden" : ""}>
           ${rendreLecture(lecon, numero, dernier === "lecture", suivante)}
         </section>
         ${
@@ -1309,8 +1339,11 @@
     );
 
     // Dans une leçon, la flèche de retour prend la place du logo, comme dans toute application.
-    zoneNavigation.innerHTML = RETOUR;
+    // Ouverte depuis « Mes notes », la leçon y ramène : c'est là qu'on était pendant le cours.
+    const precedent = pile[rangCourant - 1] || "";
+    zoneNavigation.innerHTML = /^\/notes(\/|$)/.test(precedent) ? retourNotes(precedent) : RETOUR;
     titreBarre.textContent = lecon.titre;
+    peindreNotes();
 
     if (rangeeEnPlace) {
       // Même leçon : la rangée reste, seuls le choix et le compte des questions sont mis à jour.
@@ -1340,6 +1373,11 @@
     // sous la barre complète, sinon elle est décalée de la hauteur des onglets.
     reprendreLecture(`${numero}/${onglet}`);
     rendreOngletsRangeables();
+    // Arrivée par « Voir dans la leçon » : le passage noté passe avant la reprise de lecture.
+    if (noteAMontrer) {
+      montrerNoteDansLecon(noteAMontrer);
+      noteAMontrer = null;
+    }
   }
 
   function boutonOnglet(numero, id, libelle, compte, actif) {
@@ -1363,11 +1401,18 @@
 
   function rendreLecture(lecon, numero, avecFinDeLecon, suivante) {
     // Un élément d'introduction est soit un paragraphe (chaîne), soit un bloc en marge.
+    // Chaque bloc de texte porte son adresse (« i3 » : 4e élément de l'introduction ; « s2-5 » :
+    // 6e bloc de la 3e partie). C'est à elle qu'une note rattache son passage (« Mes notes »).
     const intro = (lecon.introduction || [])
-      .map((element) => (typeof element === "string" ? html`<p>${enrichir(element)}</p>` : rendreBloc(element)))
+      .map((element, i) =>
+        typeof element === "string" ? html`<p data-bloc="i${i}">${enrichir(element)}</p>` : rendreBloc(element, `i${i}`)
+      )
       .join("");
     const sections = (lecon.sections || [])
-      .map((section) => html`<h2>${enrichir(section.titre)}</h2>${section.blocs.map(rendreBloc).join("")}`)
+      .map(
+        (section, k) =>
+          html`<h2>${enrichir(section.titre)}</h2>${section.blocs.map((bloc, j) => rendreBloc(bloc, `s${k}-${j}`)).join("")}`
+      )
       .join("");
     return html`
       <article class="lecture">
@@ -1386,33 +1431,35 @@
     `;
   }
 
-  function rendreBloc(bloc) {
+  // « adresse » : voir rendreLecture. Les titres et les figures n'en ont pas : on n'y note rien.
+  function rendreBloc(bloc, adresse) {
+    const a = adresse ? ` data-bloc="${adresse}"` : "";
     switch (bloc.type) {
       case "sous-titre":
         return html`<h3>${enrichir(bloc.texte)}</h3>`;
       case "paragraphe":
-        return html`<p>${enrichir(bloc.texte)}</p>`;
+        return html`<p${a}>${enrichir(bloc.texte)}</p>`;
       case "citation":
-        return html`<aside class="encart encart--citation">
+        return html`<aside class="encart encart--citation"${a}>
           <p>${enrichir(bloc.texte)}</p>
           ${bloc.auteur ? html`<span class="encart__source">${echapper(bloc.auteur)}</span>` : ""}
         </aside>`;
       case "verset":
-        return html`<aside class="encart encart--verset">
+        return html`<aside class="encart encart--verset"${a}>
           <p>${enrichir(bloc.texte)}</p>
           <span class="encart__source">${echapper(bloc.reference)}</span>
         </aside>`;
       case "encadre":
-        return html`<aside class="encart encart--encadre">
+        return html`<aside class="encart encart--encadre"${a}>
           ${bloc.titre ? html`<p class="encart__titre">${enrichir(bloc.titre)}</p>` : ""}
           <p>${enrichir(bloc.texte)}</p>
         </aside>`;
       case "liste":
-        return html`<ul>${bloc.elements.map((e) => html`<li>${enrichir(e)}</li>`).join("")}</ul>`;
+        return html`<ul${a}>${bloc.elements.map((e) => html`<li>${enrichir(e)}</li>`).join("")}</ul>`;
       case "note":
-        return html`<p class="note">${enrichir(bloc.texte)}</p>`;
+        return html`<p class="note"${a}>${enrichir(bloc.texte)}</p>`;
       case "tableau":
-        return html`<div class="tableau">
+        return html`<div class="tableau"${a}>
           ${bloc.titre ? html`<p class="tableau__titre">${enrichir(bloc.titre)}</p>` : ""}
           ${bloc.lignes
             .map(
@@ -1758,7 +1805,7 @@
         </div>
         <h2>Vos données</h2>
         <p>
-          Vos réponses, les versets cochés et les leçons terminées sont sauvegardés localement sur
+          Vos réponses, vos notes, les versets cochés et les leçons terminées sont sauvegardés localement sur
           votre appareil. Ni l’église ni l’enseignant n’y ont accès. Si vous effacez les données de
           votre navigateur ou changez de téléphone, ils seront perdus.
         </p>
@@ -1967,6 +2014,800 @@
   });
 
   // ---------------------------------------------------------------------------
+  // Mes notes : noter un passage d'une leçon
+  // ---------------------------------------------------------------------------
+  //
+  // Demandé par Sébastien le 23 novembre 2026, sur le modèle du surligneur de Plateforme
+  // Théologie, mais tourné vers l'étude et la rencontre du samedi. Dans l'onglet Lecture, le
+  // participant sélectionne un passage ; une barre lui propose cinq choix, tous tirés du livret :
+  //   - « Pas compris » : leçon 6, encadré « Je bute sur tel ou tel passage » ;
+  //   - « Ma question » : à poser à la rencontre ;
+  //   - « À vivre » : leçon 3, « Qu'est-ce que le Seigneur veut encore changer dans ma vie ? »,
+  //     et leçon 6, « Qu'est-ce que je devrais changer dans ma vie ? » ;
+  //   - « Pour prier » : leçon 6, « exprimer ce que j'ai lu en sujet de prière », et leçon 7 ;
+  //   - « Ça m'encourage » : leçon 5, la foi des débutants ébranlée par l'épreuve.
+  // Le passage se colore. « Mes notes » (accueil) range tout par leçon et ramène au passage.
+  //
+  // Un passage est retenu par son bloc (data-bloc, voir rendreLecture), sa place dans le texte
+  // de ce bloc et son texte. Si le livret est corrigé et que la place bouge, le passage est
+  // retrouvé par son texte. Comme tout le reste, les notes ne quittent jamais le téléphone.
+
+  const ETIQUETTES = [
+    { cle: "comprends", nom: "Pas compris", ecrire: false, invite: "Ce que je n’ai pas compris…" },
+    { cle: "question", nom: "Ma question", ecrire: true, invite: "Ce que je veux demander…" },
+    { cle: "vivre", nom: "À vivre", ecrire: true, invite: "Ce que je veux changer…" },
+    { cle: "prier", nom: "Pour prier", ecrire: true, invite: "Ma prière…" },
+    { cle: "encourage", nom: "Ça m’encourage", ecrire: false, invite: "Pourquoi ce passage m’encourage…" },
+  ];
+  const etiquetteDe = (cle) => ETIQUETTES.find((e) => e.cle === cle) || ETIQUETTES[1];
+
+  // Une note retirée dans une autre copie ouverte de l'application peut laisser un objet vide
+  // après la fusion des enregistrements (reporterChangements) : seules les notes complètes comptent.
+  // Un enregistrement abîmé (type inconnu, leçon écrite en lettres ou qui n'existe pas) ne doit
+  // pas fausser les compteurs : chaque note compte là où « Mes notes » peut la montrer.
+  function notesValides() {
+    return Object.entries(etat.notes || {})
+      .filter(([, n]) => n && typeof n.texte === "string" && n.texte && Number.isInteger(Number(n.lecon)))
+      .map(([id, n]) => ({ ...n, id, lecon: Number(n.lecon), etiquette: etiquetteDe(n.etiquette).cle }))
+      .filter((n) => !index || index.lecons.some((l) => l.numero === n.lecon));
+  }
+
+  // Place d'un bloc dans la leçon : l'introduction, puis les parties dans l'ordre.
+  function rangDuBloc(adresse) {
+    const intro = /^i(\d+)$/.exec(adresse || "");
+    if (intro) return [0, Number(intro[1]), 0];
+    const partie = /^s(\d+)-(\d+)$/.exec(adresse || "");
+    return partie ? [1, Number(partie[1]), Number(partie[2])] : [2, 0, 0];
+  }
+
+  function comparerPlaces(a, b) {
+    const x = rangDuBloc(a.bloc);
+    const y = rangDuBloc(b.bloc);
+    for (let i = 0; i < 3; i++) if (x[i] !== y[i]) return x[i] - y[i];
+    return a.debut - b.debut;
+  }
+
+  // La ligne « Mes notes » de l'accueil : ce qu'il y a dedans, ou comment commencer.
+  function resumeNotes() {
+    const notes = notesValides();
+    if (!notes.length) return "Sélectionnez un passage dans une leçon pour le noter.";
+    const lecons = [...new Set(notes.map((n) => n.lecon))].sort((a, b) => a - b);
+    const nombre = `${notes.length} note${notes.length > 1 ? "s" : ""}`;
+    const ou =
+      lecons.length > 1
+        ? `leçons ${lecons.slice(0, -1).join(", ")} et ${lecons[lecons.length - 1]}`
+        : `leçon ${lecons[0]}`;
+    return `${nombre} · ${ou}`;
+  }
+
+  const espacesSimples = (texte) => texte.replace(/\s+/g, " ").trim();
+
+  // --- Le texte d'un bloc, et une place dans ce texte ------------------------
+  // Le nom d'une note, lu aux lecteurs d'écran au début du passage coloré, n'appartient pas au
+  // texte de la leçon : marqué « hors-texte », il est ignoré de tous ces calculs.
+
+  function noeudsTexte(bloc) {
+    const marcheur = document.createTreeWalker(bloc, NodeFilter.SHOW_TEXT, {
+      acceptNode: (n) =>
+        n.parentElement && n.parentElement.closest(".hors-texte") ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT,
+    });
+    const noeuds = [];
+    while (marcheur.nextNode()) noeuds.push(marcheur.currentNode);
+    return noeuds;
+  }
+
+  function texteDuBloc(bloc) {
+    return noeudsTexte(bloc)
+      .map((n) => n.data)
+      .join("");
+  }
+
+  // Nombre de caractères du bloc avant le point (noeud, décalage) d'une sélection.
+  function positionDans(bloc, noeud, decalage) {
+    const plage = document.createRange();
+    plage.setStart(bloc, 0);
+    plage.setEnd(noeud, decalage);
+    const copie = plage.cloneContents();
+    copie.querySelectorAll(".hors-texte").forEach((e) => e.remove());
+    return copie.textContent.length;
+  }
+
+  // Colore les caractères [debut, fin) du bloc, morceau par morceau : un passage peut traverser
+  // un mot en italique ou une référence biblique.
+  function envelopper(bloc, debut, fin, note) {
+    const marques = [];
+    let cumul = 0;
+    for (const noeud of noeudsTexte(bloc)) {
+      const d = cumul;
+      const f = cumul + noeud.data.length;
+      cumul = f;
+      if (f <= debut || d >= fin) continue;
+      let morceau = noeud;
+      const a = Math.max(debut, d) - d;
+      const b = Math.min(fin, f) - d;
+      if (b < morceau.data.length) morceau.splitText(b);
+      if (a > 0) morceau = morceau.splitText(a);
+      // Le blanc de mise en page entre deux paragraphes d'un encadré (un retour à la ligne) ne se
+      // colore pas : enveloppé, il ajouterait une ligne vide. L'espace entre deux mots, si.
+      if (!morceau.data.trim() && morceau.data.includes("\n")) continue;
+      const marque = document.createElement("mark");
+      marque.className = `note-passage note--${note.etiquette}`;
+      marque.dataset.note = note.id;
+      morceau.replaceWith(marque);
+      marque.append(morceau);
+      marques.push(marque);
+    }
+    if (marques.length) {
+      const nom = document.createElement("span");
+      nom.className = "visuellement-cache hors-texte";
+      nom.textContent = `Note « ${etiquetteDe(note.etiquette).nom} » : `;
+      marques[0].prepend(nom);
+      // Le premier morceau du passage s'atteint au clavier et se lit comme un bouton : sans
+      // cela, au clavier ou avec un lecteur d'écran, on ne pouvait ni modifier ni retirer une
+      // note (agent de test, 25 novembre 2026). Entrée ou Espace l'ouvrent (voir plus bas).
+      marques[0].tabIndex = 0;
+      marques[0].setAttribute("role", "button");
+    }
+  }
+
+  function effacerMarques(racine) {
+    racine.querySelectorAll("mark.note-passage").forEach((marque) => {
+      marque.querySelectorAll(".hors-texte").forEach((e) => e.remove());
+      marque.replaceWith(...marque.childNodes);
+    });
+    racine.querySelectorAll("[data-bloc]").forEach((bloc) => bloc.normalize());
+  }
+
+  // L'occurrence du passage la plus proche de sa place d'origine, ou -1.
+  function trouverPres(texte, cherche, pres) {
+    let meilleure = -1;
+    for (let i = texte.indexOf(cherche); i >= 0; i = texte.indexOf(cherche, i + 1)) {
+      if (meilleure < 0 || Math.abs(i - pres) < Math.abs(meilleure - pres)) meilleure = i;
+    }
+    return meilleure;
+  }
+
+  function situerNote(article, note) {
+    // Comparé un à un plutôt que glissé dans un sélecteur : une valeur abîmée dans
+    // l'enregistrement (un guillemet) faisait planter toute la leçon (agent de test).
+    const bloc = [...article.querySelectorAll("[data-bloc]")].find((b) => b.dataset.bloc === note.bloc);
+    if (bloc) {
+      const texte = texteDuBloc(bloc);
+      if (texte.slice(note.debut, note.fin) === note.texte) return { bloc, debut: note.debut, fin: note.fin };
+      const i = trouverPres(texte, note.texte, note.debut);
+      if (i >= 0) return { bloc, debut: i, fin: i + note.texte.length };
+    }
+    for (const autre of article.querySelectorAll("[data-bloc]")) {
+      const i = texteDuBloc(autre).indexOf(note.texte);
+      if (i >= 0) return { bloc: autre, debut: i, fin: i + note.texte.length };
+    }
+    return null;
+  }
+
+  function articleDeLecture() {
+    return principal.querySelector("#panneau-lecture .lecture");
+  }
+
+  // Colore dans la leçon affichée tous les passages notés.
+  function peindreNotes() {
+    const article = articleDeLecture();
+    if (!article) return;
+    const numero = Number(article.closest("[data-lecon]").dataset.lecon);
+    effacerMarques(article);
+    for (const note of notesValides()) {
+      if (note.lecon !== numero) continue;
+      const place = situerNote(article, note);
+      if (place) envelopper(place.bloc, place.debut, place.fin, note);
+    }
+  }
+
+  // --- La sélection d'un passage ---------------------------------------------
+  // Trois règles, reprises du surligneur de Plateforme Théologie (24 octobre 2026) : un seul
+  // bloc (la sélection s'arrête à la fin de celui où elle commence), des mots entiers, et jamais
+  // deux notes l'une sur l'autre : un passage qui en touche un autre ouvre celui-là.
+  function lireSelection() {
+    const selection = window.getSelection();
+    if (!selection || selection.isCollapsed || !selection.rangeCount) return null;
+    const plage = selection.getRangeAt(0);
+    const article = articleDeLecture();
+    if (!article || article.closest("[hidden]")) return null;
+    const elementDe = (n) => (n.nodeType === 1 ? n : n.parentElement);
+    const bloc = elementDe(plage.startContainer) && elementDe(plage.startContainer).closest("[data-bloc]");
+    if (!bloc || !article.contains(bloc)) return null;
+
+    const texte = texteDuBloc(bloc);
+    let debut = positionDans(bloc, plage.startContainer, plage.startOffset);
+    let fin = bloc.contains(plage.endContainer) ? positionDans(bloc, plage.endContainer, plage.endOffset) : texte.length;
+    while (debut < fin && /\s/.test(texte[debut])) debut++;
+    while (fin > debut && /\s/.test(texte[fin - 1])) fin--;
+    const lettre = (c) => c !== undefined && /[\p{L}\p{N}’'-]/u.test(c);
+    while (debut > 0 && lettre(texte[debut - 1]) && lettre(texte[debut])) debut--;
+    while (fin < texte.length && lettre(texte[fin]) && lettre(texte[fin - 1])) fin++;
+    if (fin - debut < 2) return null;
+
+    for (const marque of bloc.querySelectorAll("mark.note-passage")) {
+      const md = positionDans(bloc, marque, 0);
+      const mf = md + texteDuBloc(marque).length;
+      if (md < fin && mf > debut) return { existante: marque.dataset.note };
+    }
+    return {
+      lecon: Number(article.closest("[data-lecon]").dataset.lecon),
+      adresse: bloc.dataset.bloc,
+      debut,
+      fin,
+      texte: texte.slice(debut, fin),
+      plage,
+    };
+  }
+
+  // --- La barre des cinq choix -----------------------------------------------
+  // En bas de l'écran, comme sur Plateforme Théologie : au-dessus du passage, le menu de l'iPhone
+  // (« Copier », « Rechercher ») la recouvrait quand le passage était bas dans l'écran (mesuré
+  // sur iPhone virtuel, iOS 27 et 26.5, le 23 novembre 2026).
+  const barreNotes = document.createElement("div");
+  barreNotes.className = "barre-notes";
+  barreNotes.setAttribute("role", "toolbar");
+  barreNotes.setAttribute("aria-label", "Noter ce passage");
+  barreNotes.hidden = true;
+  barreNotes.innerHTML = ETIQUETTES.map(
+    (e) =>
+      `<button type="button" class="barre-notes__choix" data-etiquette="${e.cle}">` +
+      `<span class="pastille pastille--${e.cle}" aria-hidden="true"></span>${e.nom}</button>`
+  ).join("");
+  document.body.appendChild(barreNotes);
+
+  let choixEnCours = null; // la sélection que la barre propose de noter
+
+  function montrerBarreNotes(plage) {
+    barreNotes.hidden = false;
+    // Le passage ne doit pas finir caché sous la barre : la page remonte juste ce qu'il faut.
+    const passage = plage.getBoundingClientRect();
+    const hautBarre = barreNotes.getBoundingClientRect().top;
+    if (passage.bottom > hautBarre - 16) window.scrollBy(0, passage.bottom - hautBarre + 32);
+  }
+
+  function cacherBarreNotes() {
+    barreNotes.hidden = true;
+    choixEnCours = null;
+  }
+
+  function examinerSelection() {
+    // Une fenêtre est ouverte (sa zone de saisie a sa propre sélection) : rien à proposer.
+    if (document.body.style.overflow === "hidden") return;
+    const choix = lireSelection();
+    if (!choix) {
+      cacherBarreNotes();
+      return;
+    }
+    if (choix.existante) {
+      window.getSelection().removeAllRanges();
+      cacherBarreNotes();
+      ouvrirNote(choix.existante);
+      return;
+    }
+    choixEnCours = choix;
+    montrerBarreNotes(choix.plage);
+  }
+
+  autourDesFeuilles = {
+    ouverture: cacherBarreNotes,
+    // Après que l'arrière-plan est rendu (neutraliserArrierePlan suit cacherFeuille).
+    fermeture: () => setTimeout(examinerSelection, 0),
+  };
+
+  // À la souris, la barre attend qu'on relâche le bouton ; au doigt et au clavier, qu'elle ne
+  // bouge plus (Plateforme Théologie, 24 octobre 2026 : elle suivait la sélection en cours).
+  const auDoigt = window.matchMedia("(pointer: coarse)");
+  let attenteSelection = null;
+  let sourisEnfoncee = false;
+  document.addEventListener(
+    "pointerdown",
+    (evenement) => {
+      if (evenement.pointerType === "mouse" && evenement.button === 0 && !barreNotes.contains(evenement.target))
+        sourisEnfoncee = true;
+    },
+    true
+  );
+  window.addEventListener(
+    "pointerup",
+    (evenement) => {
+      if (evenement.pointerType !== "mouse" || !sourisEnfoncee) return;
+      sourisEnfoncee = false;
+      clearTimeout(attenteSelection);
+      attenteSelection = setTimeout(examinerSelection, 10);
+    },
+    true
+  );
+  document.addEventListener("selectionchange", () => {
+    clearTimeout(attenteSelection);
+    if (sourisEnfoncee) {
+      if (!barreNotes.hidden) cacherBarreNotes();
+      return;
+    }
+    attenteSelection = setTimeout(examinerSelection, auDoigt.matches ? 350 : 120);
+  });
+
+  // Sur iPhone, avec une sélection et le menu d'Apple ouverts, le premier toucher d'un bouton se
+  // perdait (Plateforme Théologie, 21 octobre 2026) : le choix agit dès que le doigt se lève, et
+  // le clic que l'iPhone envoie ensuite, tombé là où la barre était, est ignoré.
+  let doigtSurChoix = null;
+  let ignorerClicJusqua = 0;
+  barreNotes.addEventListener("pointerdown", (evenement) => {
+    const bouton = evenement.target.closest("button");
+    if (!bouton) return;
+    evenement.preventDefault(); // garde la sélection : sans cela, elle disparaît avant le choix
+    doigtSurChoix = evenement.pointerType === "touch" ? bouton : null;
+  });
+  barreNotes.addEventListener("pointerup", (evenement) => {
+    const bouton = evenement.target.closest("button");
+    if (doigtSurChoix && bouton === doigtSurChoix) {
+      evenement.preventDefault();
+      ignorerClicJusqua = performance.now() + 700;
+      noter(bouton.dataset.etiquette);
+    }
+    doigtSurChoix = null;
+  });
+  barreNotes.addEventListener("click", (evenement) => {
+    const bouton = evenement.target.closest("button");
+    if (!bouton || performance.now() < ignorerClicJusqua) return;
+    noter(bouton.dataset.etiquette);
+  });
+  document.addEventListener(
+    "click",
+    (evenement) => {
+      if (performance.now() >= ignorerClicJusqua || barreNotes.contains(evenement.target)) return;
+      ignorerClicJusqua = 0;
+      evenement.stopPropagation();
+      evenement.preventDefault();
+    },
+    true
+  );
+
+  function noter(cle) {
+    const choix = choixEnCours;
+    if (!choix) return;
+    const id = `n${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+    if (!estObjet(etat.notes)) etat.notes = {};
+    etat.notes[id] = {
+      lecon: choix.lecon,
+      bloc: choix.adresse,
+      debut: choix.debut,
+      fin: choix.fin,
+      texte: choix.texte,
+      etiquette: cle,
+      ecrit: "",
+      cree: Date.now(),
+    };
+    const ok = enregistrerEtat();
+    const auClavier = barreNotes.contains(document.activeElement);
+    const selection = window.getSelection();
+    if (selection) selection.removeAllRanges();
+    cacherBarreNotes();
+    peindreNotes();
+    const etiquette = etiquetteDe(cle);
+    const REFUS = "Attention : cet appareil refuse d’enregistrer. Cette note sera perdue.";
+    if (etiquette.ecrire) {
+      ouvrirNote(id, { ecrire: true });
+      // Dans la fenêtre, et après son ouverture : le message du bas, lui, s'effaçait aussitôt.
+      if (!ok) fenetreNote.querySelector(".note-fenetre__etat").textContent = REFUS;
+      return;
+    }
+    if (!ok) annoncer(REFUS);
+    else annoncer(`Noté : ${etiquette.nom}`, { libelle: "Annuler", faire: () => retirerNote(id) });
+    // Au clavier, la barre disparue, on reste sur le passage qu'on vient de noter.
+    if (auClavier) rendreFocusAuPassage(id);
+  }
+
+  // Le passage coloré d'une note reprend le focus ; s'il n'existe plus, le texte de la leçon.
+  function rendreFocusAuPassage(id) {
+    const marque = principal.querySelector(`mark.note-passage[tabindex="0"][data-note="${CSS.escape(id)}"]`);
+    (marque || principal).focus({ preventScroll: true });
+  }
+
+  function retirerNote(id) {
+    delete etat.notes[id];
+    enregistrerEtat();
+    peindreNotes();
+  }
+
+  document.addEventListener("keydown", (evenement) => {
+    if (evenement.key === "Escape" && !barreNotes.hidden) cacherBarreNotes();
+  });
+
+  // --- Le petit message du bas -----------------------------------------------
+  // Dit ce qui vient d'être fait, avec « Annuler » quand c'est possible. Il reste dans la page,
+  // vide, pour que les lecteurs d'écran annoncent chaque nouveau message (role="status").
+  const annonce = document.createElement("div");
+  annonce.className = "annonce";
+  annonce.setAttribute("role", "status");
+  annonce.inert = true;
+  annonce.innerHTML = '<span class="annonce__texte"></span><button type="button" class="annonce__bouton" hidden></button>';
+  document.body.appendChild(annonce);
+  let minuterieAnnonce = null;
+  let actionAnnonce = null;
+
+  function annoncer(texte, action) {
+    clearTimeout(minuterieAnnonce);
+    annonce.querySelector(".annonce__texte").textContent = texte;
+    const bouton = annonce.querySelector(".annonce__bouton");
+    actionAnnonce = action ? action.faire : null;
+    bouton.hidden = !action;
+    if (action) bouton.textContent = action.libelle;
+    annonce.inert = false;
+    annonce.classList.add("annonce--visible");
+    minuterieAnnonce = setTimeout(cacherAnnonce, action ? 6000 : 3500);
+  }
+
+  function cacherAnnonce() {
+    clearTimeout(minuterieAnnonce);
+    annonce.classList.remove("annonce--visible");
+    annonce.inert = true;
+    actionAnnonce = null;
+  }
+
+  annonce.querySelector(".annonce__bouton").addEventListener("click", () => {
+    const faire = actionAnnonce;
+    cacherAnnonce();
+    if (faire) faire();
+  });
+
+  // --- La fenêtre d'une note -------------------------------------------------
+  // Ouverte en notant « Ma question », « À vivre » ou « Pour prier », en touchant un passage
+  // coloré, ou par « Modifier » dans « Mes notes ». On y change le choix, on y écrit, on y
+  // retire la note.
+  const fenetreNote = document.createElement("div");
+  fenetreNote.className = "feuille feuille--note";
+  fenetreNote.hidden = true;
+  fenetreNote.innerHTML = `
+    <div class="feuille__carte" role="dialog" aria-modal="true" aria-labelledby="note-titre">
+      <div class="feuille__entete">
+        <p class="feuille__titre" id="note-titre"></p>
+        <button type="button" class="feuille__fermer" aria-label="Fermer">${CROIX}</button>
+      </div>
+      <div class="feuille__corps feuille__corps--note">
+        <p class="note-fenetre__lecon"></p>
+        <blockquote class="note-fenetre__passage"></blockquote>
+        <!-- La zone d'écriture d'abord : plus bas, le clavier du téléphone la recouvrirait. -->
+        <label class="visuellement-cache" for="note-ecrit">Ce que j’écris</label>
+        <textarea id="note-ecrit" class="note-fenetre__ecrit" rows="3" autocomplete="off" autocapitalize="sentences"></textarea>
+        <p class="question__etat note-fenetre__etat" aria-live="polite"></p>
+        <p class="note-fenetre__intitule" id="note-choix-titre">Type de note</p>
+        <div class="note-fenetre__choix" role="group" aria-labelledby="note-choix-titre">
+          ${ETIQUETTES.map(
+            (e) =>
+              `<button type="button" class="choix-note" data-choix-etiquette="${e.cle}" aria-pressed="false">` +
+              `<span class="pastille pastille--${e.cle}" aria-hidden="true"></span>${e.nom}</button>`
+          ).join("")}
+        </div>
+        <div class="note-fenetre__retrait"></div>
+      </div>
+    </div>`;
+  document.body.appendChild(fenetreNote);
+
+  const zoneEcrit = fenetreNote.querySelector(".note-fenetre__ecrit");
+  const zoneRetrait = fenetreNote.querySelector(".note-fenetre__retrait");
+  const BOUTON_RETRAIT = '<button type="button" class="lien-danger" data-retirer="demander">Retirer cette note</button>';
+  const CONFIRMATION_RETRAIT =
+    '<p class="reglage__avertissement">Retirer cette note ? Le passage ne sera plus coloré.</p>' +
+    '<div class="reglage__confirmation">' +
+    '<button type="button" class="bouton-principal bouton-principal--secondaire" data-retirer="annuler">Annuler</button>' +
+    '<button type="button" class="bouton-principal bouton-danger" data-retirer="confirmer">Oui, retirer</button>' +
+    "</div>";
+
+  // Le clavier du téléphone réduit la partie visible de l'écran sans changer la mise en page :
+  // calée sur la page entière, la fenêtre était poussée vers le haut, titre et passage hors de
+  // l'écran, un bout de leçon visible dessous (iPhone virtuel, iOS 27, 23 novembre 2026). Elle
+  // suit donc la partie visible, comme le recommande MDN (« VisualViewport » : « positioning
+  // elements relative to what's shown on-screen »).
+  const zoneVisible = window.visualViewport || null;
+  function calerSurZoneVisible() {
+    if (!zoneVisible) return;
+    fenetreNote.style.top = `${zoneVisible.offsetTop}px`;
+    fenetreNote.style.height = `${zoneVisible.height}px`;
+    fenetreNote.style.bottom = "auto";
+  }
+  function suivreZoneVisible(actif) {
+    if (!zoneVisible) return;
+    const geste = actif ? "addEventListener" : "removeEventListener";
+    zoneVisible[geste]("resize", calerSurZoneVisible);
+    zoneVisible[geste]("scroll", calerSurZoneVisible);
+    if (actif) calerSurZoneVisible();
+    else fenetreNote.style.top = fenetreNote.style.height = fenetreNote.style.bottom = "";
+  }
+
+  // Pendant que la fenêtre est ouverte, la page dessous est immobilisée à sa place. Sans cela,
+  // l'iPhone la faisait défiler à l'arrivée du clavier pour montrer la zone de saisie : toute
+  // la page sautait à l'ouverture, puis revenait d'un coup à la fermeture (vidéo du 25 novembre
+  // 2026, relevé par Sébastien : « j'aime pas trop quand ça s'ouvre »). « overflow: hidden »
+  // ne suffit pas sur iPhone : le corps de la page est fixé, décalé de sa hauteur de
+  // défilement, puis rendu à sa place en refermant (pratique relevée sur les forums
+  // développeurs d'Apple et les rapports WebKit 176896 et 153224).
+  let pageFigee = null; // hauteur de défilement de la page immobilisée, ou null
+  function figerPage() {
+    if (pageFigee !== null) return;
+    pageFigee = window.scrollY;
+    Object.assign(document.body.style, { position: "fixed", top: `-${pageFigee}px`, left: "0", right: "0" });
+  }
+  function libererPage() {
+    if (pageFigee === null) return;
+    const y = pageFigee;
+    Object.assign(document.body.style, { position: "", top: "", left: "", right: "" });
+    derniereY = y; // la barre du haut ne prend pas ce retour pour un défilement
+    window.scrollTo(0, y);
+    pageFigee = null;
+  }
+
+  let noteOuverte = null;
+  let noteAMontrer = null; // posée par « Voir dans la leçon », lue par afficherLecon
+
+  // Titre, couleur du passage, choix enfoncé et invitation suivent le choix de la note.
+  function habillerFenetreNote(note) {
+    const etiquette = etiquetteDe(note.etiquette);
+    fenetreNote.querySelector(".feuille__titre").textContent = etiquette.nom;
+    const passage = fenetreNote.querySelector(".note-fenetre__passage");
+    passage.className = `note-fenetre__passage note-fenetre__passage--${etiquette.cle}`;
+    for (const bouton of fenetreNote.querySelectorAll("[data-choix-etiquette]"))
+      bouton.setAttribute("aria-pressed", String(bouton.dataset.choixEtiquette === etiquette.cle));
+    zoneEcrit.placeholder = etiquette.invite;
+  }
+
+  function ouvrirNote(id, { ecrire = false } = {}) {
+    const note = etat.notes[id];
+    if (!note || !note.texte) return;
+    cacherAnnonce();
+    noteOuverte = id;
+    const lecon = index && index.lecons.find((l) => l.numero === Number(note.lecon));
+    fenetreNote.querySelector(".note-fenetre__lecon").textContent = lecon
+      ? `Leçon ${lecon.numero} · ${lecon.titre}`
+      : `Leçon ${note.lecon}`;
+    fenetreNote.querySelector(".note-fenetre__passage").textContent = espacesSimples(note.texte);
+    zoneEcrit.value = note.ecrit || "";
+    fenetreNote.querySelector(".note-fenetre__etat").textContent = "";
+    zoneRetrait.innerHTML = BOUTON_RETRAIT;
+    habillerFenetreNote(note);
+    figerPage();
+    suivreZoneVisible(true);
+    montrerFeuille(fenetreNote);
+    neutraliserArrierePlan(true);
+    ajusterHauteur(zoneEcrit);
+    (ecrire ? zoneEcrit : fenetreNote.querySelector(".feuille__fermer")).focus({ preventScroll: true });
+  }
+
+  function fermerNote({ rendreFocus = true } = {}) {
+    enregistrerReponseEnAttente();
+    const id = noteOuverte;
+    // La zone d'écriture quitte le focus avant que la fenêtre se cache : cachée avec le clavier
+    // encore ouvert, elle le gardait, et le toucher suivant servait à le fermer (perdu).
+    if (document.activeElement === zoneEcrit) zoneEcrit.blur();
+    suivreZoneVisible(false);
+    cacherFeuille(fenetreNote);
+    neutraliserArrierePlan(false);
+    libererPage();
+    noteOuverte = null;
+    if (rendreFocus) rendreFocusAuPassage(id);
+  }
+
+  // Ce qu'on écrit est enregistré pendant la frappe, comme les réponses aux questions.
+  let minuterieEcrit = null;
+  function enregistrerEcrit() {
+    clearTimeout(minuterieEcrit);
+    if (reponseEnAttente === enregistrerEcrit) reponseEnAttente = null;
+    const note = noteOuverte && etat.notes[noteOuverte];
+    if (!note) return;
+    note.ecrit = zoneEcrit.value;
+    const ok = enregistrerEtat();
+    fenetreNote.querySelector(".note-fenetre__etat").textContent = ok
+      ? ""
+      : "Attention : cet appareil refuse d’enregistrer. Votre note sera perdue.";
+  }
+  zoneEcrit.addEventListener("input", () => {
+    ajusterHauteur(zoneEcrit);
+    clearTimeout(minuterieEcrit);
+    reponseEnAttente = enregistrerEcrit;
+    minuterieEcrit = setTimeout(enregistrerEcrit, 400);
+  });
+  zoneEcrit.addEventListener("blur", enregistrerReponseEnAttente);
+
+  fenetreNote.addEventListener("click", (evenement) => {
+    if (evenement.target === fenetreNote || evenement.target.closest(".feuille__fermer")) {
+      fermerNote();
+      return;
+    }
+    const choix = evenement.target.closest("[data-choix-etiquette]");
+    if (choix) {
+      const note = noteOuverte && etat.notes[noteOuverte];
+      if (!note) return;
+      note.etiquette = choix.dataset.choixEtiquette;
+      enregistrerEtat();
+      habillerFenetreNote(note);
+      peindreNotes();
+      return;
+    }
+    const retrait = evenement.target.closest("[data-retirer]");
+    if (!retrait) return;
+    if (retrait.dataset.retirer === "demander") {
+      zoneRetrait.innerHTML = CONFIRMATION_RETRAIT;
+      zoneRetrait.querySelector('[data-retirer="annuler"]').focus();
+    } else if (retrait.dataset.retirer === "annuler") {
+      zoneRetrait.innerHTML = BOUTON_RETRAIT;
+      zoneRetrait.querySelector("button").focus();
+    } else {
+      const id = noteOuverte;
+      enregistrerReponseEnAttente();
+      retirerNote(id);
+      fermerNote();
+      annoncer("Note retirée.");
+    }
+  });
+  document.addEventListener("keydown", (evenement) => {
+    if (evenement.key === "Escape" && feuilleOuverte(fenetreNote)) fermerNote();
+  });
+
+  // Toucher un passage coloré ouvre sa note. « cursor: pointer » (style.css) est ce qui fait
+  // que Safari d'iPhone envoie un clic sur du simple texte.
+  principal.addEventListener("click", (evenement) => {
+    const marque = evenement.target.closest("mark.note-passage");
+    if (!marque || evenement.target.closest(".ref, a, button")) return;
+    const selection = window.getSelection();
+    if (selection && !selection.isCollapsed) return;
+    ouvrirNote(marque.dataset.note);
+  });
+  // Au clavier : Entrée ou Espace sur le passage, comme sur un bouton.
+  principal.addEventListener("keydown", (evenement) => {
+    const marque = evenement.target.closest && evenement.target.closest("mark.note-passage[tabindex]");
+    if (!marque || (evenement.key !== "Enter" && evenement.key !== " ")) return;
+    evenement.preventDefault();
+    ouvrirNote(marque.dataset.note);
+  });
+
+  // --- Les écrans de « Mes notes » ---------------------------------------------
+  // Rangés comme Sébastien l'a choisi sur maquettes le 25 novembre 2026 (« Leçon d'abord »,
+  // puis « Lignes fines ») : les leçons qui ont des notes, puis un dossier par type de note
+  // dans une leçon, puis les notes d'un dossier, dans l'ordre du texte. Chaque écran ne montre
+  // qu'une chose, et se présente comme la liste des leçons de l'accueil.
+
+  const nombreDeNotes = (n) => `${n} note${n > 1 ? "s" : ""}`;
+
+  async function afficherNotes(numero, type) {
+    const liste = await chargerIndex();
+    const notes = notesValides();
+    const lecon = numero && liste.lecons.find((l) => l.numero === numero);
+    const etiquette = type && ETIQUETTES.find((e) => e.cle === type);
+    // Une adresse qui n'existe pas (« #/notes/99 ») montre l'écran le plus proche, et l'adresse
+    // le dit aussi.
+    if (numero && !lecon) return corrigerAdresse("/notes"), afficherNotes(null, null);
+    if (type && !etiquette) return corrigerAdresse(`/notes/${numero}`), afficherNotes(numero, null);
+    if (etiquette) return afficherDossier(lecon, etiquette, notes);
+    if (lecon) return afficherDossiersDeLecon(lecon, notes);
+
+    const numeros = [...new Set(notes.map((n) => n.lecon))].sort((a, b) => a - b);
+    const lignes = numeros
+      .map((n) => {
+        const l = liste.lecons.find((x) => x.numero === n);
+        const siennes = notes.filter((x) => x.lecon === n);
+        const types = ETIQUETTES.filter((e) => siennes.some((x) => x.etiquette === e.cle));
+        return html`<li>
+          <a class="carte-lecon" href="#/notes/${n}">
+            <span class="carte-lecon__numero"
+              ><span class="carte-lecon__mot visuellement-cache">Leçon</span
+              ><span class="carte-lecon__chiffre">${n}</span></span
+            >
+            <p class="carte-lecon__titre">${echapper(l ? l.titre : "")}</p>
+            <span class="carte-lecon__marque">${CHEVRON}</span>
+            <p class="carte-lecon__detail">
+              ${nombreDeNotes(siennes.length)}<span class="notes-points" aria-hidden="true"
+                >${types.map((e) => `<span class="pastille pastille--${e.cle}"></span>`).join("")}</span
+              ><span class="visuellement-cache"> : ${types.map((e) => e.nom).join(", ")}</span>
+            </p>
+          </a>
+        </li>`;
+      })
+      .join("");
+    const corps = notes.length
+      ? html`<ul class="liste-lecons">${lignes}</ul>`
+      : html`<p class="notes-vide">
+          Vous n’avez encore rien noté. Sélectionnez un passage dans une leçon pour le noter.
+        </p>`;
+    afficherDans(
+      html`
+        <h1 class="page-titre">Mes notes</h1>
+        ${stockageIndisponible ? avertissementStockage() : ""}
+        ${corps}
+      `,
+      "Mes notes"
+    );
+    zoneNavigation.innerHTML = RETOUR;
+    titreBarre.textContent = "Mes notes";
+  }
+
+  // Une leçon : un dossier par type de note qu'elle contient. Les types vides n'apparaissent pas.
+  function afficherDossiersDeLecon(lecon, notes) {
+    const siennes = notes.filter((n) => n.lecon === lecon.numero);
+    const dossiers = ETIQUETTES.map((e) => ({ e, nombre: siennes.filter((n) => n.etiquette === e.cle).length }))
+      .filter((d) => d.nombre)
+      .map(
+        ({ e, nombre }) => html`<li>
+          <a class="carte-lecon carte-lecon--dossier" href="#/notes/${lecon.numero}/${e.cle}">
+            <span class="carte-lecon__numero"><span class="pastille pastille--${e.cle}" aria-hidden="true"></span></span>
+            <p class="carte-lecon__titre">${e.nom}</p>
+            <span class="carte-lecon__marque">${CHEVRON}</span>
+            <p class="carte-lecon__detail">${nombreDeNotes(nombre)}</p>
+          </a>
+        </li>`
+      )
+      .join("");
+    afficherDans(
+      html`
+        <p class="surtitre">Mes notes · leçon ${lecon.numero}</p>
+        <h1 class="page-titre">${echapper(lecon.titre)}</h1>
+        ${dossiers ? html`<ul class="liste-lecons">${dossiers}</ul>` : html`<p class="notes-vide">Plus aucune note dans cette leçon.</p>`}
+      `,
+      `Mes notes, leçon ${lecon.numero}`
+    );
+    zoneNavigation.innerHTML = retourNotes("/notes");
+    titreBarre.textContent = `Leçon ${lecon.numero}`;
+  }
+
+  // Un dossier : ses notes dans l'ordre du texte. Toucher une ligne ramène au passage dans la
+  // leçon ; c'est là, en touchant le passage coloré, qu'on modifie ou retire la note.
+  function afficherDossier(lecon, etiquette, notes) {
+    const siennes = notes
+      .filter((n) => n.lecon === lecon.numero && n.etiquette === etiquette.cle)
+      .sort(comparerPlaces);
+    const lignes = siennes
+      .map((note) => {
+        const ecrit = (note.ecrit || "").trim();
+        return html`<li>
+          <a class="ligne-note" href="#/lecon/${lecon.numero}/lecture" data-aller-note="${note.id}">
+            <span class="ligne-note__texte">
+              <span class="ligne-note__passage">«\u00a0${echapper(espacesSimples(note.texte))}\u00a0»</span>
+              ${ecrit ? html`<span class="ligne-note__ecrit">${echapper(ecrit).replace(/\n/g, "<br>")}</span>` : ""}
+            </span>
+            ${CHEVRON}
+          </a>
+        </li>`;
+      })
+      .join("");
+    afficherDans(
+      html`
+        <p class="surtitre">Leçon ${lecon.numero} · ${echapper(lecon.titre)}</p>
+        <h1 class="page-titre page-titre--dossier">
+          <span class="pastille pastille--${etiquette.cle}" aria-hidden="true"></span>${etiquette.nom}
+        </h1>
+        ${lignes ? html`<ul class="liste-notes">${lignes}</ul>` : html`<p class="notes-vide">Plus aucune note ici.</p>`}
+      `,
+      `${etiquette.nom}, leçon ${lecon.numero}`
+    );
+    zoneNavigation.innerHTML = retourNotes(`/notes/${lecon.numero}`, `la leçon ${lecon.numero}`);
+    titreBarre.textContent = etiquette.nom;
+  }
+
+  principal.addEventListener("click", (evenement) => {
+    const aller = evenement.target.closest("[data-aller-note]");
+    if (aller) {
+      // Le lien suit son cours ; la leçon, une fois affichée, descend jusqu'au passage.
+      noteAMontrer = aller.dataset.allerNote;
+    }
+  });
+
+  // Le passage noté vient au premier tiers de l'écran et s'allume un instant.
+  function montrerNoteDansLecon(id) {
+    const marques = principal.querySelectorAll(`mark.note-passage[data-note="${id}"]`);
+    if (!marques.length) {
+      annoncer("Ce passage n’a pas été retrouvé dans la leçon.");
+      return;
+    }
+    const y = marques[0].getBoundingClientRect().top + window.scrollY - hauteurBarre - window.innerHeight * 0.2;
+    window.scrollTo(0, Math.max(0, y));
+    marques.forEach((marque) => {
+      marque.classList.add("note-passage--montre");
+      const eteindre = () => marque.classList.remove("note-passage--montre");
+      marque.addEventListener("animationend", eteindre, { once: true });
+      setTimeout(eteindre, 2500);
+    });
+  }
+
+  // ---------------------------------------------------------------------------
   // Navigation (adresse après le #)
   // ---------------------------------------------------------------------------
 
@@ -2037,7 +2878,10 @@
   const lignesQuittees = new Map();
   // Les écrans de liste retrouvent leur place au retour ; les leçons et les documents ont la
   // leur (reprendreLecture).
+  // « Mes notes » compte trois niveaux de listes : les leçons, les dossiers d'une leçon
+  // (« /notes/2 »), les notes d'un dossier (« /notes/2/question »).
   const LISTES = new Set(["/", "/documents"]);
+  const estListe = (cle) => LISTES.has(cle) || /^\/notes(\/|$)/.test(cle);
   let ecranCourant = null;
   let rangCourant = 0;
   let navigation = 0;
@@ -2050,10 +2894,26 @@
     if (/^\/documents\/[a-z0-9-]+/.test(chemin)) return { cle: chemin.replace(/\/$/, ""), niveau: 2 };
     if (/^\/documents\/?$/.test(chemin)) return { cle: "/documents", niveau: 1 };
     if (chemin === "/a-propos") return { cle: "/a-propos", niveau: 1 };
+    const notes = chemin.match(/^\/notes(?:\/(\d+)(?:\/([a-z]+))?)?\/?$/);
+    if (notes) {
+      const [, numero, type] = notes;
+      if (type) return { cle: `/notes/${numero}/${type}`, niveau: 3 };
+      if (numero) return { cle: `/notes/${numero}`, niveau: 2 };
+      return { cle: "/notes", niveau: 1 };
+    }
     return { cle: "/", niveau: 0 };
   }
 
   let remplacementEnCours = false;
+
+  // Remplace l'adresse affichée sans changer d'écran ni d'entrée d'historique.
+  function corrigerAdresse(chemin) {
+    history.replaceState(history.state, "", `#${chemin}`);
+    cheminRoute = chemin;
+    ecranCourant = situer(chemin);
+    pile[rangCourant] = ecranCourant.cle;
+    noterPile();
+  }
 
   // Remonte dans l'historique jusqu'à l'écran visé s'il s'y trouve, plus haut que l'écran
   // actuel. Renvoie vrai si c'est le cas.
@@ -2082,13 +2942,20 @@
       }
       return;
     }
-    if (cible.niveau < ecranCourant.niveau && remonterVers(cible.cle)) {
+    // Une ligne de « Mes notes » avance toujours vers son passage, même si la leçon est plus bas
+    // dans l'historique : y remonter rendait la leçon telle qu'on l'avait laissée (autre onglet,
+    // autre endroit), sans le passage (agent de test, 25 novembre 2026).
+    if (
+      (cible.niveau < ecranCourant.niveau || "retour" in lien.dataset) &&
+      !("allerNote" in lien.dataset) &&
+      remonterVers(cible.cle)
+    ) {
       evenement.preventDefault();
       return;
     }
     // Avancer : le lien suit son cours. La ligne touchée est notée ; allumée sous le doigt,
     // elle le reste jusqu'à l'arrivée du nouvel écran (le routeur la reprend en main).
-    ligneDepart = lien.closest("a.carte-lecon, a.annexe");
+    ligneDepart = lien.closest("a.carte-lecon, a.annexe, a.ligne-note");
     if (ligneDepart && ligneDepart === ligneAppuyee) {
       clearTimeout(extinctionAppui);
       ligneAppuyee = null;
@@ -2119,13 +2986,15 @@
   }
 
   principal.addEventListener("click", (evenement) => {
-    const ligne = evenement.target.closest("a.carte-lecon, a.annexe");
+    const ligne = evenement.target.closest("a.carte-lecon, a.annexe, a.ligne-note");
     if (!ligne || evenement.button || evenement.metaKey || evenement.ctrlKey || evenement.shiftKey) return;
     if (!ecranCourant) return;
     // La position se note ici, au toucher, et non au changement d'adresse : filmé sur iPhone
     // virtuel, Safari avait déjà ramené la page en haut quand l'adresse changeait.
     positionsQuittees.set(ecranCourant.cle, window.scrollY);
-    lignesQuittees.set(ecranCourant.cle, ligne.getAttribute("href"));
+    // Les lignes d'un dossier de notes mènent toutes à la même leçon : elles se reconnaissent
+    // à leur note.
+    lignesQuittees.set(ecranCourant.cle, ligne.dataset.allerNote || ligne.getAttribute("href"));
   });
 
   // Sous le doigt, la ligne s'allume (teinte, et elle s'enfonce à peine) et reste allumée
@@ -2146,7 +3015,7 @@
   }
   principal.addEventListener("pointerdown", (evenement) => {
     eteindreAppui();
-    const ligne = evenement.target.closest("a.carte-lecon, a.annexe");
+    const ligne = evenement.target.closest("a.carte-lecon, a.annexe, a.ligne-note");
     if (!ligne || evenement.button) return;
     attenteAppui = setTimeout(() => {
       ligneAppuyee = ligne;
@@ -2189,9 +3058,13 @@
       const lecon = chemin.match(/^\/lecon\/(\d+)(?:\/(lecture|versets|questions))?\/?$/);
       if (lecon) return await afficherLecon(Number(lecon[1]), lecon[2]);
       if (chemin === "/a-propos") return await afficherAPropos();
+      const notes = chemin.match(/^\/notes(?:\/(\d+)(?:\/([a-z]+))?)?\/?$/);
+      if (notes) return await afficherNotes(notes[1] ? Number(notes[1]) : null, notes[2] || null);
       if (chemin === "/documents" || chemin === "/documents/") return await afficherDocuments();
       const texte = chemin.match(/^\/documents\/([a-z0-9-]+)\/?$/);
       if (texte) return await afficherDocument(texte[1]);
+      // Une adresse inconnue montre l'accueil, et l'adresse le dit aussi.
+      if (chemin !== "/") corrigerAdresse("/");
       return await afficherAccueil();
     } catch (erreur) {
       console.error(erreur);
@@ -2207,6 +3080,17 @@
     cheminRoute = chemin;
     // Avant de reconstruire l'écran, dont les champs seront remplis depuis l'enregistrement.
     enregistrerReponseEnAttente();
+    // Le retour du navigateur, fenêtre d'une note ouverte : elle se ferme (son texte est
+    // enregistré) au lieu de rester par-dessus le nouvel écran (agent de test, 25 novembre 2026).
+    if (feuilleOuverte(fenetreNote)) fermerNote({ rendreFocus: false });
+    // Même chose pour les autres fenêtres (réglages, verset, partage, image agrandie) : elles
+    // restaient ouvertes par-dessus l'écran suivant (agent de contre-vérification).
+    if (feuilleOuverte(reglages)) fermerReglages();
+    if (feuilleOuverte(feuille)) fermerVerset();
+    if (feuilleOuverte(fenetrePartage)) fermerPartage();
+    if (!loupe.hidden) fermerLoupe();
+    cacherBarreNotes();
+    cacherAnnonce();
     const jeton = ++navigation;
     const { ecran, sens, retour } = changementDEcran(chemin);
     const anime = sens === "avant" && !mouvementReduit.matches;
@@ -2237,13 +3121,13 @@
     // attend que la position soit rétablie pour retirer sa photo de l'écran précédent
     // (ViewGestureController, « ScrollPositionRestoration ») : un défilement de plus arrive
     // après. On ne replace donc la page que si elle n'est pas à sa place.
-    retourVersListe = retour && LISTES.has(ecran.cle) && positionsQuittees.has(ecran.cle);
+    retourVersListe = retour && estListe(ecran.cle) && positionsQuittees.has(ecran.cle);
     await afficherChemin(chemin);
     retourVersListe = false;
     if (jeton !== navigation) return;
 
     principal.classList.remove(...CLASSES_ECRAN);
-    if (retour && LISTES.has(ecran.cle) && positionsQuittees.has(ecran.cle)) {
+    if (retour && estListe(ecran.cle) && positionsQuittees.has(ecran.cle)) {
       const y = positionsQuittees.get(ecran.cle);
       if (Math.abs(window.scrollY - y) > 2) window.scrollTo(0, y);
       // Une seconde fois à l'image suivante, au cas où le navigateur replacerait la page
@@ -2255,8 +3139,8 @@
     if (retour && lignesQuittees.has(ecran.cle)) {
       const adresse = lignesQuittees.get(ecran.cle);
       lignesQuittees.delete(ecran.cle);
-      const ligne = [...principal.querySelectorAll("a.carte-lecon, a.annexe")].find(
-        (a) => a.getAttribute("href") === adresse
+      const ligne = [...principal.querySelectorAll("a.carte-lecon, a.annexe, a.ligne-note")].find(
+        (a) => (a.dataset.allerNote || a.getAttribute("href")) === adresse
       );
       if (ligne) {
         ligne.classList.add("ligne--revient");

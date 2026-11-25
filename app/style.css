@@ -44,6 +44,8 @@
   /* Bordure des éléments avec lesquels on interagit : 3 pour 1, exigé pour être repérable. */
   --bord-actif: #8a838c;
   --teinte: #f3e8f4;
+  /* Ombre du petit message du bas (« Noté : … »). */
+  --annonce-ombre: 0 6px 20px rgba(43, 31, 46, 0.25);
   /* Voile posé sur un bloc déjà teinté quand on le touche. */
   --pression: rgba(43, 31, 46, 0.07);
   /* Marque que l'iPhone pose sur un bouton touché : mauve, au lieu de son gris par défaut
@@ -73,6 +75,22 @@
   --ok-fond: #e6f4ec;
   --danger: #b3261e;
   --danger-doux: #f7e3e1;
+  /* Mes notes : un fond de passage (le texte reste à l'encre, contrôlé par
+     verifier-contrastes.mjs) et une pastille par choix. Chaque choix porte aussi son nom écrit :
+     la couleur seule ne dit rien à qui la distingue mal. */
+  --note-comprends: #fde3d8;
+  --point-comprends: #cf5a2f;
+  --note-question: #fcecb0;
+  --point-question: #a37800; /* plus foncé que #c99400 (2,7 pour 1 sur blanc) : 3 pour 1 au moins partout */
+  --note-vivre: #d6f0de;
+  --point-vivre: #2b8a50;
+  --note-prier: #d9e8f8;
+  --point-prier: #3a77c0;
+  --note-encourage: #f3d9f1;
+  --point-encourage: #a8449f;
+  /* Taille du texte choisie dans les réglages. Les zones à toucher s'écrivent
+     « max(2.75rem, 44px) » : en rem seuls, elles suivaient le texte et tombaient à 40 px à la
+     plus petite taille, sous les 44 px exigés (agent de test, 25 novembre 2026). */
   --echelle: 1;
   --rayon: 14px;
   --ombre: 0 1px 2px rgba(43, 31, 46, 0.06), 0 4px 14px rgba(43, 31, 46, 0.06);
@@ -110,6 +128,16 @@
   --ok-fond: #1f3527;
   --danger: #f28b82;
   --danger-doux: #3a2422;
+  --note-comprends: #573021;
+  --point-comprends: #f0916a;
+  --note-question: #52440f;
+  --point-question: #e6c04a;
+  --note-vivre: #1f4430;
+  --point-vivre: #6fcf94;
+  --note-prier: #1f3a5c;
+  --point-prier: #7fb0ea;
+  --note-encourage: #4c2349;
+  --point-encourage: #e08ad8;
   --ombre: none;
   --barre-filet-flottant: var(--bord);
   --barre-ombre-flottante: none;
@@ -450,8 +478,8 @@ html:has(main.ecran--entre) .barre--onglets {
 
 .bouton-retour {
   flex: none;
-  width: 2.75rem;
-  height: 2.75rem;
+  width: max(2.75rem, 44px);
+  height: max(2.75rem, 44px);
   display: grid;
   place-items: center;
   margin-left: -0.5rem;
@@ -471,6 +499,9 @@ html:has(main.ecran--entre) .barre--onglets {
 .marque__lien {
   flex: none;
   display: flex;
+  /* 44 px de haut à toucher, logo centré dedans (il fait 34 px) : sa place ne change pas. */
+  align-items: center;
+  min-height: 44px;
   line-height: 0;
   border-radius: 50%;
 }
@@ -521,8 +552,8 @@ html:has(main.ecran--entre) .barre--onglets {
   border: none;
   background: none;
   border-radius: 10px;
-  width: 2.75rem;
-  height: 2.75rem;
+  width: max(2.75rem, 44px);
+  height: max(2.75rem, 44px);
   display: grid;
   place-items: center;
   color: var(--texte-doux);
@@ -1117,7 +1148,7 @@ a[href^="#/"] {
 .invite__plus-tard {
   display: block;
   width: 100%;
-  min-height: 2.75rem;
+  min-height: max(2.75rem, 44px);
   margin-top: 0.5rem;
   border: none;
   background: none;
@@ -1387,8 +1418,8 @@ a[href^="#/"] {
   position: absolute;
   top: calc(0.75rem + env(safe-area-inset-top));
   right: 0.75rem;
-  width: 2.75rem;
-  height: 2.75rem;
+  width: max(2.75rem, 44px);
+  height: max(2.75rem, 44px);
   display: grid;
   place-items: center;
   border: 1px solid rgba(255, 255, 255, 0.5);
@@ -1486,7 +1517,7 @@ a[href^="#/"] {
   justify-content: center;
   text-align: center;
   margin: 3px;
-  min-height: 2.75rem;
+  min-height: max(2.75rem, 44px);
   border: none;
   background: transparent;
   border-radius: 10px;
@@ -1536,7 +1567,8 @@ a[href^="#/"] {
   vertical-align: middle;
 }
 
-.question textarea {
+.question textarea,
+.note-fenetre__ecrit {
   width: 100%;
   min-height: 5.5rem;
   resize: vertical;
@@ -1549,7 +1581,8 @@ a[href^="#/"] {
   color: var(--encre);
 }
 
-.question textarea:focus {
+.question textarea:focus,
+.note-fenetre__ecrit:focus {
   border-color: var(--violet);
   outline: none;
   box-shadow: 0 0 0 3px rgba(152, 40, 152, 0.18);
@@ -1572,7 +1605,7 @@ a[href^="#/"] {
   align-items: flex-start;
   gap: 0.7rem;
   padding: 0.6rem 0;
-  min-height: 2.75rem;
+  min-height: max(2.75rem, 44px);
 }
 
 .case input {
@@ -1623,7 +1656,7 @@ a[href^="#/"] {
 /* L'action la plus dangereuse et la plus rare ne doit pas être la plus voyante de la fenêtre.
    Elle reste haute de 44 px pour rester atteignable au doigt. */
 .lien-danger {
-  min-height: 2.75rem;
+  min-height: max(2.75rem, 44px);
   padding: 0;
   border: none;
   background: none;
@@ -1757,8 +1790,8 @@ a[href^="#/"] {
 
 .feuille__fermer {
   flex: none;
-  width: 2.75rem;
-  height: 2.75rem;
+  width: max(2.75rem, 44px);
+  height: max(2.75rem, 44px);
   display: grid;
   place-items: center;
   border: none;
@@ -1860,8 +1893,8 @@ a[href^="#/"] {
 /* 2,75 rem font 44 pixels : la plus petite cible tactile confortable. */
 .bouton-taille {
   flex: none;
-  width: 2.75rem;
-  height: 2.75rem;
+  width: max(2.75rem, 44px);
+  height: max(2.75rem, 44px);
   border: 1px solid var(--bord-actif);
   background: var(--carte);
   border-radius: 10px;
@@ -1922,6 +1955,433 @@ a[href^="#/"] {
   font-size: 0.95rem;
   font-weight: 600;
   color: var(--texte-doux);
+}
+
+/* ---------- Mes notes ---------- */
+
+/* Un passage noté, dans la leçon comme dans « Mes notes ». Le texte garde sa couleur ; seul le
+   fond dit le choix. « cursor: pointer » fait que Safari d'iPhone envoie un clic au toucher d'un
+   simple texte (sans lui, toucher le passage n'ouvrait rien). */
+.note-passage {
+  color: inherit;
+  background: var(--note-question);
+  border-radius: 3px;
+  padding: 0.05em 0;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  cursor: pointer;
+}
+
+.note--comprends {
+  background: var(--note-comprends);
+}
+.note--question {
+  background: var(--note-question);
+}
+.note--vivre {
+  background: var(--note-vivre);
+}
+.note--prier {
+  background: var(--note-prier);
+}
+.note--encourage {
+  background: var(--note-encourage);
+}
+
+/* Arrivée par « Voir dans la leçon » : un cadre s'allume autour du passage puis s'efface. */
+.note-passage--montre {
+  animation: note-montree 1.8s ease-out;
+}
+
+@keyframes note-montree {
+  0%,
+  55% {
+    box-shadow: 0 0 0 3px var(--violet);
+  }
+  100% {
+    box-shadow: 0 0 0 3px transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .note-passage--montre {
+    animation: none;
+    box-shadow: 0 0 0 3px var(--violet);
+  }
+}
+
+.pastille {
+  display: inline-block;
+  flex: none;
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 50%;
+  background: var(--point-question);
+}
+
+.pastille--comprends {
+  background: var(--point-comprends);
+}
+.pastille--question {
+  background: var(--point-question);
+}
+.pastille--vivre {
+  background: var(--point-vivre);
+}
+.pastille--prier {
+  background: var(--point-prier);
+}
+.pastille--encourage {
+  background: var(--point-encourage);
+}
+
+/* La barre des cinq choix, en bas de l'écran pendant une sélection : deux lignes sur un
+   téléphone de 375 points, trois sur un écran de 320 (mesuré le 23 novembre 2026). Sous les
+   fenêtres (90), au-dessus de la page. */
+.barre-notes {
+  position: fixed;
+  z-index: 85;
+  left: 50%;
+  bottom: calc(0.9rem + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100vw - 1.5rem);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2px;
+  padding: 5px;
+  background: var(--carte);
+  border: 1px solid var(--bord);
+  border-radius: 22px;
+  box-shadow: var(--onglets-ombre);
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.barre-notes[hidden] {
+  display: none;
+}
+
+.barre-notes__choix {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: max(2.75rem, 44px);
+  padding: 0 0.55rem;
+  border: none;
+  border-radius: 16px;
+  background: transparent;
+  color: var(--encre);
+  font-size: 0.95rem;
+  font-weight: 600;
+  touch-action: manipulation;
+}
+
+.barre-notes__choix:active {
+  background: var(--pression);
+}
+
+@media (hover: hover) {
+  .barre-notes__choix:hover {
+    background: var(--teinte);
+  }
+}
+
+/* Le petit message du bas (« Noté : Pas compris · Annuler »). Toujours présent, invisible
+   et inerte tant qu'il n'a rien à dire. */
+.annonce {
+  position: fixed;
+  z-index: 95;
+  left: 50%;
+  bottom: calc(1rem + env(safe-area-inset-bottom));
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: max-content;
+  max-width: calc(100vw - 2rem);
+  min-height: max(2.75rem, 44px);
+  padding: 0.25rem 1rem;
+  border-radius: 999px;
+  background: var(--encre);
+  color: var(--fond);
+  font-size: 0.95rem;
+  font-weight: 600;
+  box-shadow: var(--annonce-ombre);
+  opacity: 0;
+  transform: translate(-50%, 0.75rem);
+  pointer-events: none;
+  transition:
+    opacity 200ms ease,
+    transform 260ms var(--feuille-courbe);
+}
+
+.annonce--visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+  pointer-events: auto;
+}
+
+.annonce__bouton {
+  min-height: max(2.75rem, 44px);
+  margin-right: -0.6rem;
+  padding: 0 0.8rem;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.annonce__bouton[hidden] {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .annonce {
+    transition: none;
+  }
+}
+
+/* La fenêtre d'une note. Calée sur la partie visible de l'écran (app.js, « VisualViewport ») :
+   clavier ouvert, elle tient au-dessus de lui, et sa partie centrale défile. */
+.feuille--note .feuille__carte {
+  max-height: min(82vh, calc(100% - 0.75rem));
+}
+
+/* Sous la partie visible, Safari laisse voir la page à travers sa barre d'adresse translucide,
+   juste au-dessus du clavier : une bande de leçon restait visible entre la fenêtre et le clavier
+   (iPhone virtuel, iOS 27, 25 novembre 2026). Sur téléphone, la fenêtre se prolonge donc vers le
+   bas, comme une fenêtre de l'iPhone qui passe derrière le clavier ; le prolongement monte et
+   descend avec elle. Clavier fermé, il est hors de l'écran. Il recouvre d'un pixel le bas de la
+   fenêtre : bord à bord, un filet clair restait visible. */
+@media (max-width: 599.98px) {
+  .feuille--note .feuille__carte {
+    position: relative;
+  }
+
+  .feuille--note .feuille__carte::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% - 1px);
+    height: 100vh;
+    background: var(--carte);
+    pointer-events: none;
+  }
+}
+
+.feuille__corps--note {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+.note-fenetre__lecon {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--texte-doux);
+}
+
+.note-fenetre__passage {
+  margin: 0;
+  padding: 0.6rem 0.85rem;
+  border-left: 4px solid var(--point-question);
+  border-radius: 0 10px 10px 0;
+  background: var(--note-question);
+  font-family: var(--police-titres);
+  font-size: 1.05rem;
+  line-height: 1.5;
+}
+
+.note-fenetre__passage--comprends {
+  border-left-color: var(--point-comprends);
+  background: var(--note-comprends);
+}
+.note-fenetre__passage--vivre {
+  border-left-color: var(--point-vivre);
+  background: var(--note-vivre);
+}
+.note-fenetre__passage--prier {
+  border-left-color: var(--point-prier);
+  background: var(--note-prier);
+}
+.note-fenetre__passage--encourage {
+  border-left-color: var(--point-encourage);
+  background: var(--note-encourage);
+}
+
+.note-fenetre__intitule {
+  margin: 0.2rem 0 -0.4rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--texte-doux);
+}
+
+.note-fenetre__choix {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.choix-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: max(2.75rem, 44px);
+  padding: 0 0.85rem;
+  border: 1px solid var(--bord-actif);
+  border-radius: 999px;
+  background: var(--carte);
+  color: var(--encre);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+/* Le choix de la note : trait plus épais et fond teinté, pas seulement une couleur. */
+.choix-note[aria-pressed="true"] {
+  padding: 0 calc(0.85rem - 1px);
+  border: 2px solid var(--encre);
+  background: var(--teinte);
+  font-weight: 700;
+}
+
+.note-fenetre__etat:empty {
+  display: none;
+}
+
+.note-fenetre__retrait .reglage__avertissement {
+  margin-top: 0.25rem;
+}
+
+/* Les écrans de « Mes notes » (choisis par Sébastien sur maquettes le 25 novembre 2026,
+   « Leçon d'abord » puis « Lignes fines ») : les leçons et les dossiers sont des lignes de la
+   liste des leçons (.carte-lecon) ; les notes d'un dossier sont des lignes fines. */
+.notes-vide {
+  margin: 1rem 0;
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+/* Une pastille par type de note présent dans la leçon, à la suite du nombre de notes. */
+.notes-points {
+  display: inline-flex;
+  gap: 0.3rem;
+  margin-left: 0.5rem;
+  vertical-align: middle;
+}
+
+.notes-points .pastille {
+  width: 0.6rem;
+  height: 0.6rem;
+}
+
+/* Un dossier : la pastille de son type tient la place du grand chiffre, plus étroite. */
+.carte-lecon--dossier {
+  grid-template-columns: 1.5rem 1fr auto;
+}
+
+.carte-lecon--dossier .carte-lecon__numero {
+  align-self: center;
+}
+
+.carte-lecon--dossier .pastille {
+  display: block;
+  width: 1rem;
+  height: 1rem;
+}
+
+.page-titre--dossier {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.page-titre--dossier .pastille {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+.liste-notes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Une note : le passage entre guillemets, ce qu'on a écrit dessous, la flèche à droite. Toute
+   la ligne mène au passage dans la leçon. Elle se touche comme une ligne de leçon. */
+.ligne-note {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  column-gap: 0.8rem;
+  padding: 1.05rem 0;
+  border-bottom: 1px solid var(--bord);
+  color: inherit;
+  text-decoration: none;
+  position: relative;
+  isolation: isolate;
+  transition: transform 220ms ease-out;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
+}
+
+.ligne-note__texte {
+  display: grid;
+  gap: 0.5rem;
+  /* Un mot sans espace (une adresse web) se coupe au lieu de pousser la page vers la droite :
+     « min-width: 0 » laisse la colonne rétrécir, « anywhere » autorise la coupure. */
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.ligne-note__passage {
+  font-family: var(--police-titres);
+  font-size: 1.08rem;
+  line-height: 1.45;
+}
+
+.ligne-note__ecrit {
+  padding-left: 0.75rem;
+  border-left: 2px solid var(--bord);
+  font-size: 0.98rem;
+  line-height: 1.5;
+}
+
+.ligne-note::before {
+  content: "";
+  position: absolute;
+  inset: -1px -0.75rem;
+  z-index: -1;
+  border-radius: 12px;
+  background: var(--teinte);
+  opacity: 0;
+  transition: opacity 220ms ease-out;
+}
+
+.ligne-note.ligne--touchee {
+  transform: scale(0.985);
+  transition-duration: 80ms;
+}
+
+.ligne-note.ligne--touchee::before {
+  opacity: 1;
+  transition-duration: 80ms;
+}
+
+@media (hover: hover) {
+  .ligne-note:hover {
+    border-bottom-color: var(--violet);
+  }
 }
 
 /* ---------- Messages ---------- */
@@ -2063,6 +2523,14 @@ html:has(main.ecran--entre) body {
 
   .annexe.ligne--revient {
     animation: annexe-revient 600ms 150ms ease-out both;
+  }
+
+  .ligne-note.ligne--revient {
+    animation: ligne-revient-forme 600ms 150ms ease-out both;
+  }
+
+  .ligne-note.ligne--revient::before {
+    animation: ligne-revient 600ms 150ms ease-out both;
   }
 }
 
