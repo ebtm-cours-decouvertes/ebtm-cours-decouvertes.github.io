@@ -2435,8 +2435,22 @@ a[href^="#/"] {
   color: var(--fond);
   font: inherit;
   font-weight: 700;
+  /* Le mot reste à sa place quand le rouge s'élargit (ci-dessous). */
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 0;
   /* Même rythme que la ligne : en la relâchant, le rouge reste collé à elle. */
   transition: width 260ms var(--feuille-courbe);
+}
+
+/* « Retirer » toujours centré dans les 88 px de droite, quelle que soit la largeur du rouge :
+   centré dans tout le bouton, il glissait pendant que le rouge s'élargissait, puis sautait à
+   droite au-delà des trois cinquièmes (vidéo de Sébastien, 25 novembre 2026, 23 h 57). */
+.ligne-note__retirer-mot {
+  flex: none;
+  width: 88px;
+  text-align: center;
 }
 
 /* Caché tant que la ligne n'a pas glissé : sinon son bord rouge dépasse dans la marge du cadre.
@@ -2465,8 +2479,6 @@ a[href^="#/"] {
 /* Glissée au-delà des trois cinquièmes : « Retirer » s'étire sous le doigt, comme dans Mail. */
 .ligne-note-cadre--loin .ligne-note__retirer {
   width: 100%;
-  text-align: right;
-  padding-right: 1.4rem;
 }
 
 /* La ligne retirée se replie ; la suivante remonte à sa place. */

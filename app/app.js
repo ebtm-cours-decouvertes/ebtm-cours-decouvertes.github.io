@@ -3005,7 +3005,7 @@
             ${CHEVRON}
           </a>
           <button type="button" class="ligne-note__retirer" data-retirer-note="${note.id}" tabindex="-1" aria-hidden="true">
-            Retirer<span class="visuellement-cache"> la note «\u00a0${passage}\u00a0»</span>
+            <span class="ligne-note__retirer-mot">Retirer<span class="visuellement-cache"> la note «\u00a0${passage}\u00a0»</span></span>
           </button>
         </li>`;
       })
