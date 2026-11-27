@@ -45,9 +45,7 @@
   --sur-choix: #6e1a6e;
   --choix-contour: var(--nav-pastille-contour);
 
-  --verre: 0.3;
-  --flou: 4px;
-  --nav-fond: rgba(255, 255, 255, var(--verre));
+  --nav-fond: #ffffff;
   --nav-contour: transparent;
   --nav-ombre: inset 0 1.5px 0 rgba(255, 255, 255, 0.95), inset 0 -1.5px 0 rgba(255, 255, 255, 0.6),
     inset 0 0 0 1px rgba(255, 255, 255, 0.5), inset 0 10px 14px -10px rgba(255, 255, 255, 0.9),
@@ -88,6 +86,13 @@
   --danger: #b42318;
   --danger-doux: #f7e3e1;
 
+  --danger-texte: #b42318;
+  --erreur-fond: #fdecea;
+  --erreur-texte: #7a1c14;
+
+  --papier: #ffffff;
+  --papier-texte: #666666;
+
   --note-comprends: #fde3d8;
   --point-comprends: #cf5a2f;
   --note-question: #fcecb0;
@@ -122,7 +127,7 @@
   --filet-fort: #f2eef3;
   --choix: #2b242e;
   --sur-choix: #e2b5ee;
-  --nav-fond: rgba(33, 28, 34, 0.55);
+  --nav-fond: #211c22;
   --nav-contour: transparent;
   --nav-ombre: inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 12px 32px rgba(0, 0, 0, 0.45);
   --nav-pastille: #2b242e;
@@ -137,7 +142,10 @@
   --appui-ligne: rgba(255, 255, 255, 0.07);
   --toucher: rgba(255, 255, 255, 0.08);
   --danger: #ff8a80;
-  --danger-doux: #3a2422;
+  --danger-doux: rgba(255, 180, 171, 0.12);
+  --danger-texte: #ffb4ab;
+  --erreur-fond: #3d1b18;
+  --erreur-texte: #ffb4ab;
   --note-comprends: #573021;
   --point-comprends: #f0916a;
   --note-question: #52440f;
@@ -155,30 +163,7 @@
 }
 
 :root[data-apparence="sombre"] .figure {
-  background: #ffffff;
   border-color: transparent;
-}
-
-:root[data-apparence="sombre"] .figure figcaption {
-  color: #666666;
-}
-
-:root[data-apparence="sombre"] .message--erreur {
-  background: #3d1b18;
-  color: #ffb4ab;
-}
-
-:root[data-apparence="sombre"] .bouton-danger {
-  color: #ffb4ab;
-  border-color: #ffb4ab;
-}
-
-:root[data-apparence="sombre"] .bouton-danger:hover {
-  background: rgba(255, 180, 171, 0.12);
-}
-
-:root[data-apparence="sombre"] .question__etat {
-  color: #ffb4ab;
 }
 
 *,
@@ -191,9 +176,6 @@ html {
   font-size: calc(100% * var(--echelle));
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: var(--toucher);
-}
-
-html {
   background: var(--fond);
 }
 
@@ -454,14 +436,6 @@ html:has(main.ecran--entre) .barre--onglets {
   border-radius: 38px;
   background: var(--nav-fond);
   box-shadow: var(--nav-ombre);
-  -webkit-backdrop-filter: blur(var(--flou)) saturate(1.8) brightness(1.06);
-  backdrop-filter: blur(var(--flou)) saturate(1.8) brightness(1.06);
-}
-
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  :root {
-    --verre: 0.97;
-  }
 }
 
 .navigation[hidden] {
@@ -592,7 +566,7 @@ main h1:focus {
 .logo-rond__dessin {
   width: 82%;
   aspect-ratio: 500 / 265;
-  background: #fff;
+  background: var(--sur-bouton);
   -webkit-mask: center / contain no-repeat;
   mask: center / contain no-repeat;
 }
@@ -1088,7 +1062,7 @@ a[href^="#/"] {
   max-width: 320px;
   height: auto;
   margin: 0 auto 1rem;
-  background: #fff;
+  background: var(--papier);
   border: 1px solid var(--bord);
   padding: 0.75rem;
   box-sizing: border-box;
@@ -1243,7 +1217,7 @@ a[href^="#/"] {
 .figure {
   margin: 1.5rem 0;
   padding: 1rem;
-  background: var(--carte);
+  background: var(--papier);
   border: 1px solid var(--bord);
   text-align: center;
 }
@@ -1255,7 +1229,7 @@ a[href^="#/"] {
   height: auto;
   margin: 0 auto;
 
-  background: #fff;
+  background: var(--papier);
 }
 
 .figure__bouton {
@@ -1305,7 +1279,7 @@ a[href^="#/"] {
 .loupe img {
   max-width: 100%;
   max-height: 100%;
-  background: #fff;
+  background: var(--papier);
   border-radius: 8px;
 }
 
@@ -1327,7 +1301,7 @@ a[href^="#/"] {
 .figure figcaption {
   margin-top: 0.7rem;
   font-size: 0.88rem;
-  color: var(--texte-doux);
+  color: var(--papier-texte);
   text-align: center;
 }
 
@@ -1511,7 +1485,7 @@ a[href^="#/"] {
   margin: 0;
   font-size: 0.85rem;
   font-weight: 600;
-  color: var(--danger);
+  color: var(--danger-texte);
 }
 
 .question__etat:not(:empty) {
@@ -1605,8 +1579,8 @@ a.bouton-principal--secondaire {
 .bouton-danger {
   min-height: max(2.75rem, 44px);
   background: transparent;
-  color: var(--danger);
-  border: 1.5px solid var(--danger);
+  color: var(--danger-texte);
+  border: 1.5px solid var(--danger-texte);
 }
 
 @media (hover: hover) {
@@ -2569,8 +2543,8 @@ body.avec-navigation .annonce {
 }
 
 .message--erreur {
-  background: #fdecea;
-  color: #7a1c14;
+  background: var(--erreur-fond);
+  color: var(--erreur-texte);
 }
 
 .a-propos p {
@@ -2605,7 +2579,7 @@ body.avec-navigation .annonce {
   width: 120px;
   height: 120px;
   padding: 6px;
-  background: #fff;
+  background: var(--papier);
   border: 1px solid var(--bord);
   box-sizing: border-box;
 }

@@ -52,10 +52,16 @@ const PAIRES = [
   // Le contour de la bulle du choix actif (mauve pâle, comme la barre du bas) n'est pas mesuré :
   // écart assumé par Sébastien le 26 novembre 2026, voir « --choix » dans style.css.
   ["compte d’un onglet sur bandeau", "texte-doux", "teinte", 4.5],
-  // La bulle et la barre du bas sont du verre (blanc translucide) : mesurées sur le fond de page.
+  // La bulle du choix est du verre (blanc translucide) : mesurée sur le fond de page.
   ["texte de l’onglet choisi", "sur-choix", "fond", 4.5],
-  ["avertissement d’effacement", "danger", "carte", 4.5],
-  ["avertissement sur fond", "danger", "fond", 4.5],
+  // La barre du bas est pleine depuis le 27 novembre 2026 : ses libellés et l'icône de l'onglet
+  // ouvert se mesurent sur son fond.
+  ["libellé de la barre du bas", "nav-texte", "nav-fond", 4.5],
+  ["icône de l’onglet ouvert", "nav-icone-active", "nav-fond", 3],
+  ["texte rouge sur carte", "danger-texte", "carte", 4.5],
+  ["texte rouge sur fond", "danger-texte", "fond", 4.5],
+  ["message d’erreur", "erreur-texte", "erreur-fond", 4.5],
+  ["légende d’une figure", "papier-texte", "papier", 4.5],
   ["bordure d’un champ", "bord-actif", "carte", 3],
   ["bordure d’un champ sur fond", "bord-actif", "fond", 3],
   // Mes notes : le texte d'un passage noté, sur le fond de son choix.

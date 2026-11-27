@@ -1414,6 +1414,45 @@ test("4 · Notes", "« Tout supprimer » vide les notes récemment supprimées, 
   t.verifier((await page.locator('a[href="#/notes/supprimees"]').count()) === 0, "l'onglet Notes propose encore « Récemment supprimées » une fois la corbeille vide");
 });
 
+// Les trois actions qui effacent en deux temps (« Effacer toutes mes réponses », « Retirer cette
+// note », « Tout supprimer ») : la question posée, le focus passe à « Annuler » ; « Annuler »
+// le rend au bouton du début. Sans cela, le clavier et le lecteur d'écran repartent du haut de
+// la page. Ajouté le 27 novembre 2026 avant de réunir leur code (nettoyage) ; témoin : une copie
+// où l'une d'elles ne déplace plus le focus doit être repérée.
+test("4 · Notes", "confirmations en deux temps : le focus va à « Annuler », puis revient", async (t) => {
+  const page = await t.page();
+  const focusSur = (selecteur) => page.evaluate((s) => Boolean(document.activeElement && document.activeElement.matches(s)), selecteur);
+  const essayer = async (nom, attribut, avant) => {
+    if (avant) await avant();
+    const demander = `[data-${attribut}="demander"]`;
+    if (!t.verifier((await page.locator(demander).count()) === 1, `${nom} : bouton introuvable`)) return;
+    await page.locator(demander).tap();
+    t.verifier(await focusSur(`[data-${attribut}="annuler"]`), `${nom} : la question posée, le focus n'est pas sur « Annuler »`);
+    await page.locator(`[data-${attribut}="annuler"]`).tap();
+    t.verifier(await focusSur(demander), `${nom} : après « Annuler », le focus n'est pas revenu sur le bouton`);
+  };
+  await aller(page, "/plus");
+  await essayer("« Effacer toutes mes réponses »", "effacer");
+  await aller(page, "/lecon/1");
+  const r = await noter(page, "geôlier", "question");
+  if (!t.verifier(!r.erreur, r.erreur)) return;
+  await page.waitForFunction(() => document.querySelector(".feuille--note").classList.contains("feuille--ouverte"), null, { timeout: 3000 }).catch(() => {});
+  await repos(page);
+  await essayer("« Retirer cette note »", "retirer");
+  await fermerNoteOuverte(page);
+  await page.evaluate(() => {
+    const etat = JSON.parse(localStorage.getItem("cours-decouvertes"));
+    for (const id of Object.keys(etat.notes)) etat.notes[id].retiree = Date.now() - 1000;
+    localStorage.setItem("cours-decouvertes", JSON.stringify(etat));
+  });
+  await recharger(page);
+  await repos(page);
+  await aller(page, "/notes/supprimees");
+  await page.waitForSelector('[data-vider="demander"]', { timeout: 3000 }).catch(() => {});
+  await essayer("« Tout supprimer »", "vider");
+  await controlerSante(t, page, "confirmations annulées");
+});
+
 test("4 · Notes", "les cinq types, puis l'onglet Notes et « Voir dans la leçon »", async (t) => {
   const page = await t.page();
   await aller(page, "/lecon/1");

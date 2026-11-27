@@ -282,6 +282,29 @@
     return chaines.reduce((acc, morceau, i) => acc + morceau + (i < valeurs.length ? valeurs[i] : ""), "");
   }
 
+  const boutonEnDeuxTemps = (nom, libelle) =>
+    `<button type="button" class="bouton-principal bouton-danger" data-${nom}="demander">${libelle}</button>`;
+  const questionEnDeuxTemps = (nom, question, oui) =>
+    `<p class="reglage__avertissement">${question}</p>` +
+    '<div class="reglage__confirmation">' +
+    `<button type="button" class="bouton-principal bouton-principal--secondaire" data-${nom}="annuler">Annuler</button>` +
+    `<button type="button" class="bouton-principal bouton-danger" data-${nom}="confirmer">${oui}</button>` +
+    "</div>";
+
+  function choixEnDeuxTemps(zone, choix, nom, bouton, question) {
+    if (choix === "demander") {
+      zone.innerHTML = question;
+      zone.querySelector(`[data-${nom}="annuler"]`).focus();
+      return false;
+    }
+    if (choix === "annuler") {
+      zone.innerHTML = bouton;
+      zone.querySelector("button").focus();
+      return false;
+    }
+    return true;
+  }
+
   const principal = document.getElementById("principal");
 
   document.querySelector(".saut").addEventListener("click", (evenement) => {
@@ -293,9 +316,12 @@
 
   let autourDesFeuilles = null;
   const moinsDeMouvement = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+  const auDoigt = window.matchMedia("(pointer: coarse)");
+
+  const dureeDuStyle = (nom) => parseFloat(getComputedStyle(document.documentElement).getPropertyValue(nom)) || 0;
   function dureeFermetureFeuille() {
-    if (moinsDeMouvement.matches) return 0;
-    return parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--feuille-fermeture")) || 0;
+    return moinsDeMouvement.matches ? 0 : dureeDuStyle("--feuille-fermeture");
   }
   function feuilleOuverte(fenetre) {
     return fenetre.classList.contains("feuille--ouverte");
@@ -516,10 +542,6 @@
           </ol>`;
   }
 
-  function appareilTactile() {
-    return window.matchMedia("(pointer: coarse)").matches;
-  }
-
   let apiInstallationAttendue = true;
   setTimeout(() => {
     apiInstallationAttendue = false;
@@ -558,7 +580,7 @@
   const CLE_ORDINATEUR = "cours-decouvertes-ecran-ordinateur";
 
   function surOrdinateur() {
-    return !appareilTactile() && !dejaInstallee();
+    return !auDoigt.matches && !dejaInstallee();
   }
 
   function derogationOrdinateur() {
@@ -639,7 +661,7 @@
       </section>`;
     }
 
-    if (!apiInstallationAttendue && appareilTactile()) {
+    if (!apiInstallationAttendue && auDoigt.matches) {
       return html`<section class="invite" id="invite-installation">
         <p class="invite__titre">Installer le cours sur votre téléphone</p>
         <p class="invite__texte">
@@ -1041,18 +1063,14 @@
       }`;
   }
 
-  const BOUTON_EFFACER =
-    '<button type="button" class="bouton-principal bouton-danger" data-effacer="demander">' +
-    "Effacer toutes mes réponses</button>";
-
-  const CONFIRMATION_EFFACER =
-    '<p class="reglage__avertissement">Êtes-vous sûr ? Toutes vos réponses, vos notes, les versets cochés ' +
-    "et les leçons terminées seront effacés de cet appareil. C’est définitif, et ils ne sont " +
-    "enregistrés nulle part ailleurs.</p>" +
-    '<div class="reglage__confirmation">' +
-    '<button type="button" class="bouton-principal bouton-principal--secondaire" data-effacer="annuler">Annuler</button>' +
-    '<button type="button" class="bouton-principal bouton-danger" data-effacer="confirmer">Oui, tout effacer</button>' +
-    "</div>";
+  const BOUTON_EFFACER = boutonEnDeuxTemps("effacer", "Effacer toutes mes réponses");
+  const CONFIRMATION_EFFACER = questionEnDeuxTemps(
+    "effacer",
+    "Êtes-vous sûr ? Toutes vos réponses, vos notes, les versets cochés " +
+      "et les leçons terminées seront effacés de cet appareil. C’est définitif, et ils ne sont " +
+      "enregistrés nulle part ailleurs.",
+    "Oui, tout effacer"
+  );
 
   function rafraichirReglages(racine) {
     racine.querySelector('[data-reglage="taille"]').textContent = NOMS_TAILLES[etat.taillePolice] || "Normal";
@@ -1094,13 +1112,7 @@
     const effacer = evenement.target.closest("[data-effacer]");
     if (!effacer) return false;
     const zone = racine.querySelector('[data-reglage="effacement"]');
-    if (effacer.dataset.effacer === "demander") {
-      zone.innerHTML = CONFIRMATION_EFFACER;
-      zone.querySelector('[data-effacer="annuler"]').focus();
-    } else if (effacer.dataset.effacer === "annuler") {
-      zone.innerHTML = BOUTON_EFFACER;
-      zone.querySelector("button").focus();
-    } else {
+    if (choixEnDeuxTemps(zone, effacer.dataset.effacer, "effacer", BOUTON_EFFACER, CONFIRMATION_EFFACER)) {
 
       const conserves = { taillePolice: etat.taillePolice, apparence: etat.apparence };
       etat = { ...ETAT_PAR_DEFAUT(), ...conserves };
@@ -1170,10 +1182,6 @@
       return;
     }
     reglageTouche(reglages, evenement);
-  });
-
-  document.addEventListener("keydown", (evenement) => {
-    if (evenement.key === "Escape" && feuilleOuverte(reglages)) fermerReglages();
   });
 
   appliquerApparence();
@@ -1842,9 +1850,6 @@
   }
 
   loupe.addEventListener("click", () => fermerLoupe());
-  document.addEventListener("keydown", (evenement) => {
-    if (evenement.key === "Escape" && !loupe.hidden) fermerLoupe();
-  });
   principal.addEventListener("click", (evenement) => {
     const bouton = evenement.target.closest(".figure__bouton");
     if (!bouton) return;
@@ -1899,9 +1904,6 @@
 
   feuille.addEventListener("click", (evenement) => {
     if (evenement.target === feuille || evenement.target.closest(".feuille__fermer")) fermerVerset();
-  });
-  document.addEventListener("keydown", (evenement) => {
-    if (evenement.key === "Escape" && feuilleOuverte(feuille)) fermerVerset();
   });
   principal.addEventListener("click", (evenement) => {
     const bouton = evenement.target.closest(".ref");
@@ -2166,7 +2168,6 @@
     fermeture: () => setTimeout(examinerSelection, 0),
   };
 
-  const auDoigt = window.matchMedia("(pointer: coarse)");
   let attenteSelection = null;
   let sourisEnfoncee = false;
   document.addEventListener(
@@ -2283,10 +2284,6 @@
     peindreNotes();
   }
 
-  document.addEventListener("keydown", (evenement) => {
-    if (evenement.key === "Escape" && !barreNotes.hidden) cacherBarreNotes();
-  });
-
   const annonce = document.createElement("div");
   annonce.className = "annonce";
   annonce.setAttribute("role", "status");
@@ -2362,13 +2359,8 @@
 
   const zoneEcrit = fenetreNote.querySelector(".note-fenetre__ecrit");
   const zoneRetrait = fenetreNote.querySelector(".note-fenetre__retrait");
-  const BOUTON_RETRAIT = '<button type="button" class="bouton-principal bouton-danger" data-retirer="demander">Retirer cette note</button>';
-  const CONFIRMATION_RETRAIT =
-    '<p class="reglage__avertissement">Retirer cette note ? Le passage ne sera plus coloré.</p>' +
-    '<div class="reglage__confirmation">' +
-    '<button type="button" class="bouton-principal bouton-principal--secondaire" data-retirer="annuler">Annuler</button>' +
-    '<button type="button" class="bouton-principal bouton-danger" data-retirer="confirmer">Oui, retirer</button>' +
-    "</div>";
+  const BOUTON_RETRAIT = boutonEnDeuxTemps("retirer", "Retirer cette note");
+  const CONFIRMATION_RETRAIT = questionEnDeuxTemps("retirer", "Retirer cette note ? Le passage ne sera plus coloré.", "Oui, retirer");
 
   const zoneVisible = window.visualViewport || null;
   function calerSurZoneVisible() {
@@ -2572,13 +2564,7 @@
     }
     const retrait = evenement.target.closest("[data-retirer]");
     if (!retrait) return;
-    if (retrait.dataset.retirer === "demander") {
-      zoneRetrait.innerHTML = CONFIRMATION_RETRAIT;
-      zoneRetrait.querySelector('[data-retirer="annuler"]').focus();
-    } else if (retrait.dataset.retirer === "annuler") {
-      zoneRetrait.innerHTML = BOUTON_RETRAIT;
-      zoneRetrait.querySelector("button").focus();
-    } else {
+    if (choixEnDeuxTemps(zoneRetrait, retrait.dataset.retirer, "retirer", BOUTON_RETRAIT, CONFIRMATION_RETRAIT)) {
       const id = noteOuverte;
       enregistrerReponseEnAttente();
 
@@ -2587,8 +2573,14 @@
       fermerNote();
     }
   });
+
   document.addEventListener("keydown", (evenement) => {
-    if (evenement.key === "Escape" && feuilleOuverte(fenetreNote)) fermerNote();
+    if (evenement.key !== "Escape") return;
+    if (feuilleOuverte(reglages)) fermerReglages();
+    if (!loupe.hidden) fermerLoupe();
+    if (feuilleOuverte(feuille)) fermerVerset();
+    if (!barreNotes.hidden) cacherBarreNotes();
+    if (feuilleOuverte(fenetreNote)) fermerNote();
   });
 
   principal.addEventListener("click", (evenement) => {
@@ -2701,34 +2693,22 @@
     );
   }
 
-  const BOUTON_VIDER = '<button type="button" class="bouton-principal bouton-danger" data-vider="demander">Tout supprimer</button>';
+  const BOUTON_VIDER = boutonEnDeuxTemps("vider", "Tout supprimer");
   const confirmationVider = (nombre) =>
-    `<p class="reglage__avertissement">${
+    questionEnDeuxTemps(
+      "vider",
       nombre === 1
         ? "Supprimer définitivement cette note\u00a0? Elle ne pourra plus être récupérée."
-        : `Supprimer définitivement ces ${nombre} notes\u00a0? Elles ne pourront plus être récupérées.`
-    }</p>` +
-    '<div class="reglage__confirmation">' +
-    '<button type="button" class="bouton-principal bouton-principal--secondaire" data-vider="annuler">Annuler</button>' +
-    '<button type="button" class="bouton-principal bouton-danger" data-vider="confirmer">Oui, supprimer</button>' +
-    "</div>";
+        : `Supprimer définitivement ces ${nombre} notes\u00a0? Elles ne pourront plus être récupérées.`,
+      "Oui, supprimer"
+    );
 
   principal.addEventListener("click", (evenement) => {
     const bouton = evenement.target.closest("[data-vider]");
     if (!bouton) return;
     const zone = principal.querySelector("[data-corbeille]");
     if (!zone) return;
-    const choix = bouton.dataset.vider;
-    if (choix === "demander") {
-      zone.innerHTML = confirmationVider(notesRetirees().length);
-      zone.querySelector('[data-vider="annuler"]').focus();
-      return;
-    }
-    if (choix === "annuler") {
-      zone.innerHTML = BOUTON_VIDER;
-      zone.querySelector("button").focus();
-      return;
-    }
+    if (!choixEnDeuxTemps(zone, bouton.dataset.vider, "vider", BOUTON_VIDER, confirmationVider(notesRetirees().length))) return;
     const retirees = notesRetirees();
     const gardees = retirees.map((n) => [n.id, etat.notes[n.id]]);
     for (const n of retirees) delete etat.notes[n.id];
@@ -3131,10 +3111,6 @@
       marque.addEventListener("animationend", eteindre, { once: true });
       setTimeout(eteindre, 2500);
     });
-  }
-
-  function dureeEntree() {
-    return parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--ecran-entree")) || 0;
   }
 
   const DUREE_ALLUMAGE = 90;
@@ -3554,7 +3530,7 @@
       principal.style.clipPath = depasse > 0 ? `inset(${Math.ceil(depasse)}px 0 0 0)` : "";
       principal.classList.add("ecran--entre");
       if (calque) calque.classList.add("calque-quitte--part");
-      await attendre(dureeEntree() + 40);
+      await attendre(dureeDuStyle("--ecran-entree") + 40);
       if (jeton === navigation) {
         principal.classList.remove(...CLASSES_ECRAN);
         principal.style.clipPath = "";

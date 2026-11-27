@@ -29,8 +29,8 @@ jobs:
   verifier:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: "22"
       # Rien ne part en ligne si le contenu, les versets ou les contrastes ne passent pas.
@@ -43,7 +43,7 @@ jobs:
       # "github-pages" were found » : trois échecs le 21 novembre 2026, un le 16). Défaut connu
       # de l'outil : https://github.com/actions/deploy-pages/issues/451. Avec deux travaux,
       # plusieurs secondes les séparent. C'est la disposition des modèles de GitHub.
-      - uses: actions/configure-pages@v5
+      - uses: actions/configure-pages@v6
         if: github.repository != 'ebtm-cours-decouvertes/cours-decouvertes-travail'
       - uses: actions/upload-pages-artifact@v5
         if: github.repository != 'ebtm-cours-decouvertes/cours-decouvertes-travail'
