@@ -25,6 +25,7 @@ const lire = (...morceaux) => readFileSync(join(app, ...morceaux), "utf8");
 const contenu = {
   "contenu/index.json": JSON.parse(lire("contenu", "index.json")),
   "contenu/a-propos.json": JSON.parse(lire("contenu", "a-propos.json")),
+  "contenu/eglise.json": JSON.parse(lire("contenu", "eglise.json")),
   "contenu/versets.json": JSON.parse(lire("contenu", "versets.json")),
 };
 for (const fichier of readdirSync(join(app, "contenu", "lecons")).filter((f) => f.endsWith(".json"))) {
@@ -43,13 +44,10 @@ function enBase64(chemin) {
   return `data:${type};base64,${readFileSync(join(app, chemin)).toString("base64")}`;
 }
 
-// Le logo de l'en-tête et le QR code sont posés par le code, pas écrits dans la page : il faut
-// les embarquer aussi.
+// Le QR code est posé par le code, pas écrit dans la page : il faut l'embarquer aussi.
 const figures = {
-  "icones/logo-ebtm.png": enBase64("icones/logo-ebtm.png"),
-  "icones/logo-ebtm-mot.png": enBase64("icones/logo-ebtm-mot.png"),
-  "icones/logo-ebtm-mot-sombre.png": enBase64("icones/logo-ebtm-mot-sombre.png"),
   "qr-cours-decouvertes.png": enBase64("qr-cours-decouvertes.png"),
+  "icones/logo-ebtm-silhouette.png": enBase64("icones/logo-ebtm-silhouette.png"),
 };
 const dossierFigures = join(app, "contenu", "figures");
 if (existsSync(dossierFigures)) {

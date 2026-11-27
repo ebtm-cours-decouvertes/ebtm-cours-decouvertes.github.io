@@ -9,7 +9,7 @@
   "scope": "./",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#6e1c70",
+  "theme_color": "#6e1a6e",
   "prefer_related_applications": false,
   "icons": [
     {
@@ -29,29 +29,6 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "captures/accueil.png",
-      "sizes": "412x824",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "La liste des dix leçons et l’avancement"
-    },
-    {
-      "src": "captures/lecon.png",
-      "sizes": "412x824",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Le texte d’une leçon, avec ses références bibliques"
-    },
-    {
-      "src": "captures/versets.png",
-      "sizes": "412x824",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Les versets à apprendre et leurs trois modes d’affichage"
     }
   ]
 }

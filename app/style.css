@@ -1,24 +1,6 @@
-/* Cours découvertes — feuille de style. Mobile d'abord, sans dépendance. */
-
-/* Police « Chaleureux », choisie par Sébastien sur maquettes le 23 novembre 2026, parmi cinq :
-   Fraunces pour les titres et les grands chiffres, Nunito pour le texte. Hébergées dans
-   l'application (dossier « polices », licence SIL Open Font License 1.1 jointe), jamais chargées
-   d'un autre site. Fichiers officiels de Google Fonts, sous-ensemble « latin » : tout le texte
-   du cours y est (vérifié ; seules les flèches ← → passent par la police du téléphone).
-   Une seule police variable par famille, qui porte toutes les graisses utilisées. */
 @font-face {
-  font-family: "Fraunces";
-  src: url("polices/fraunces.woff2") format("woff2");
-  font-weight: 400 600;
-  font-style: normal;
-  font-display: swap;
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304,
-    U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-
-@font-face {
-  font-family: "Nunito";
-  src: url("polices/nunito.woff2") format("woff2");
+  font-family: "Inter Tight";
+  src: url("polices/inter-tight.woff2") format("woff2");
   font-weight: 400 700;
   font-style: normal;
   font-display: swap;
@@ -26,107 +8,135 @@
     U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
+@font-face {
+  font-family: "Bricolage Grotesque";
+  src: url("polices/bricolage-grotesque.woff2") format("woff2");
+  font-weight: 200 800;
+  font-stretch: 75% 100%;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304,
+    U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 :root {
-  /* Les deux polices de l'application, définies ici seulement. */
-  --police-titres: "Fraunces", Georgia, "Times New Roman", serif;
-  --police-texte: "Nunito", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
-    Arial, sans-serif;
-  --violet: #982898;
-  --violet-fonce: #6e1c70;
-  --magenta: #d40775;
-  --encre: #2b1f2e;
-  --texte-doux: #5f5363;
-  /* Blanc pur depuis le 21 novembre 2026 (« Fond blanc, lignes fines », choisi par Sébastien
-     sur captures) : l'ancien gris-mauve #faf7fb donnait un air terne. */
+
+  --police: "Inter Tight", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --police-titres: "Bricolage Grotesque", var(--police);
+
+  --violet: #6e1a6e;
+  --magenta: #b0175f;
+
+  --logo-degrade: radial-gradient(110% 70% at 105% 105%, #d40775, transparent 62%),
+    radial-gradient(90% 60% at -10% -5%, #4f1352, transparent 70%),
+    linear-gradient(165deg, #6e1c70, #982898 60%, #b3157f);
+  --encre: #111111;
+  --texte-doux: #666666;
   --fond: #ffffff;
   --carte: #ffffff;
-  --bord: #e6dce8;
-  /* Bordure des éléments avec lesquels on interagit : 3 pour 1, exigé pour être repérable. */
+  --bord: #e6e6e6;
+
+  --filet-fort: #111111;
+
+  --bouton: #6e1a6e;
+  --sur-bouton: #ffffff;
+
+  --choix: var(--nav-pastille);
+  --sur-choix: #6e1a6e;
+  --choix-contour: var(--nav-pastille-contour);
+
+  --verre: 0.3;
+  --flou: 4px;
+  --nav-fond: rgba(255, 255, 255, var(--verre));
+  --nav-contour: transparent;
+  --nav-ombre: inset 0 1.5px 0 rgba(255, 255, 255, 0.95), inset 0 -1.5px 0 rgba(255, 255, 255, 0.6),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.5), inset 0 10px 14px -10px rgba(255, 255, 255, 0.9),
+    inset 0 -12px 16px -12px rgba(110, 26, 110, 0.22), 0 0 0 1px rgba(110, 26, 110, 0.1),
+    0 12px 32px rgba(110, 26, 110, 0.2);
+
+  --nav-pastille: rgba(255, 255, 255, 0.72);
+  --nav-pastille-contour: rgba(29, 20, 32, 0.08);
+  --nav-pastille-ombre: inset 0 1px 0 #ffffff, 0 2px 7px rgba(29, 20, 32, 0.14);
+
+  --carte-ombre: 0 2px 10px rgba(29, 20, 32, 0.1);
+
+  --selection-dessin: rgba(0, 122, 255, 0.22);
+  --poignee-dessin: #007aff;
+  --nav-icone-active: #7e2a8c;
+  --nav-texte: #221a26;
+
   --bord-actif: #8a838c;
-  --teinte: #f3e8f4;
-  /* Ombre du petit message du bas (« Noté : … »). */
+  --teinte: #f6edf5;
+
+  --gris-leger: #f6f6f6;
+
   --annonce-ombre: 0 6px 20px rgba(43, 31, 46, 0.25);
-  /* Voile posé sur un bloc déjà teinté quand on le touche. */
+
   --pression: rgba(43, 31, 46, 0.07);
-  /* Marque que l'iPhone pose sur un bouton touché : mauve, au lieu de son gris par défaut
-     (demande de Sébastien, 21 novembre 2026 : « il est gris, c'est pas dans l'esprit du site »). */
-  --toucher: rgba(152, 40, 152, 0.16);
-  /* Fenêtres du bas : montée et descente, même chemin, même courbe (démarrage net, arrivée très
-     douce). Rythme « Lent », choisi par Sébastien sur vidéo le 21 novembre 2026, parmi trois. */
+
+  --appui-ligne: rgba(17, 17, 17, 0.05);
+
+  --toucher: rgba(17, 17, 17, 0.06);
+
   --feuille-ouverture: 720ms;
   --feuille-fermeture: 480ms;
   --feuille-courbe: cubic-bezier(0.32, 0.72, 0, 1);
-  /* Arrivée d'un écran ouvert depuis une liste (même courbe que les fenêtres du bas). Rythme
-     « Lent », choisi par Sébastien sur vidéo le 21 novembre 2026, parmi trois (0,36 / 0,48 / 0,60 s). */
+
   --ecran-entree: 600ms;
-  /* Rangée d'onglets d'une leçon qui se range sous le bandeau à la lecture et revient à la
-     remontée. Rythme « Très douce », choisi par Sébastien sur vidéo le 21 novembre 2026, parmi
-     « Aujourd'hui » (0,10 / 0,25 s), « Douce » (0,32 / 0,38 s) et « Fixe ». */
+
   --barre-mouvement: 480ms;
-  /* Bandeau de l'accueil, « Dégradé de la croix » : du violet des lettres du logo au rose de sa
-     croix (relevés sur le logo : #862292, #ee206c), assombris pour porter du blanc. Choisi par
-     Sébastien sur captures le 21 novembre 2026, parmi quatre bandeaux. */
-  --bandeau-debut: #6e1c70;
-  --bandeau-milieu: #8a1a6e;
-  --bandeau-fin: #b0185f;
-  --bandeau: linear-gradient(90deg, var(--bandeau-debut) 0%, var(--bandeau-milieu) 55%, var(--bandeau-fin) 100%);
-  --sur-bandeau: #ffffff;
-  --ok: #2b7449;
-  --ok-fond: #e6f4ec;
-  --danger: #b3261e;
+  --danger: #b42318;
   --danger-doux: #f7e3e1;
-  /* Mes notes : un fond de passage (le texte reste à l'encre, contrôlé par
-     verifier-contrastes.mjs) et une pastille par choix. Chaque choix porte aussi son nom écrit :
-     la couleur seule ne dit rien à qui la distingue mal. */
+
   --note-comprends: #fde3d8;
   --point-comprends: #cf5a2f;
   --note-question: #fcecb0;
-  --point-question: #a37800; /* plus foncé que #c99400 (2,7 pour 1 sur blanc) : 3 pour 1 au moins partout */
+  --point-question: #a37800;
   --note-vivre: #d6f0de;
   --point-vivre: #2b8a50;
   --note-prier: #d9e8f8;
   --point-prier: #3a77c0;
   --note-encourage: #f3d9f1;
   --point-encourage: #a8449f;
-  /* Taille du texte choisie dans les réglages. Les zones à toucher s'écrivent
-     « max(2.75rem, 44px) » : en rem seuls, elles suivaient le texte et tombaient à 40 px à la
-     plus petite taille, sous les 44 px exigés (agent de test, 25 novembre 2026). */
+
   --echelle: 1;
-  --rayon: 14px;
   --ombre: 0 1px 2px rgba(43, 31, 46, 0.06), 0 4px 14px rgba(43, 31, 46, 0.06);
-  /* Limite de la barre du haut quand le texte passe dessous : une ombre en clair, un filet en
-     sombre (une ombre ne s'y voit pas). Le mode sombre change ces deux valeurs, jamais les règles
-     de la barre : une règle préfixée par l'apparence pèse plus lourd que les règles propres à un
-     écran et les écrasait (filet resté fixe sous les onglets rangés, vidéo du 23 novembre 2026). */
+
   --barre-filet-flottant: transparent;
   --barre-ombre-flottante: 0 1px 3px rgba(43, 31, 46, 0.05), 0 6px 20px rgba(43, 31, 46, 0.09);
-  /* Pastille des onglets d'une leçon, qui flotte au-dessus du texte : une ombre douce en clair,
-     un contour fin en sombre (la dernière valeur trace un trait d'un pixel qui suit l'arrondi). */
+
   --onglets-ombre: 0 1px 3px rgba(43, 31, 46, 0.1), 0 6px 18px rgba(43, 31, 46, 0.16);
-  /* L'application reste claire quel que soit le réglage du téléphone. Le mode sombre est un
-     choix explicite du lecteur, jamais une conséquence du réglage de son appareil. */
+
   color-scheme: light;
 }
 
-/* L'attribut est « apparence » et non « theme » : le lecteur d'aperçu pose son propre
-   data-theme sur la racine, les deux ne doivent pas se marcher dessus. */
 :root[data-apparence="sombre"] {
   color-scheme: dark;
-  --violet: #c56cc5;
-  --violet-fonce: #d99bd9;
-  --magenta: #ff5fb4;
-  --encre: #f1e9f2;
-  --texte-doux: #b9adbc;
-  --fond: #171219;
-  --carte: #221a25;
-  --bord: #3a2e3d;
+  --violet: #d9a6e6;
+  --magenta: #f28db8;
+  --encre: #f2eef3;
+  --texte-doux: #a79faa;
+  --fond: #141114;
+  --carte: #1d181e;
+  --bord: #2e2930;
+  --filet-fort: #f2eef3;
+  --choix: #2b242e;
+  --sur-choix: #e2b5ee;
+  --nav-fond: rgba(33, 28, 34, 0.55);
+  --nav-contour: transparent;
+  --nav-ombre: inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 12px 32px rgba(0, 0, 0, 0.45);
+  --nav-pastille: #2b242e;
+  --nav-pastille-contour: #4a3b4e;
+  --nav-pastille-ombre: 0 3px 10px rgba(0, 0, 0, 0.35);
+  --nav-icone-active: #e2b5ee;
+  --nav-texte: #ede6ef;
   --bord-actif: #7b7280;
-  --teinte: #2c2130;
+  --teinte: #2a1c2e;
+  --gris-leger: #1f1c1f;
   --pression: rgba(255, 255, 255, 0.08);
-  --toucher: rgba(217, 155, 217, 0.22);
-  --ok: #7fd39f;
-  --ok-fond: #1f3527;
-  --danger: #f28b82;
+  --appui-ligne: rgba(255, 255, 255, 0.07);
+  --toucher: rgba(255, 255, 255, 0.08);
+  --danger: #ff8a80;
   --danger-doux: #3a2422;
   --note-comprends: #573021;
   --point-comprends: #f0916a;
@@ -142,21 +152,15 @@
   --barre-filet-flottant: var(--bord);
   --barre-ombre-flottante: none;
   --onglets-ombre: 0 0 0 1px var(--bord);
-  --bandeau-debut: #3a1a3d;
-  --bandeau-milieu: #4a173f;
-  --bandeau-fin: #5e1443;
 }
 
-/* Les figures du livret, elles, sont imprimées sur blanc : on leur laisse leur papier plutôt
-   que de les afficher en bloc blanc au milieu du sombre. */
 :root[data-apparence="sombre"] .figure {
   background: #ffffff;
   border-color: transparent;
 }
 
-:root[data-apparence="sombre"] .figure figcaption,
-:root[data-apparence="sombre"] .figure__aide {
-  color: #5f5363;
+:root[data-apparence="sombre"] .figure figcaption {
+  color: #666666;
 }
 
 :root[data-apparence="sombre"] .message--erreur {
@@ -189,73 +193,19 @@ html {
   -webkit-tap-highlight-color: var(--toucher);
 }
 
-/* Le fond de la page. Dans l'application installée, il est violet : c'est d'après lui qu'iOS
-   choisit d'écrire l'heure en blanc, sans voile, ou en noir sous un voile clair (vu sous iOS 27
-   sur le simulateur, le 21 novembre 2026 : bande violette en haut mais fond blanc, d'où un voile
-   pâle et l'heure en noir ; même constat sur GDJ-EBTM, 12 novembre 2026). Le contenu est posé
-   sur une nappe blanche fixée derrière lui (« body::after ») ; body reste sans fond, sinon le
-   sien se peindrait par-dessus la nappe. Dans Safari, le fond reste blanc : iOS 26 y teinte le
-   bas de l'écran, derrière la barre d'adresse, avec ce fond. */
 html {
   background: var(--fond);
 }
 
-@media (display-mode: standalone) {
-  html {
-    background: var(--bandeau-debut);
-  }
-}
-
 body {
   margin: 0;
+
   min-height: 100vh;
+  min-height: 100dvh;
   color: var(--encre);
-  font-family: var(--police-texte);
+  font-family: var(--police);
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
-}
-
-body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  background: var(--fond);
-  pointer-events: none;
-}
-
-/* Le haut de l'écran sur iPhone. Depuis iOS 26, la zone de l'heure (dans Safari comme dans
-   l'application installée) prend la couleur du bloc fixé tout en haut de l'écran, s'il mesure
-   plus de 10 px ; à défaut, le fond de la page. Sous iOS 27, rien ne se dessine plus sous
-   l'heure : le réglage « black-translucent » est abandonné (WebKit, bugs 301756 et 317153).
-   Cette bande violette fixée, de 12 px au moins, donne donc sa couleur à la zone de l'heure ;
-   la page commence dessous. Méthode de Plateforme Théologie (journal du 4 novembre 2026),
-   vérifiée là-bas sous iOS 27.0 et 26.5, appli et Safari.
-   Ici, le 21 novembre 2026 : la page passait sous l'heure avec « black-translucent », vérifié
-   sous iOS 26.5 seulement ; sur l'iPhone de Sébastien (iOS 27), bande blanche sous l'heure
-   (capture de 22 h 20). La barre, fixée en haut, a un fond blanc : c'est lui qu'iOS prenait.
-   Couleur unie, pas le dégradé : iOS pose une seule couleur sous l'heure. L'en-tête commence
-   par ce même violet uni (« .entete ») : aucune ligne à la jonction. La bande passe devant la
-   barre : quand celle-ci s'efface dans une leçon, elle se range dessous.
-   Vérifié sur le simulateur (iPhone 18 Pro, iOS 27.0, application installée) : violet jusqu'en
-   haut, heure en blanc, en clair et en sombre. Limites vues : sous iOS 26.5, le texte d'une
-   leçon passe sous l'heure, voilé de violet, quand la barre s'efface ; sous iOS 27, la zone de
-   l'heure ne s'assombrit pas avec le voile d'une fenêtre du bas (essayé : iOS garde la couleur
-   prise à l'ouverture). Remettre « black-translucent » ramenait la bande blanche sous iOS 26.5
-   sur une application déjà installée : essayé et retiré. */
-body::before {
-  content: "";
-  position: fixed;
-  /* Elle monte aussi au-dessus de l'écran : sous iOS 27, la zone de l'heure montre en flou ce
-     qui s'y trouve, c'est-à-dire le texte qui vient de défiler hors de l'écran (vu sur le
-     simulateur, le 21 novembre 2026). La bande le couvre. */
-  top: -240px;
-  right: 0;
-  left: 0;
-  z-index: 25;
-  height: calc(240px + max(12px, env(safe-area-inset-top)));
-  background-color: var(--bandeau-debut);
-  pointer-events: none;
 }
 
 a {
@@ -273,7 +223,6 @@ button {
   outline-offset: 2px;
 }
 
-/* Lien d'évitement : invisible tant qu'on ne l'atteint pas au clavier. */
 .saut {
   position: absolute;
   top: -100%;
@@ -304,51 +253,33 @@ button {
   white-space: nowrap;
 }
 
-/* ---------- En-tête ---------- */
-
 .barre {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 20;
-  background: var(--carte);
-  border-bottom: 1px solid var(--bord);
-  /* translate3d, même à zéro, place la barre sur sa propre couche graphique : sans cela,
-     WebKit la redessine à chaque image et elle scintille. */
+  background: var(--fond);
+  border-bottom: 1px solid transparent;
+
   transform: translate3d(0, 0, 0);
 }
 
-/* La barre reste en place et entièrement opaque : on ne voit rien passer derrière (demande de
-   Sébastien, 21 novembre 2026 ; elle s'effaçait pendant la lecture et devenait translucide).
-   Dès qu'on défile, une ombre (un filet en sombre) dit seule qu'elle passe au-dessus du texte. */
 .barre--flottante {
   border-bottom-color: var(--barre-filet-flottant);
   box-shadow: var(--barre-ombre-flottante);
 }
 
-/* Dans une leçon, la rangée des onglets se range sous le bandeau violet quand on descend dans
-   le texte, et revient dès qu'on remonte (remise à la demande de Sébastien, 21 novembre 2026).
-   Seule la rangée bouge : le bandeau reste en place et opaque, et rien ne passe dans la zone de
-   l'heure. C'est la barre entière qui partait avant, et iOS 27 la montrait alors floutée sous
-   l'heure ; une rangée qui reste sous le bandeau ne peut pas y arriver.
-   La barre elle-même devient transparente : chaque partie porte son fond, et l'endroit libéré
-   par la rangée laisse voir le texte et le laisse toucher.
-   La rangée flotte (« Flottante avec ombre », choisie par Sébastien sur captures le 23 novembre
-   2026) : plus de bande ni de filet derrière la pastille, le texte passe autour d'elle et se
-   touche autour d'elle ; seule la pastille, opaque, porte une ombre (un contour fin en sombre). */
+.barre:not(.barre--flottante):not(:has(.bouton-retour, .bouton-barre:not([hidden]), .onglets)) {
+  visibility: hidden;
+}
+
 .barre--onglets,
 .barre--onglets.barre--flottante {
   background: transparent;
   border-bottom-color: transparent;
   box-shadow: none;
   pointer-events: none;
-}
-
-/* Rien ne dépasse au-dessus de la barre, même quand le bandeau est moins haut que la rangée
-   (hors application installée) ; l'ombre, en dessous, reste visible. */
-.barre--onglets {
-  clip-path: inset(0 0 -40px 0);
 }
 
 .barre--onglets > * {
@@ -358,25 +289,25 @@ button {
 .barre--onglets .entete {
   position: relative;
   z-index: 1;
+
+  border-bottom: 1px solid transparent;
+}
+
+.barre--onglets.barre--flottante .entete {
+  border-bottom: 1px solid var(--barre-filet-flottant);
+  box-shadow: var(--barre-ombre-flottante);
 }
 
 .barre--onglets #zone-onglets {
   position: relative;
-  /* Les touchers passent à travers la zone, sauf sur la pastille et ses onglets. */
+
   pointer-events: none;
-  /* Le mouvement est confié au compositeur (transition sur transform), pas au script : sur
-     iOS le défilement tourne hors du fil principal, et un déplacement image par image depuis
-     le script restait en retard d'une image. */
+
   transition:
     transform var(--barre-mouvement) var(--feuille-courbe),
     background-color 0.2s ease-out;
 }
 
-/* Pendant la glissade d'un écran (style.css, « Changement d'écran »), la zone de la rangée
-   reprend le fond de la page : sinon on voyait, autour de la pastille, la copie de l'écran quitté
-   et l'ombre de l'écran qui arrive (vidéo de Sébastien, 23 novembre 2026, 11 h 44). Le fond
-   s'efface ensuite en 0,2 s ; en haut de page, il a la couleur de ce qu'il cachait. Il arrive,
-   lui, sans fondu : une transition se lit sur l'état d'arrivée, d'où le « 0s » ici. */
 html:has(main.ecran--attente) .barre--onglets #zone-onglets,
 html:has(main.ecran--entre) .barre--onglets #zone-onglets {
   background-color: var(--fond);
@@ -385,15 +316,11 @@ html:has(main.ecran--entre) .barre--onglets #zone-onglets {
     background-color 0s;
 }
 
-/* Même chose pour la bordure transparente d'un point au bas de la barre : pendant la glissade,
-   elle prend le fond de la page, pour que rien de ce qui passe dessous ne s'y voie. */
 html:has(main.ecran--attente) .barre--onglets,
 html:has(main.ecran--entre) .barre--onglets {
   border-bottom-color: var(--fond);
 }
 
-/* Un toucher sur le fond de la pastille (::before) compte pour la rangée : il ne traverse pas
-   jusqu'au texte caché dessous. */
 .barre--onglets .onglets::before,
 .barre--onglets .onglet {
   pointer-events: auto;
@@ -413,63 +340,15 @@ html:has(main.ecran--entre) .barre--onglets {
   }
 }
 
-/* L'en-tête de chaque écran est un bandeau en dégradé, du violet des lettres du logo au rose de
-   sa croix (« Dégradé de la croix », choisi par Sébastien le 21 novembre 2026) ; logo, titre et
-   boutons y sont en blanc. Sur tous les écrans, pour que la couleur sous l'heure ne change
-   jamais d'un écran à l'autre. Son sommet est du violet uni de la bande de l'heure (voir
-   « body::before »), puis le dégradé prend le relais : aucune ligne à la jonction. Le contenu
-   commence sous la bande (moins la marge intérieure de l'en-tête). */
 .entete {
-  background: linear-gradient(to bottom, var(--bandeau-debut) max(12px, env(safe-area-inset-top)),
-      transparent calc(max(12px, env(safe-area-inset-top)) + 2rem)),
-    var(--bandeau);
+  background: var(--fond);
   padding-top: calc(max(12px, env(safe-area-inset-top)) - 0.6rem);
-}
-
-/* Dans l'application installée, l'iPhone floute le haut de l'écran bien au-delà de l'heure
-   (iOS 27 : croix du logo et titre « Cours découvertes » flous, vus par Sébastien sur son iPhone
-   le 21 novembre 2026 et mesurés sur le simulateur ; GDJ-EBTM : texte net à partir d'environ
-   110 points du haut). Le logo, le titre et les boutons descendent sous cette zone ; le violet
-   du bandeau, lui, garde sa place. */
-@media (display-mode: standalone) {
-  .entete {
-    padding-top: calc(max(12px, env(safe-area-inset-top)) - 0.6rem + 1.75rem);
-  }
-}
-
-.entete .marque__titre,
-.entete .bouton-barre,
-.entete .bouton-retour {
-  color: var(--sur-bandeau);
-}
-
-/* Le logo en blanc : on part de la version détourée (celle du livret a un fond blanc). */
-.entete .marque__logo--clair {
-  display: none;
-}
-
-.entete .marque__logo--sombre {
-  display: block;
-  filter: brightness(0) invert(1);
-}
-
-/* Le cadre de focus magenta se perdrait dans le dégradé : il passe en blanc sur le bandeau. */
-.entete :focus-visible {
-  outline-color: var(--sur-bandeau);
-}
-
-@media (hover: hover) {
-  .entete .bouton-barre:hover,
-  .entete .bouton-retour:hover {
-    background: rgba(255, 255, 255, 0.16);
-    color: var(--sur-bandeau);
-  }
 }
 
 .entete__contenu {
   max-width: 720px;
   margin: 0 auto;
-  padding: 0.6rem 1rem;
+  padding: 0.6rem 1.5rem;
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -478,454 +357,540 @@ html:has(main.ecran--entre) .barre--onglets {
 
 .bouton-retour {
   flex: none;
-  width: max(2.75rem, 44px);
-  height: max(2.75rem, 44px);
-  display: grid;
-  place-items: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  min-height: max(2.75rem, 44px);
+  min-width: max(2.75rem, 44px);
   margin-left: -0.5rem;
-  border-radius: 10px;
-  font-size: 1.3rem;
-  line-height: 1;
+  padding: 0 0.5rem 0 0.25rem;
+  font-weight: 500;
+  font-size: 1rem;
   text-decoration: none;
-  color: var(--violet);
+  color: var(--encre);
+}
+
+.bouton-retour .icone {
+  width: 1.25rem;
+  height: 1.25rem;
 }
 
 @media (hover: hover) {
   .bouton-retour:hover {
-    background: var(--teinte);
+    color: var(--violet);
   }
 }
 
-.marque__lien {
-  flex: none;
-  display: flex;
-  /* 44 px de haut à toucher, logo centré dedans (il fait 34 px) : sa place ne change pas. */
-  align-items: center;
-  min-height: 44px;
-  line-height: 0;
-  border-radius: 50%;
-}
-
-.marque__logo {
-  height: 34px;
-  width: auto;
-  flex: none;
-  display: block;
-}
-
-/* Le logo existe en deux versions : celle du livret, imprimée sur blanc, et une version
-   détourée aux lettres éclaircies pour l'apparence sombre. Il y était auparavant posé sur un
-   rectangle blanc, ce qui faisait autocollant. Ces règles doivent rester APRÈS celle du
-   dessus : à force égale, c'est la dernière écrite qui l'emporte. */
-.marque__logo--sombre,
-:root[data-apparence="sombre"] .marque__logo--clair {
-  display: none;
-}
-
-:root[data-apparence="sombre"] .marque__logo--sombre {
-  display: block;
+.entete__contenu:not(:has(.bouton-retour, .bouton-barre:not([hidden]))) {
+  min-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
 .marque__titre {
   flex: 1;
   min-width: 0;
   margin: 0;
-  color: var(--sur-bandeau);
+  color: var(--encre);
   font-weight: 600;
-  font-size: 1.2rem;
-  letter-spacing: -0.005em;
+  font-size: 1rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* Sous 360 pixels, « Cours découvertes » déborderait : mesuré, 176 px pour 158 disponibles. */
-@media (max-width: 359px) {
-  .marque__titre {
-    font-size: 1.05rem;
-  }
-}
-
-/* Les boutons de la barre : le partage, sur la liste des leçons seulement, et les réglages. */
 .bouton-barre {
   flex: none;
   border: none;
   background: none;
-  border-radius: 10px;
   width: max(2.75rem, 44px);
   height: max(2.75rem, 44px);
   display: grid;
   place-items: center;
-  color: var(--texte-doux);
+  color: var(--encre);
 }
 
-/* « Modifier » / « OK » dans un dossier de « Mes notes » : un mot plutôt qu'une icône. */
 .bouton-barre--texte {
   width: auto;
   min-width: max(2.75rem, 44px);
   padding: 0 0.6rem;
   font: inherit;
-  font-weight: 700;
+  font-weight: 600;
+  color: var(--violet);
 }
 
-/* Sans cette règle, « display: grid » l'emporterait sur l'attribut hidden. */
 .bouton-barre[hidden] {
   display: none;
 }
 
-.bouton-barre .icone {
-  display: block;
+.entete__contenu > .bouton-barre:last-child {
+  margin-right: -0.6rem;
 }
 
-/* La roue est tirée de 8 px vers le bord, comme la flèche de retour l'est à gauche : c'est ce
-   qui rend au titre une part de la place prise par l'icône de partage. Elle l'est sur tous
-   les écrans, pour ne pas sauter d'un écran à l'autre. */
 #ouvrir-reglages {
-  margin-right: -0.5rem;
+  font-weight: 600;
+  font-size: 1.05rem;
 }
 
 @media (hover: hover) {
   .bouton-barre:hover {
-    background: var(--teinte);
     color: var(--violet);
   }
 }
 
-/* Bandeau de l'accueil « Logo et filet », choisi par Sébastien sur maquettes le 23 novembre 2026,
-   titre dans la police des titres : un fin trait blanc sépare le logo du titre, et le partage
-   et les réglages sont posés dans des ronds blancs translucides. */
-.barre--accueil .entete__contenu {
-  gap: 0.6rem;
+.navigation {
+  position: fixed;
+  z-index: 30;
+  left: 14px;
+  right: 14px;
+  bottom: calc(14px + env(safe-area-inset-bottom));
+  max-width: 32rem;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 2px;
+  padding: 6px;
+  border: 1px solid var(--nav-contour);
+  border-radius: 38px;
+  background: var(--nav-fond);
+  box-shadow: var(--nav-ombre);
+  -webkit-backdrop-filter: blur(var(--flou)) saturate(1.8) brightness(1.06);
+  backdrop-filter: blur(var(--flou)) saturate(1.8) brightness(1.06);
 }
 
-.barre--accueil .marque__titre {
-  font-family: var(--police-titres);
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root {
+    --verre: 0.97;
+  }
+}
+
+.navigation[hidden] {
+  display: none;
+}
+
+.navigation__onglet {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 62px;
+  border: 1px solid transparent;
+  border-radius: 31px;
+  color: var(--nav-texte);
+  font-size: 0.75rem;
   font-weight: 600;
-  font-size: 1.1rem;
-  line-height: 1.6;
-  padding-left: 0.7rem;
-  border-left: 1.5px solid rgba(255, 255, 255, 0.55);
+  line-height: 1.1;
+  text-align: center;
+  text-decoration: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
+
+  position: relative;
+  z-index: 1;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.barre--accueil .bouton-barre {
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.16);
+.navigation__onglet[aria-current="page"] {
+  font-weight: 700;
 }
 
-/* Sur les écrans de moins de 390 px (360 px courant sur Android), le titre serait coupé :
-   il se resserre un peu. Mesuré : entier à 375 et 360 px ; coupé à 320 px, comme avant. */
-@media (max-width: 389px) {
-  .barre--accueil .entete__contenu {
-    gap: 0.45rem;
+.navigation__bulle {
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  left: 6px;
+  width: calc((100% - 12px - 6px) / 4);
+  border-radius: 31px;
+  background: var(--nav-pastille);
+  box-shadow: 0 0 0 1px var(--nav-pastille-contour), var(--nav-pastille-ombre);
+  translate: calc(var(--onglet, 0) * (100% + 2px)) 0;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .navigation__bulle {
+    transition: translate 0.4s cubic-bezier(0.3, 1.3, 0.5, 1);
   }
 
-  .barre--accueil .marque__titre {
-    font-size: 1rem;
-    padding-left: 0.55rem;
+  .navigation__bulle--bouge {
+    animation: etirer 0.4s ease-out;
+  }
+
+  .navigation__onglet .icone {
+    transition: color 0.25s ease-out;
+  }
+
+  .navigation__onglet {
+    transition: transform 0.14s ease-out;
   }
 }
 
-/* Sur l'accueil, rien sous le bandeau : ni filet, ni la bande translucide d'un pixel qu'il
-   laissait, à travers laquelle on voyait passer le texte (vidéo de Sébastien, 22 h 45). */
-.barre--accueil,
-.barre--accueil.barre--flottante {
-  border-bottom: 0;
+.navigation__onglet:active {
+  transform: scale(0.94);
 }
 
-/* Dans leurs ronds, les deux boutons ne sont plus tirés vers le bord. */
-.barre--accueil #ouvrir-reglages {
-  margin-right: 0;
+.navigation__onglet[aria-current="page"] .icone {
+  color: var(--nav-icone-active);
 }
 
-/* ---------- Structure des pages ---------- */
+.navigation__onglet:focus-visible {
+  outline-offset: -3px;
+}
 
 main {
   max-width: 720px;
   margin: 0 auto;
-  padding: 1rem 1rem calc(3rem + env(safe-area-inset-bottom));
+  padding: 0.5rem 1.5rem calc(3rem + env(safe-area-inset-bottom));
 }
 
-/* Assez de hauteur pour que la barre puisse s'effacer même sur une page courte. */
+body.avec-navigation main {
+  padding-bottom: calc(8rem + env(safe-area-inset-bottom));
+}
+
 .panneau {
   min-height: 60vh;
 }
 
-.retour {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  text-decoration: none;
-  font-weight: 600;
-  margin-bottom: 0.75rem;
-}
-
-/* Le titre reçoit le focus à chaque changement de page (lecteurs d'écran) : pas de cadre visuel. */
-.page-titre:focus {
+main h1:focus {
   outline: none;
 }
 
-.page-titre {
+.titre-accueil,
+.titre-page,
+.titre-sous-page,
+.page-titre,
+.lecon-titre {
+  margin: 0;
+  color: var(--encre);
   font-family: var(--police-titres);
-  font-weight: 400;
-  font-size: 2.15rem;
-  line-height: 1.2;
+  font-weight: 600;
+}
+
+.accueil-tete {
+  --logo-rond: clamp(44px, 16vw, 64px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 2.25rem;
+}
+
+.logo-rond {
+  flex: none;
+  width: var(--logo-rond);
+  height: var(--logo-rond);
+  border: 1px solid var(--encre);
+  border-radius: 50%;
+  background: var(--logo-degrade);
+  display: grid;
+  place-items: center;
+}
+
+.logo-rond__dessin {
+  width: 82%;
+  aspect-ratio: 500 / 265;
+  background: #fff;
+  -webkit-mask: center / contain no-repeat;
+  mask: center / contain no-repeat;
+}
+
+.titre-accueil {
+
+  font-size: min(3rem, 14vw, calc((100vw - 4rem - var(--logo-rond)) / 5.6));
+  line-height: 0.98;
+  letter-spacing: -0.04em;
+}
+
+.titre-accueil__petit,
+.titre-accueil__grand {
+  display: block;
+}
+
+.titre-accueil__petit {
+  font-size: 0.42em;
+  font-weight: 700;
+  line-height: 1.15;
   letter-spacing: -0.01em;
-  margin: 0.25rem 0 1rem;
+}
+
+.titre-accueil__grand {
+  font-weight: 800;
+}
+
+.titre-page {
+  margin-top: 2.25rem;
+  font-size: 2.75rem;
+  line-height: 1;
+  letter-spacing: -0.035em;
+}
+
+.titre-sous-page,
+.page-titre,
+.lecon-titre {
+  font-size: 2rem;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  hyphens: auto;
+  overflow-wrap: break-word;
+}
+
+.titre-sous-page,
+.page-titre {
+  margin-top: 0.25rem;
+}
+
+.page-titre {
+  margin-bottom: 1rem;
+}
+
+.lecon-numero {
+  margin: 0.5rem 0 0;
   color: var(--violet);
+  font-size: 4rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.lecon-titre {
+  margin-top: 0.5rem;
 }
 
 .surtitre {
-  font-size: 0.9rem;
+  margin: 0.5rem 0 0;
+  font-size: 0.875rem;
   font-weight: 500;
   color: var(--texte-doux);
-  margin: 0;
 }
 
 .texte-doux {
   color: var(--texte-doux);
 }
 
-/* Sur un téléphone, le navigateur pose un voile gris sur le lien qu'on touche. Pour un lien
-   qui change d'écran, ce voile est pris dans l'image que l'iPhone garde de l'écran quitté :
-   au retour en arrière, la carte touchée réapparaissait grise un instant (filmé par Sébastien
-   le 21 novembre 2026, reproduit sur iPhone virtuel). Il est retiré de tous les liens internes
-   de l'application, et d'eux seuls. Rien ne le remplace : l'écran change dès le toucher. */
 a[href^="#/"] {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* ---------- Accueil ---------- */
-
-.accueil__intro {
-  margin: 0 0 1rem;
-  color: var(--texte-doux);
-}
-
-.liste-lecons {
+.liste-lignes {
   list-style: none;
-  margin: 0;
+  margin: 1.625rem 0 0;
   padding: 0;
-  display: grid;
 }
 
-/* Une leçon est une ligne de la liste, séparée de la suivante par un filet : ni boîte, ni
-   ombre (« Fond blanc, lignes fines », choisi par Sébastien le 21 novembre 2026 sur captures).
-   Le nom de classe « carte » date de l'époque où chaque leçon était une boîte. */
-.carte-lecon {
-  display: grid;
-  grid-template-columns: 3.1rem 1fr auto;
-  /* L'avancement occupe une ligne à lui, sur toute la largeur : il tient alors d'un trait. */
-  grid-template-areas:
-    "numero titre marque"
-    "numero detail detail";
-  /* Le chiffre et le titre sont posés sur la même ligne d'écriture. */
-  align-items: baseline;
-  column-gap: 0.8rem;
-  border-bottom: 1px solid var(--bord);
-  padding: 1.05rem 0;
-  text-decoration: none;
+.accueil-tete + .liste-lignes {
+  margin-top: 1.25rem;
+}
+
+.liste-lignes--a-part {
+  margin-top: 2.25rem;
+}
+
+.ligne-lecon {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  min-height: 3.625rem;
+  margin-bottom: 0.625rem;
+  padding: 0.5rem 1rem;
+  border-radius: 16px;
+  background: var(--carte);
+  box-shadow: 0 0 0 1px var(--nav-pastille-contour), var(--carte-ombre);
   color: inherit;
-  /* Pour l'état « touché » ci-dessous : la teinte est un calque posé derrière le contenu. */
+  text-decoration: none;
+
   position: relative;
   isolation: isolate;
-  /* Une ligne est une commande, pas un texte : un appui long ne sélectionne rien et n'ouvre
-     pas le menu des liens de l'iPhone. */
+
   -webkit-user-select: none;
   user-select: none;
   -webkit-touch-callout: none;
   touch-action: manipulation;
-}
-
-@media (hover: hover) {
-  .carte-lecon:hover {
-    border-bottom-color: var(--violet);
-  }
-}
-
-/* Sous le doigt, la ligne se teinte et s'enfonce à peine (« ligne--touchee », posé par app.js),
-   et reste ainsi jusqu'à l'arrivée de l'écran ouvert. La teinte déborde un peu des deux côtés,
-   coins arrondis, et recouvre les deux filets qui l'encadrent. Pas de « :active » : il restait
-   allumé pendant un défilement commencé sur la ligne. */
-.carte-lecon {
   transition: transform 220ms ease-out;
 }
 
-.carte-lecon.ligne--touchee {
-  transform: scale(0.985);
-  transition-duration: 80ms;
+@media (hover: hover) {
+  .ligne-lecon:hover {
+    box-shadow: 0 0 0 1px var(--bord-actif), var(--carte-ombre);
+  }
 }
 
-.carte-lecon::before {
-  content: "";
-  position: absolute;
-  inset: -1px -0.75rem;
-  z-index: -1;
-  border-radius: 12px;
-  background: var(--teinte);
-  opacity: 0;
-  transition: opacity 220ms ease-out;
-}
-
-.carte-lecon.ligne--touchee::before {
-  opacity: 1;
-  transition-duration: 80ms;
-}
-
-/* Le numéro de la leçon est un grand chiffre violet, sans cadre, dans le caractère des titres
-   du cours. Choix validé le 16 novembre 2026, sur trois variantes montrées en image : le
-   carré teinté qui portait « LEÇON 1 » ne lui plaisait pas. Fin et non plus gras depuis le
-   21 novembre 2026, comme les titres. Le mot « Leçon » n'est plus
-   affiché mais reste dans la page, masqué à l'œil seulement : le lecteur d'écran annonce
-   toujours « Leçon 1, Le plan du salut ». Une leçon terminée se reconnaît à sa coche, plus à
-   la couleur de son numéro. */
-.carte-lecon__numero {
-  grid-area: numero;
-  color: var(--violet);
-}
-
-/* Les chiffres tabulaires gardent la même largeur, pour que « 1 » et « 10 » s'alignent. */
-.carte-lecon__chiffre {
+.ligne-lecon__numero {
+  flex: none;
+  width: 2.5rem;
+  color: var(--encre);
   font-family: var(--police-titres);
-  font-weight: 400;
-  font-size: 2.3rem;
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
+  font-size: 1.5rem;
+  font-weight: 700;
   letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
 }
 
-.carte-lecon__titre {
-  grid-area: titre;
+.ligne-lecon__numero ~ .ligne-lecon__titre {
+  font-family: var(--police-titres);
+  font-size: 1.25rem;
   font-weight: 600;
-  font-size: 1.08rem;
-  margin: 0;
+  letter-spacing: -0.015em;
 }
 
-.carte-lecon__detail {
-  grid-area: detail;
-  margin: 0.25rem 0 0;
-  font-size: 0.85rem;
-  color: var(--texte-doux);
-}
-
-.carte-lecon__marque {
-  grid-area: marque;
-  align-self: center;
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-}
-
-.carte-lecon__coche {
-  display: block;
-  color: var(--ok);
-}
-
-.carte-lecon__chevron {
-  display: block;
-  color: var(--texte-doux);
-}
-
-/* Sous les leçons, un seul bloc teinté réunit ce qui n'est pas une leçon : les documents de
-   l'église, puis « À propos du cours ». Sans numéro et détaché de la liste, pour ne pas passer
-   pour une onzième leçon. C'est le seul bloc plein de l'accueil. « Dans le même bloc », choisi
-   par Sébastien le 21 novembre 2026 sur trois captures : « À propos du cours » était un petit
-   lien souligné de 16 px de haut, sous le seuil de 44 px exigé pour le toucher. */
-.annexes {
-  margin-top: 2.25rem;
-  border-radius: var(--rayon);
-  background: var(--teinte);
-}
-
-.annexe {
-  position: relative;
-  display: grid;
-  grid-template-columns: 1fr auto;
-  grid-template-areas:
-    "titre marque"
-    "detail detail";
-  align-items: center;
-  column-gap: 0.8rem;
-  padding: 1.1rem 1rem;
-  text-decoration: none;
-  color: inherit;
-  transition: background-color 220ms ease-out;
-  -webkit-user-select: none;
-  user-select: none;
-  -webkit-touch-callout: none;
-  touch-action: manipulation;
-}
-
-/* Au toucher, l'entrée fonce un peu : le bloc est déjà teinté, c'est un voile qui s'ajoute. */
-.annexe.ligne--touchee {
-  background-color: var(--pression);
-  transition-duration: 80ms;
-}
-
-/* Le cadre de mise en évidence au clavier épouse les coins du bloc. */
-.annexe:first-child {
-  border-top-left-radius: var(--rayon);
-  border-top-right-radius: var(--rayon);
-}
-
-.annexe:last-child {
-  border-bottom-left-radius: var(--rayon);
-  border-bottom-right-radius: var(--rayon);
-}
-
-/* Un trait fin sépare les deux entrées, en retrait des bords. Purement décoratif : chaque
-   entrée se reconnaît à son titre et à sa flèche. */
-.annexe + .annexe::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 1rem;
-  right: 1rem;
-  height: 1px;
-  background: var(--bord-actif);
-  opacity: 0.35;
-}
-
-.annexe__titre {
-  grid-area: titre;
-  margin: 0;
-  font-weight: 600;
-  font-size: 1.08rem;
-}
-
-.annexe__detail {
-  grid-area: detail;
-  margin: 0.25rem 0 0;
-  font-size: 0.85rem;
-  color: var(--texte-doux);
-}
-
-.annexe__marque {
-  grid-area: marque;
-  display: flex;
-  align-items: center;
-}
-
-/* ---------- Documents de l'église ---------- */
-
-/* « ecclésiastiques » et « l’association » sont de longs mots : en texte très grand sur un
-   écran de 320 pixels, ils poussaient la carte hors de l'écran. Le titre peut donc se couper
-   à la syllabe, ce que la langue déclarée de la page (fr) permet au navigateur. */
-.carte-lecon--document .carte-lecon__titre {
+.ligne-lecon__titre {
+  flex: 1;
   min-width: 0;
+  font-size: 1.125rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+
   hyphens: auto;
   overflow-wrap: break-word;
 }
 
-.documents__eglise {
-  margin: 0 0 1.25rem;
+.ligne-lecon__etat {
+  flex: none;
+  color: var(--texte-doux);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.ligne-lecon__etat--en-cours {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  color: var(--magenta);
+  font-weight: 700;
+}
+
+.point {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.ligne-lecon--en-cours {
+  background: var(--gris-leger);
+}
+
+.ligne-lecon--en-cours .ligne-lecon__numero {
+  color: var(--violet);
+}
+
+.ligne-lecon > .icone {
+  flex: none;
+  color: var(--texte-doux);
+}
+
+.ligne-lecon--icone {
+  min-height: 4rem;
+}
+
+.ligne-lecon--icone > .icone:first-child {
+  color: var(--violet);
+}
+
+.ligne-lecon--detail {
+  flex-wrap: wrap;
+  row-gap: 0.125rem;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+.ligne-lecon__detail {
+  flex-basis: 100%;
+  color: var(--texte-doux);
+  font-size: 0.85rem;
+}
+
+.ligne-lecon__numero ~ .ligne-lecon__detail {
+  padding-left: calc(2.5rem + 0.875rem);
+}
+
+.ligne-lecon--icone > .icone:first-child ~ .ligne-lecon__detail {
+  padding-left: calc(20px + 0.875rem);
+}
+
+.titre-section {
+  margin: 2.5rem 0 0;
+  color: var(--encre);
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.titre-page + .titre-section {
+  margin-top: 1.75rem;
+}
+
+.titre-section + .liste-lignes {
+  margin-top: 0.75rem;
+}
+
+.ligne-info {
+  display: grid;
+  grid-template-columns: 5.75rem 1fr;
+  column-gap: 0.875rem;
+  padding: 0.875rem 0;
+  border-bottom: 1px solid var(--bord);
+  line-height: 1.45;
+}
+
+.ligne-info:first-child {
+  border-top: 1px solid var(--bord);
+}
+
+.ligne-info__debut {
+  color: var(--texte-doux);
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding-top: 0.1rem;
+}
+
+.ligne-lecon--dossier .ligne-lecon__numero {
+  width: 1rem;
+}
+
+.ligne-lecon--dossier .ligne-lecon__numero ~ .ligne-lecon__detail {
+  padding-left: calc(1rem + 0.875rem);
+}
+
+.ligne-lecon--dossier .pastille {
+  display: block;
+  width: 1rem;
+  height: 1rem;
+}
+
+.ligne-lecon.ligne--touchee {
+  transform: scale(0.985);
+  transition-duration: 80ms;
+}
+
+.ligne-lecon::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--appui-ligne);
+  opacity: 0;
+  transition: opacity 220ms ease-out;
+}
+
+.ligne-lecon--en-cours::before {
+  background: var(--pression);
+}
+
+.ligne-lecon.ligne--touchee::before {
+  opacity: 1;
+  transition-duration: 80ms;
 }
 
 .document__soustitre {
-  margin: 0 0 0.5rem;
+  margin: -0.5rem 0 0.5rem;
 }
 
-/* Un document commence par son premier titre : le filet qui sépare les chapitres ferait
-   double emploi juste sous le titre de la page. */
 .lecture--document > h2:first-child {
   margin-top: 1.25rem;
   padding-top: 0;
@@ -939,16 +904,6 @@ a[href^="#/"] {
   text-align: center;
 }
 
-/* ---------- Leçon : onglets ---------- */
-
-/* Les onglets forment un seul bandeau : un fond teinté commun, l'onglet choisi en violet plein.
-   Le bandeau est dessiné par un pseudo-élément calé sur les marges intérieures du conteneur.
-   Un onglet n'a pas besoin de contour, son libellé suffit à l'identifier ; c'est l'état choisi
-   qui doit trancher à 3 pour 1 sur le bandeau (WCAG 1.4.11, « Understanding Non-text
-   Contrast », page du 4 octobre 2026), ce que mesure verifier-contrastes.mjs.
-   Même écart au-dessus et au-dessous de la rangée (demande de Sébastien, 23 novembre 2026 : elle
-   touchait le bandeau violet). Il n'y avait rien au-dessus du temps de l'en-tête blanc, qui
-   faisait lui-même l'écart. */
 .onglets {
   --onglets-ecart: 0.6rem;
   position: relative;
@@ -956,19 +911,19 @@ a[href^="#/"] {
   margin: 0 auto;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  padding: var(--onglets-ecart) 1rem;
+  padding: var(--onglets-ecart) 1.5rem;
 }
 
 .onglets::before {
   content: "";
   position: absolute;
-  inset: var(--onglets-ecart) 1rem;
-  background: var(--teinte);
+  inset: var(--onglets-ecart) 1.5rem;
+
+  background: var(--carte);
+  border: 1px solid var(--bord);
   border-radius: 13px;
 }
 
-/* La marge de 3 px laisse voir le bandeau autour de l'onglet choisi ; la marge intérieure est
-   réduite d'autant, moins l'ancien filet : la barre garde exactement sa hauteur. */
 .onglet {
   position: relative;
   border: none;
@@ -991,50 +946,28 @@ a[href^="#/"] {
 }
 
 .onglet[aria-selected="true"] {
-  background: var(--violet);
-  color: #fff;
+  background: var(--choix);
+  box-shadow: inset 0 0 0 1px var(--choix-contour);
+  color: var(--sur-choix);
+  font-weight: 700;
 }
 
-/* Le cadre de focus passe au-dessus de l'onglet voisin. */
 .onglet:focus-visible {
   z-index: 1;
 }
 
 .onglet[aria-selected="true"] .onglet__compte {
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--texte-doux);
 }
 
-/* ---------- Bandeaux : la bulle qui glisse ---------- */
-
-/* La bulle violette du choix actif : un seul élément, posé par app.js sous les libellés, qui
-   glisse d'un bouton à l'autre. Même mécanique et mêmes réglages que la barre d'onglets de
-   l'application du groupe de jeunes, demandés tels quels le 16 novembre 2026 (« il faut un
-   mouvement exactement comme ça ») : 0,4 s, un léger dépassement à l'arrivée, et la bulle qui
-   s'étire un instant en chemin, comme une goutte.
-
-   Elle se déplace par « translate » et s'étire par « scale » : le téléphone anime ces deux
-   propriétés sans repasser par la page, donc sans à-coup pendant que l'écran change. Deux
-   versions précédentes découpaient une copie violette de la rangée (« clip-path ») : ce
-   découpage se recalculait à chaque image, en même temps que la page, et le mouvement sautait
-   ou paraissait plat. À ne pas refaire.
-
-   « --bulle-x » est la distance, mesurée par app.js, entre le bord de son cadre et le bouton
-   choisi ; la largeur et la hauteur sont celles du bouton. */
 .bandeau-cadre {
   position: absolute;
   inset: 0;
   pointer-events: none;
 }
 
-/* Onglets d'une leçon : le cadre épouse la pastille et retient la bulle dedans. En arrivant sur
-   l'onglet du bord, son rebond la faisait déborder de la pastille (8 points, vu par Sébastien le
-   23 novembre 2026) ; il est désormais coupé au bord, le mouvement reste le même à l'intérieur.
-   Le cadre ne bouge pas : seule la bulle s'anime, comme avant (rien à recalculer à chaque
-   image, contrairement au « clip-path » écarté plus bas). « isolation » en fait une couche à
-   part, parade recommandée pour que Safari coupe bien un élément animé dans un cadre arrondi
-   (bug WebKit 68196, corrigé, et 231360). */
 .onglets > .bandeau-cadre {
-  inset: var(--onglets-ecart) 1rem;
+  inset: var(--onglets-ecart) 1.5rem;
   border-radius: 13px;
   overflow: hidden;
   isolation: isolate;
@@ -1045,7 +978,8 @@ a[href^="#/"] {
   top: 0;
   left: 0;
   border-radius: 10px;
-  background: var(--violet);
+  background: var(--choix);
+  box-shadow: inset 0 0 0 1px var(--choix-contour), var(--nav-pastille-ombre);
   translate: var(--bulle-x, 0) 0;
   pointer-events: none;
 }
@@ -1063,9 +997,6 @@ a[href^="#/"] {
     animation: etirer 0.4s ease-out;
   }
 
-  /* Le libellé change de couleur pendant que la bulle glisse. Plus vite que l'icône du groupe
-     de jeunes (0,25 s) : ici le libellé passe du blanc à l'encre, et resterait un instant
-     blanc sur fond clair si la bulle le quittait avant qu'il ait changé. */
   .bandeau--equipe > button,
   .bandeau--equipe > button .onglet__compte {
     transition: color 0.15s ease-out;
@@ -1078,15 +1009,10 @@ a[href^="#/"] {
   }
 }
 
-/* Posée sans voyage : à l'ouverture d'un écran, ou quand la rangée change de largeur. */
 .bandeau-bulle.bandeau-bulle--posee {
   transition: none;
 }
 
-/* Sur un téléphone, le navigateur pose un voile gris sur ce qu'on touche : il passait sur
-   l'onglet juste avant la bulle. Il est retiré ici, et remplacé par une teinte légère tant
-   que le doigt appuie. Le toucher n'attend plus un éventuel second toucher, et un appui long
-   ne sélectionne plus le libellé : ce sont des commandes, pas du texte à copier. */
 .onglet,
 .bouton-choix {
   -webkit-tap-highlight-color: transparent;
@@ -1095,45 +1021,31 @@ a[href^="#/"] {
   user-select: none;
 }
 
-.onglet:active,
-.bouton-choix:active {
-  background: rgba(152, 40, 152, 0.12);
-  background: color-mix(in srgb, var(--violet) 12%, transparent);
-}
-
-/* Chaque bouton est dessiné sur son propre calque, au-dessus de la bulle. Sans cela, Safari
-   glissait un instant le libellé de l'onglet quitté sous la bulle en mouvement (vu image par
-   image sur iPhone virtuel, le 16 novembre 2026). */
 .bandeau--equipe > button {
   will-change: transform;
 }
 
-/* Au-dessus de la bulle, le vrai bouton n'a plus à porter le violet lui-même : il garde
-   seulement son libellé blanc. */
 .bandeau--equipe > .onglet[aria-selected="true"],
 .bandeau--equipe > .bouton-choix[aria-pressed="true"] {
   background: transparent;
+  box-shadow: none;
 }
 
 .panneau[hidden] {
   display: none;
 }
 
-/* Invite d'installation. Volontairement lisible plutôt que discrète : elle s'adresse à des
-   personnes qui n'ont pas l'habitude d'installer une application, et elle ne s'affiche qu'une
-   fois. Elle disparaît définitivement dès qu'on la referme ou que l'installation est faite. */
 .invite {
-  background: var(--teinte);
-  border-radius: var(--rayon);
-  padding: 1rem;
-  margin-bottom: 1rem;
+  margin-top: 1.5rem;
+  padding: 1rem 1rem 0.5rem;
+  background: var(--gris-leger);
 }
 
 .invite__titre {
   margin: 0 0 0.4rem;
-  font-weight: 700;
-  font-size: 1.05rem;
-  color: var(--violet-fonce);
+  font-weight: 600;
+  font-size: 1.0625rem;
+  color: var(--encre);
 }
 
 .invite__texte {
@@ -1151,24 +1063,9 @@ a[href^="#/"] {
 .invite__icone {
   display: inline-flex;
   vertical-align: -0.35em;
-  color: var(--violet-fonce);
+  color: var(--violet);
 }
 
-.invite__plus-tard {
-  display: block;
-  width: 100%;
-  min-height: max(2.75rem, 44px);
-  margin-top: 0.5rem;
-  border: none;
-  background: none;
-  color: var(--texte-doux);
-  font-size: 0.95rem;
-  font-weight: 600;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-/* Écran d'orientation et écran d'installation : deux pages qui ne montrent qu'une chose. */
 .orientation {
   max-width: 26rem;
   margin: 2rem auto 0;
@@ -1185,8 +1082,7 @@ a[href^="#/"] {
   line-height: 1.6;
 }
 
-.orientation__qr,
-.partage__qr {
+.orientation__qr {
   display: block;
   width: 100%;
   max-width: 320px;
@@ -1194,13 +1090,11 @@ a[href^="#/"] {
   margin: 0 auto 1rem;
   background: #fff;
   border: 1px solid var(--bord);
-  border-radius: var(--rayon);
   padding: 0.75rem;
   box-sizing: border-box;
 }
 
-.orientation__adresse,
-.partage__adresse {
+.orientation__adresse {
   margin: 0 0 1.5rem;
   font-size: 0.95rem;
   color: var(--texte-doux);
@@ -1216,27 +1110,28 @@ a[href^="#/"] {
   text-align: left;
 }
 
-/* ---------- Leçon : lecture ---------- */
-
 .lecture {
-  font-size: 1.05rem;
-  line-height: 1.65;
+  margin-top: 1.5rem;
+  font-size: 1.0625rem;
+  line-height: 1.6;
 }
 
 .lecture h2 {
-  font-family: var(--police-titres);
-  font-weight: 400;
-  font-size: 1.55rem;
-  color: var(--violet);
-  margin: 2rem 0 0.75rem;
-  padding-top: 1.25rem;
-  border-top: 1px solid var(--bord);
+  margin: 2.25rem 0 0.75rem;
+  padding-top: 1rem;
+  border-top: 2px solid var(--filet-fort);
+  color: var(--encre);
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
 }
 
 .lecture h3 {
-  font-size: 1.1rem;
+  margin: 1.5rem 0 0.35rem;
   color: var(--magenta);
-  margin: 1.4rem 0 0.35rem;
+  font-size: 1rem;
+  font-weight: 600;
 }
 
 .lecture p {
@@ -1253,70 +1148,65 @@ a[href^="#/"] {
 }
 
 .encart {
-  margin: 1.2rem 0;
-  padding: 0.9rem 1rem;
-  border-radius: var(--rayon);
-  background: var(--carte);
-  border: 1px solid var(--bord);
-  box-shadow: var(--ombre);
-}
-
-.encart--citation {
-  border-left: 4px solid var(--violet);
-  font-family: var(--police-titres);
-  font-style: italic;
-  font-size: 1.05rem;
+  display: flex;
+  flex-direction: column;
+  margin: 1.5rem 0;
 }
 
 .encart--verset {
-  border-left: 4px solid var(--magenta);
-  font-family: var(--police-titres);
-  font-size: 1.05rem;
+  padding-top: 0.75rem;
+  border-top: 2px solid var(--filet-fort);
+  font-size: 1.25rem;
+  font-weight: 500;
+  line-height: 1.45;
+  letter-spacing: -0.01em;
+}
+
+.encart--verset .encart__source {
+  order: -1;
+  margin: 0 0 0.5rem;
+  color: var(--texte-doux);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.encart--citation {
+  padding-left: 1rem;
+  border-left: 2px solid var(--filet-fort);
+  font-style: italic;
+}
+
+.encart--citation .encart__source {
+  margin-top: 0.5rem;
+  color: var(--texte-doux);
+  font-size: 0.85rem;
+  font-style: normal;
+  font-weight: 600;
 }
 
 .encart--encadre {
+  padding: 1rem;
   background: var(--teinte);
-  border-color: transparent;
   font-size: 0.95rem;
 }
 
-.encart__titre {
+.encart__titre,
+.tableau__titre {
   margin: 0 0 0.4rem;
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-weight: 700;
-  color: var(--violet);
+  color: var(--magenta);
+  font-size: 0.8125rem;
+  font-weight: 600;
 }
 
 .encart p:last-child {
   margin-bottom: 0;
 }
 
-.encart__source {
-  display: block;
-  margin-top: 0.5rem;
-  font-style: normal;
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--texte-doux);
-  text-align: right;
-}
-
 .tableau {
   margin: 1.5rem 0;
-  padding: 1rem;
-  background: var(--teinte);
-  border-radius: var(--rayon);
-}
-
-.tableau__titre {
-  margin: 0 0 0.8rem;
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-weight: 700;
-  color: var(--violet);
+  padding-top: 0.75rem;
+  border-top: 2px solid var(--filet-fort);
 }
 
 .tableau__ligne {
@@ -1338,12 +1228,11 @@ a[href^="#/"] {
 
 .tableau__entete {
   margin: 0 0 0.2rem;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 0.85rem;
   color: var(--violet);
 }
 
-/* Sur un écran large, les deux colonnes se remettent côte à côte. */
 @media (min-width: 600px) {
   .tableau__ligne {
     grid-template-columns: 1fr 1fr;
@@ -1356,8 +1245,6 @@ a[href^="#/"] {
   padding: 1rem;
   background: var(--carte);
   border: 1px solid var(--bord);
-  border-radius: var(--rayon);
-  box-shadow: var(--ombre);
   text-align: center;
 }
 
@@ -1367,9 +1254,8 @@ a[href^="#/"] {
   max-width: 420px;
   height: auto;
   margin: 0 auto;
-  /* Les figures du livret sont des dessins au trait sur fond blanc. */
+
   background: #fff;
-  border-radius: 6px;
 }
 
 .figure__bouton {
@@ -1434,7 +1320,8 @@ a[href^="#/"] {
   border: 1px solid rgba(255, 255, 255, 0.5);
   background: rgba(255, 255, 255, 0.12);
   color: #fff;
-  border-radius: 999px;
+
+  border-radius: 0;
 }
 
 .figure figcaption {
@@ -1453,41 +1340,35 @@ a[href^="#/"] {
 }
 
 .lecture__fin {
-  margin-top: 2rem;
-  padding: 1rem;
-  border-radius: var(--rayon);
-  background: var(--teinte);
-  text-align: center;
-}
-
-/* ---------- Leçon : versets ---------- */
-
-.aide {
-  color: var(--texte-doux);
-  margin: 0 0 1rem;
+  margin-top: 2.25rem;
+  padding-top: 1rem;
+  border-top: 2px solid var(--filet-fort);
 }
 
 .verset-carte {
-  background: var(--carte);
-  border: 1px solid var(--bord);
-  border-radius: var(--rayon);
-  padding: 1rem;
-  margin-bottom: 1rem;
-  box-shadow: var(--ombre);
+  margin: 1.75rem 0 0;
+  padding-top: 1rem;
+  border-top: 2px solid var(--filet-fort);
+}
+
+.verset-carte:first-child {
+  margin-top: 1rem;
 }
 
 .verset-carte__reference {
-  margin: 0 0 0.5rem;
-  font-weight: 700;
-  color: var(--magenta);
+  margin: 0 0 0.6rem;
+  color: var(--texte-doux);
+  font-size: 0.8125rem;
+  font-weight: 600;
 }
 
 .verset-carte__texte {
-  font-family: var(--police-titres);
-  font-size: 1.2rem;
-  line-height: 1.5;
-  margin: 0 0 0.9rem;
+  margin: 0 0 1rem;
   min-height: 3rem;
+  font-size: 1.3125rem;
+  font-weight: 500;
+  line-height: 1.45;
+  letter-spacing: -0.01em;
 }
 
 .verset-carte__texte--cache {
@@ -1508,14 +1389,13 @@ a[href^="#/"] {
   color: var(--texte-doux);
 }
 
-/* Un choix exclusif prend la forme du bandeau des onglets. Chaque bouton garde ses 44 px.
-   Même géométrie que les onglets, une marge de 3 px autour de chaque bouton, pour que la
-   bulle ait la même forme dans les trois menus. */
 .groupe-boutons {
   position: relative;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  background: var(--teinte);
+
+  background: var(--carte);
+  box-shadow: inset 0 0 0 1px var(--bord), var(--onglets-ombre);
   border-radius: 13px;
 }
 
@@ -1537,67 +1417,96 @@ a[href^="#/"] {
 }
 
 .bouton-choix[aria-pressed="true"] {
-  background: var(--violet);
-  color: #fff;
+  background: var(--choix);
+  box-shadow: inset 0 0 0 1px var(--choix-contour);
+  color: var(--sur-choix);
+  font-weight: 700;
 }
 
 .bouton-choix:focus-visible {
   z-index: 1;
 }
 
-/* ---------- Leçon : questions ---------- */
-
 .question {
-  background: var(--carte);
-  border: 1px solid var(--bord);
-  border-radius: var(--rayon);
-  padding: 1rem;
-  margin-bottom: 1rem;
-  box-shadow: var(--ombre);
+  margin-top: 1.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--bord);
+}
+
+.question:first-child,
+.message + .question {
+  margin-top: 1rem;
+  border-top: 2px solid var(--filet-fort);
 }
 
 .question__intitule {
   display: block;
-  margin: 0 0 0.6rem;
+  margin: 0 0 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.etiquette {
+  display: block;
+  margin-bottom: 0.375rem;
+  color: var(--magenta);
+  font-size: 0.8125rem;
   font-weight: 600;
 }
 
-.question__numero {
-  display: inline-grid;
-  place-items: center;
-  width: 1.7rem;
-  height: 1.7rem;
-  border-radius: 50%;
-  background: var(--teinte);
-  color: var(--violet);
-  font-weight: 700;
-  font-size: 0.85rem;
-  margin-right: 0.45rem;
-  vertical-align: middle;
-}
-
-.question textarea,
-.note-fenetre__ecrit {
+.question textarea {
+  display: block;
   width: 100%;
-  min-height: 5.5rem;
-  resize: vertical;
-  border: 1px solid var(--bord-actif);
-  border-radius: 10px;
-  padding: 0.7rem 0.8rem;
-  font: inherit;
-  line-height: 1.5;
-  background: var(--fond);
+  min-height: 4.5rem;
+
+  resize: none;
+  padding: 0.5rem 0;
+  border: 0;
+  border-bottom: 2px solid var(--encre);
+  border-radius: 0;
+  background: transparent;
   color: var(--encre);
+  font: inherit;
+  font-size: 1.0625rem;
+  line-height: 1.5;
 }
 
-.question textarea:focus,
-.note-fenetre__ecrit:focus {
-  border-color: var(--violet);
+.question textarea::placeholder {
+  color: var(--texte-doux);
+}
+
+.question textarea:focus {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(152, 40, 152, 0.18);
+  box-shadow: 0 1px 0 var(--encre);
 }
 
-/* Vide tant que tout va bien : ne réserve alors aucune place. */
+.note-fenetre__ecrit {
+  display: block;
+  width: 100%;
+  min-height: 4.5rem;
+
+  resize: none;
+  padding: 0.5rem 0;
+  border: 0;
+  border-bottom: 2px solid var(--encre);
+  border-radius: 0;
+  background: transparent;
+  color: var(--encre);
+  font: inherit;
+  font-size: 1.0625rem;
+  line-height: 1.5;
+}
+
+.note-fenetre__ecrit::placeholder {
+  color: var(--texte-doux);
+}
+
+.note-fenetre__ecrit:focus {
+  box-shadow: 0 1px 0 var(--encre);
+  outline: none;
+}
+
 .question__etat {
   margin: 0;
   font-size: 0.85rem;
@@ -1618,63 +1527,86 @@ a[href^="#/"] {
 }
 
 .case input {
+  appearance: none;
+  -webkit-appearance: none;
+  display: grid;
+  place-content: center;
   width: 1.5rem;
   height: 1.5rem;
   margin: 0.1rem 0 0;
-  accent-color: var(--violet);
+  border: 1.5px solid var(--encre);
+  border-radius: 0;
+  background: transparent;
   flex: none;
+  cursor: pointer;
+}
+
+.case input::after {
+  content: "";
+  width: 0.4rem;
+  height: 0.75rem;
+  margin-top: -0.15rem;
+  border: solid var(--violet);
+  border-width: 0 2.5px 2.5px 0;
+  rotate: 45deg;
+  opacity: 0;
+}
+
+.case input:checked::after {
+  opacity: 1;
 }
 
 .bouton-principal {
   display: block;
+  box-sizing: border-box;
   width: 100%;
-  border: none;
-  border-radius: 12px;
-  padding: 0.9rem 1rem;
-  font-weight: 700;
-  font-size: 1rem;
-  background: var(--violet);
-  color: #fff;
+  min-height: 3.25rem;
   margin-top: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 0;
+  background: var(--bouton);
+  color: var(--sur-bouton);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+a.bouton-principal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  text-decoration: none;
+}
+
+a.bouton-principal--secondaire {
+  color: var(--encre);
 }
 
 @media (hover: hover) {
   .bouton-principal:hover {
-    background: var(--violet-fonce);
+    background: color-mix(in srgb, var(--bouton) 88%, #000);
   }
 }
 
 .bouton-principal--secondaire {
-  background: var(--carte);
-  color: var(--violet);
-  border: 1px solid var(--violet);
+  min-height: max(2.75rem, 44px);
+  background: transparent;
+  color: var(--encre);
+  border: 1.5px solid var(--encre);
 }
 
 @media (hover: hover) {
   .bouton-principal--secondaire:hover {
-    background: var(--teinte);
+    background: var(--appui-ligne);
   }
 }
 
 .bouton-danger {
+  min-height: max(2.75rem, 44px);
   background: transparent;
   color: var(--danger);
-  border: 1px solid var(--danger);
-}
-
-/* L'action la plus dangereuse et la plus rare ne doit pas être la plus voyante de la fenêtre.
-   Elle reste haute de 44 px pour rester atteignable au doigt. */
-.lien-danger {
-  min-height: max(2.75rem, 44px);
-  padding: 0;
-  border: none;
-  background: none;
-  color: var(--danger);
-  font-size: 0.95rem;
-  font-weight: 600;
-  text-align: left;
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  border: 1.5px solid var(--danger);
 }
 
 @media (hover: hover) {
@@ -1684,31 +1616,15 @@ a[href^="#/"] {
 }
 
 .fin-lecon {
-  margin-top: 1.5rem;
-  padding: 1rem;
-  border-radius: var(--rayon);
-  background: var(--teinte);
-}
-
-.fin-lecon--terminee {
-  background: var(--ok-fond);
+  margin-top: 2.25rem;
+  padding-top: 1rem;
+  border-top: 2px solid var(--filet-fort);
 }
 
 .fin-lecon p {
   margin: 0 0 0.75rem;
 }
 
-.lien-suivant {
-  display: block;
-  text-align: center;
-  margin-top: 0.75rem;
-  font-weight: 600;
-}
-
-/* ---------- Références bibliques et liens ---------- */
-
-/* Chrome refuse « display: inline » sur un bouton : c'est le groupe qui reste insécable,
-   pour que la ponctuation qui suit une référence ne tombe pas seule à la ligne. */
 .ref-groupe {
   white-space: nowrap;
 }
@@ -1726,7 +1642,7 @@ a[href^="#/"] {
 
 @media (hover: hover) {
   .ref:hover {
-    background: var(--teinte);
+    background: var(--appui-ligne);
   }
 }
 
@@ -1743,15 +1659,11 @@ a[href^="#/"] {
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  /* Le voile s'assombrit pendant que la fenêtre monte, s'éclaircit pendant qu'elle descend.
-     app.js pose « feuille--ouverte » une image après l'avoir rendue visible, et ne la cache
-     qu'une fois la descente finie. Une fenêtre refermée en pleine montée repart de là où elle
-     est : une transition CSS reprend depuis la position affichée. */
+
   background: rgba(28, 18, 30, 0);
   transition: background-color var(--feuille-fermeture) ease;
 }
 
-/* Pendant la descente, la fenêtre ne retient plus les touchers : la page derrière répond déjà. */
 .feuille:not(.feuille--ouverte) {
   pointer-events: none;
 }
@@ -1769,7 +1681,7 @@ a[href^="#/"] {
   flex-direction: column;
   background: var(--carte);
   border-radius: 18px 18px 0 0;
-  padding: 1rem 1rem calc(1rem + env(safe-area-inset-bottom));
+  padding: 1rem 1.5rem calc(1rem + env(safe-area-inset-bottom));
   box-shadow: 0 -6px 30px rgba(43, 31, 46, 0.25);
   transform: translate3d(0, 100%, 0);
   transition: transform var(--feuille-fermeture) var(--feuille-courbe);
@@ -1781,7 +1693,6 @@ a[href^="#/"] {
   transition-duration: var(--feuille-ouverture);
 }
 
-/* Une note rouverte au retour d'une leçon est déjà en place : ni montée, ni voile qui fonce. */
 .feuille.feuille--aussitot,
 .feuille.feuille--aussitot .feuille__carte {
   transition: none;
@@ -1798,9 +1709,11 @@ a[href^="#/"] {
 .feuille__titre {
   flex: 1;
   margin: 0;
-  font-weight: 700;
-  font-size: 1.05rem;
-  color: var(--magenta);
+  font-family: var(--police-titres);
+  font-weight: 600;
+  font-size: 1.125rem;
+  letter-spacing: -0.01em;
+  color: var(--encre);
 }
 
 .feuille__fermer {
@@ -1811,28 +1724,24 @@ a[href^="#/"] {
   place-items: center;
   border: none;
   background: none;
-  border-radius: 999px;
+
+  border-radius: 0;
   color: var(--texte-doux);
-  /* Le pavé « Fermer » pesait plus lourd que les réglages eux-mêmes. La cible reste à 44 px,
-     le minimum tactile ; seul le dessin s'efface. */
 }
 
 @media (hover: hover) {
   .feuille__fermer:hover {
-    background: var(--teinte);
-    color: var(--violet);
+    background: var(--appui-ligne);
+    color: var(--encre);
   }
 }
 
 .feuille__corps {
   overflow-y: auto;
-  /* Dans une colonne flex, un enfant défilant garde `min-height: auto` et déborde au lieu de
-     défiler. Sans ces deux lignes, la fenêtre est tronquée en paysage : le bas devient
-     inatteignable. */
+
   flex: 1;
   min-height: 0;
   padding: 0.9rem 0 0.2rem;
-  font-family: var(--police-titres);
   font-size: 1.05rem;
   line-height: 1.6;
 }
@@ -1845,7 +1754,6 @@ a[href^="#/"] {
   display: inline-block;
   min-width: 1.4em;
   margin-right: 0.2em;
-  font-family: var(--police-texte);
   font-size: 0.72em;
   font-weight: 700;
   color: var(--violet);
@@ -1866,7 +1774,6 @@ a[href^="#/"] {
     align-items: center;
   }
 
-  /* Au centre d'un grand écran, la fenêtre monte de quelques pixels en apparaissant. */
   .feuille__carte {
     border-radius: 18px;
     max-height: 78vh;
@@ -1885,7 +1792,7 @@ a[href^="#/"] {
 }
 
 .reglage {
-  padding: 0.9rem 0 0.7rem;
+  padding: 1rem 0 1.25rem;
   border-top: 1px solid var(--bord);
 }
 
@@ -1893,9 +1800,18 @@ a[href^="#/"] {
   border-top: none;
 }
 
+.reglages-page {
+  margin-top: 1.5rem;
+}
+
+.reglages-page > .reglage:first-of-type {
+  border-top: 1px solid var(--bord);
+}
+
 .reglage__libelle {
-  margin: 0 0 0.55rem;
-  font-size: 0.95rem;
+  margin: 0 0 0.75rem;
+  color: var(--texte-doux);
+  font-size: 0.8125rem;
   font-weight: 600;
 }
 
@@ -1905,42 +1821,44 @@ a[href^="#/"] {
   gap: 0.9rem;
 }
 
-/* 2,75 rem font 44 pixels : la plus petite cible tactile confortable. */
 .bouton-taille {
   flex: none;
-  width: max(2.75rem, 44px);
-  height: max(2.75rem, 44px);
-  border: 1px solid var(--bord-actif);
-  background: var(--carte);
-  border-radius: 10px;
-  font-family: var(--police-titres);
-  font-size: 1rem;
-  font-weight: 700;
-  color: var(--violet);
+  width: max(3.25rem, 44px);
+  height: max(3.25rem, 44px);
+  border: 1.5px solid var(--encre);
+  border-radius: 0;
+  background: transparent;
+  color: var(--encre);
+  font-size: 1.0625rem;
+  font-weight: 600;
+}
+
+.bouton-taille--plus {
+  font-size: 1.3125rem;
 }
 
 @media (hover: hover) {
   .bouton-taille:hover:not(:disabled) {
-    background: var(--teinte);
+    background: var(--appui-ligne);
   }
 }
 
 .bouton-taille:disabled {
-  opacity: 0.4;
+  opacity: 0.35;
   cursor: default;
 }
 
-.feuille__corps--reglages,
-.feuille__corps--partage {
+.feuille__corps--reglages {
   font-family: inherit;
   font-size: 1rem;
   line-height: 1.55;
 }
 
 .reglage__note {
-  margin: 0.75rem 0 0;
-  font-size: 0.82rem;
-  color: var(--texte-doux);
+  margin: 0.5rem 0 0;
+  font-size: 1rem;
+  line-height: 1.45;
+  color: var(--encre);
 }
 
 .reglage__avertissement {
@@ -1958,8 +1876,9 @@ a[href^="#/"] {
   margin-top: 0;
 }
 
-#zone-effacement .bouton-principal {
-  padding: 0.7rem 1rem;
+[data-reglage="effacement"] .reglage__confirmation .bouton-principal {
+  min-height: max(2.75rem, 44px);
+  padding: 0.5rem 1rem;
   font-size: 0.95rem;
   margin-top: 0;
 }
@@ -1967,16 +1886,11 @@ a[href^="#/"] {
 .reglage__valeur {
   flex: 1;
   text-align: center;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--texte-doux);
+  font-size: 1.0625rem;
+  font-weight: 500;
+  color: var(--encre);
 }
 
-/* ---------- Mes notes ---------- */
-
-/* Un passage noté, dans la leçon comme dans « Mes notes ». Le texte garde sa couleur ; seul le
-   fond dit le choix. « cursor: pointer » fait que Safari d'iPhone envoie un clic au toucher d'un
-   simple texte (sans lui, toucher le passage n'ouvrait rien). */
 .note-passage {
   color: inherit;
   background: var(--note-question);
@@ -2003,7 +1917,6 @@ a[href^="#/"] {
   background: var(--note-encourage);
 }
 
-/* Arrivée par « Voir dans la leçon » : un cadre s'allume autour du passage puis s'efface. */
 .note-passage--montre {
   animation: note-montree 1.8s ease-out;
 }
@@ -2050,9 +1963,6 @@ a[href^="#/"] {
   background: var(--point-encourage);
 }
 
-/* La barre des cinq choix, en bas de l'écran pendant une sélection : deux lignes sur un
-   téléphone de 375 points, trois sur un écran de 320 (mesuré le 23 novembre 2026). Sous les
-   fenêtres (90), au-dessus de la page. */
 .barre-notes {
   position: fixed;
   z-index: 85;
@@ -2100,12 +2010,10 @@ a[href^="#/"] {
 
 @media (hover: hover) {
   .barre-notes__choix:hover {
-    background: var(--teinte);
+    background: var(--appui-ligne);
   }
 }
 
-/* Le petit message du bas (« Noté : Pas compris · Annuler »). Toujours présent, invisible
-   et inerte tant qu'il n'a rien à dire. */
 .annonce {
   position: fixed;
   z-index: 95;
@@ -2132,6 +2040,10 @@ a[href^="#/"] {
     transform 260ms var(--feuille-courbe);
 }
 
+body.avec-navigation .annonce {
+  bottom: calc(14px + 76px + 12px + env(safe-area-inset-bottom));
+}
+
 .annonce--visible {
   opacity: 1;
   transform: translate(-50%, 0);
@@ -2143,12 +2055,12 @@ a[href^="#/"] {
   margin-right: -0.6rem;
   padding: 0 0.8rem;
   border: none;
-  border-radius: 999px;
+  border-radius: 0;
   background: transparent;
   color: inherit;
   font: inherit;
-  text-decoration: underline;
-  text-underline-offset: 3px;
+
+  font-weight: 700;
 }
 
 .annonce__bouton[hidden] {
@@ -2161,13 +2073,10 @@ a[href^="#/"] {
   }
 }
 
-/* La fenêtre d'une note. Calée sur la partie visible de l'écran (app.js, « VisualViewport ») :
-   clavier ouvert, elle tient au-dessus de lui, et sa partie centrale défile. */
 .feuille--note .feuille__carte {
   max-height: min(82vh, calc(100% - 0.75rem));
 }
 
-/* « OK » à la place de la croix (app.js) : un mot, à la couleur des actions. */
 .feuille__ok {
   width: auto;
   min-width: max(2.75rem, 44px);
@@ -2179,12 +2088,6 @@ a[href^="#/"] {
   font-weight: 700;
 }
 
-/* Sous la partie visible, Safari laisse voir la page à travers sa barre d'adresse translucide,
-   juste au-dessus du clavier : une bande de leçon restait visible entre la fenêtre et le clavier
-   (iPhone virtuel, iOS 27, 25 novembre 2026). Sur téléphone, la fenêtre se prolonge donc vers le
-   bas, comme une fenêtre de l'iPhone qui passe derrière le clavier ; le prolongement monte et
-   descend avec elle. Clavier fermé, il est hors de l'écran. Il recouvre d'un pixel le bas de la
-   fenêtre : bord à bord, un filet clair restait visible. */
 @media (max-width: 599.98px) {
   .feuille--note .feuille__carte {
     position: relative;
@@ -2211,17 +2114,16 @@ a[href^="#/"] {
   line-height: 1.55;
 }
 
-/* « Voir dans la leçon » (note ouverte depuis « Mes notes ») : un lien, à la couleur des actions. */
 .note-fenetre__voir {
   align-self: flex-start;
   display: inline-flex;
   align-items: center;
   min-height: max(2.75rem, 44px);
-  margin: -0.5rem 0;
-  color: var(--violet);
+  padding: 0 0.9rem;
+  border: 1px solid var(--encre);
+  color: var(--encre);
   font-weight: 600;
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  text-decoration: none;
 }
 
 .note-fenetre__voir[hidden] {
@@ -2237,10 +2139,8 @@ a[href^="#/"] {
 .note-fenetre__passage {
   margin: 0;
   padding: 0.6rem 0.85rem;
-  border-left: 4px solid var(--point-question);
-  border-radius: 0 10px 10px 0;
+  border-left: 3px solid var(--point-question);
   background: var(--note-question);
-  font-family: var(--police-titres);
   font-size: 1.05rem;
   line-height: 1.5;
 }
@@ -2275,18 +2175,17 @@ a[href^="#/"] {
   min-height: max(2.75rem, 44px);
   padding: 0 0.85rem;
   border: 1px solid var(--bord-actif);
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--carte);
   color: var(--encre);
   font-size: 0.92rem;
   font-weight: 600;
 }
 
-/* Le choix de la note : trait plus épais et fond teinté, pas seulement une couleur. */
 .choix-note[aria-pressed="true"] {
   padding: 0 calc(0.85rem - 1px);
   border: 2px solid var(--encre);
-  background: var(--teinte);
+  background: transparent;
   font-weight: 700;
 }
 
@@ -2298,16 +2197,162 @@ a[href^="#/"] {
   margin-top: 0.25rem;
 }
 
-/* Les écrans de « Mes notes » (choisis par Sébastien sur maquettes le 25 novembre 2026,
-   « Leçon d'abord » puis « Lignes fines ») : les leçons et les dossiers sont des lignes de la
-   liste des leçons (.carte-lecon) ; les notes d'un dossier sont des lignes fines. */
 .notes-vide {
   margin: 1rem 0;
   font-size: 1.05rem;
   line-height: 1.6;
 }
 
-/* Une pastille par type de note présent dans la leçon, à la suite du nombre de notes. */
+.notes-aide__titre {
+  margin-top: 1.5rem;
+}
+
+.notes-aide__etapes {
+  counter-reset: etape;
+  list-style: none;
+  margin: 0.9rem 0 0;
+  padding: 0;
+  font-size: 1.05rem;
+  line-height: 1.55;
+}
+
+.notes-aide__etapes li {
+  counter-increment: etape;
+  position: relative;
+  margin: 0.6rem 0;
+  padding-left: 2.1rem;
+}
+
+.notes-aide__etapes li::before,
+.notes-aide__repere {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--bouton);
+  color: var(--sur-bouton);
+  font: 700 0.8rem/1 var(--police);
+  font-style: normal;
+}
+
+.notes-aide__etapes li::before {
+  content: counter(etape);
+  position: absolute;
+  left: 0;
+  top: 0.1rem;
+}
+
+.notes-aide__dessin {
+  margin: 1.25rem 0 0;
+  padding: 1.1rem 1rem 1rem;
+  border-radius: 16px;
+  background: var(--gris-leger);
+  pointer-events: none;
+}
+
+.notes-aide__phrase {
+  margin: 0 0 1.4rem;
+  font-size: 1.05rem;
+  line-height: 1.75;
+}
+
+.notes-aide__etiquette + .notes-aide__phrase {
+  margin-bottom: 1rem;
+}
+
+.notes-aide__choix {
+  background: var(--selection-dessin);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+.notes-aide__poignee {
+  position: relative;
+  display: inline-block;
+  width: 0;
+  height: 1em;
+}
+
+.notes-aide__poignee::before,
+.notes-aide__poignee::after {
+  content: "";
+  position: absolute;
+  background: var(--poignee-dessin);
+}
+
+.notes-aide__poignee::before {
+  left: -1px;
+  top: -0.15em;
+  width: 2px;
+  height: 1.35em;
+}
+
+.notes-aide__poignee::after {
+  left: -5px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.notes-aide__poignee--debut::after {
+  top: calc(-0.15em - 9px);
+}
+
+.notes-aide__poignee--fin::after {
+  top: calc(1.2em - 1px);
+}
+
+.notes-aide__repere {
+  width: 22px;
+  height: 22px;
+  margin-left: 0.5rem;
+  vertical-align: -5px;
+  font-size: 0.75rem;
+  box-shadow: 0 0 0 2px var(--gris-leger);
+}
+
+.notes-aide__barre {
+  position: static;
+  transform: none;
+  margin: 0 auto;
+  max-width: 100%;
+}
+
+.notes-aide__appuye {
+  position: relative;
+  background: var(--pression);
+}
+
+.notes-aide__repere--barre {
+  position: absolute;
+  top: -9px;
+  right: -8px;
+  margin: 0;
+}
+
+.notes-aide__suite {
+  margin: 1rem 0 0;
+  color: var(--texte-doux);
+  line-height: 1.55;
+}
+
+.notes-aide__etiquette {
+  margin: 0 0 0.35rem;
+  color: var(--texte-doux);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.notes-aide__dessin .ligne-lecon {
+  margin-bottom: 0;
+  padding-right: 0.75rem;
+  padding-left: 0.75rem;
+  gap: 0.6rem;
+}
+
 .notes-points {
   display: inline-flex;
   gap: 0.3rem;
@@ -2320,36 +2365,23 @@ a[href^="#/"] {
   height: 0.6rem;
 }
 
-/* Un dossier : la pastille de son type tient la place du grand chiffre, plus étroite. */
-.carte-lecon--dossier {
-  grid-template-columns: 1.5rem 1fr auto;
-}
-
-.carte-lecon--dossier .carte-lecon__numero {
-  align-self: center;
-}
-
-.carte-lecon--dossier .pastille {
-  display: block;
-  width: 1rem;
-  height: 1rem;
-}
-
 .liste-notes {
   list-style: none;
-  margin: 0;
+  margin: 1.25rem 0 0;
   padding: 0;
 }
 
-/* « Récemment supprimées » : même ligne qu'une note, l'origine au-dessus, « Récupérer » à droite. */
 .ligne-supprimee {
-  /* « Récupérer » passe sous le texte quand la place manque (texte très grand, petit écran). */
+
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.4rem 0.8rem;
-  padding: 1.05rem 0;
-  border-bottom: 1px solid var(--bord);
+  gap: 0.6rem 0.8rem;
+  margin-bottom: 0.625rem;
+  padding: 0.9rem 1rem;
+  border-radius: 16px;
+  background: var(--carte);
+  box-shadow: 0 0 0 1px var(--nav-pastille-contour), var(--carte-ombre);
 }
 
 .ligne-supprimee__origine {
@@ -2372,25 +2404,27 @@ a[href^="#/"] {
 .bouton-recuperer {
   margin-left: auto;
   min-height: max(2.75rem, 44px);
-  padding: 0 0.6rem;
-  margin-right: -0.6rem;
-  border: none;
-  border-radius: 10px;
+  padding: 0 0.9rem;
+  border: 1px solid var(--encre);
+  border-radius: 0;
   background: none;
-  color: var(--violet);
+  color: var(--encre);
   font: inherit;
-  font-weight: 700;
+  font-weight: 600;
 }
 
-/* Une note : le passage entre guillemets, ce qu'on a écrit dessous, la flèche à droite. Toute
-   la ligne mène au passage dans la leçon. Elle se touche comme une ligne de leçon. */
+.corbeille-vider {
+  margin-top: 1.25rem;
+}
+
 .ligne-note {
   display: grid;
   grid-template-columns: 1fr auto;
   align-items: center;
   column-gap: 0.8rem;
-  padding: 1.05rem 0;
-  border-bottom: 1px solid var(--bord);
+  padding: 0.9rem 1rem;
+  border-radius: 16px;
+  box-shadow: 0 0 0 1px var(--nav-pastille-contour), var(--carte-ombre);
   color: inherit;
   text-decoration: none;
   position: relative;
@@ -2399,90 +2433,76 @@ a[href^="#/"] {
   -webkit-user-select: none;
   user-select: none;
   -webkit-touch-callout: none;
-  /* Le glissement horizontal est pour l'application (retirer), le vertical pour la page. */
+
   touch-action: pan-y;
-  /* Elle couvre le bouton « Retirer » posé dessous. */
-  background: var(--fond);
+
+  background: var(--carte);
 }
 
-/* --- Retirer une note : glisser la ligne vers la gauche, ou « Modifier » (app.js) ---------- */
-/* Le cadre déborde de 0,75 rem de chaque côté pour garder la teinte du toucher (« ::before ») ;
-   il coupe ce qui sort, c'est-à-dire la ligne quand elle glisse. */
 .ligne-note-cadre {
   position: relative;
   margin: 0 -0.75rem;
-  padding: 0 0.75rem;
-  overflow: hidden;
+  padding: 0 0.75rem 0.625rem;
+  overflow-x: clip;
+  overflow-y: visible;
 }
 
 .ligne-note-cadre .ligne-note {
-  /* Au-dessus du bouton « Retirer », qui vient après elle dans la page. */
+
   z-index: 1;
   transition: transform 260ms var(--feuille-courbe);
 }
 
-/* Le bouton s'arrête au bord droit de la liste (aligné sur la flèche), pas dans la marge du
-   cadre : fermée, la ligne le couvre entièrement. Dans la marge, il se voyait en filet rouge
-   après la fermeture (vidéo de Sébastien, 25 novembre 2026). */
 .ligne-note__retirer {
   position: absolute;
   top: 0;
   right: 0.75rem;
-  bottom: 1px;
+  bottom: 0.625rem;
   width: 88px;
   border: none;
+
+  border-radius: 16px;
   background: var(--danger);
   color: var(--fond);
   font: inherit;
   font-weight: 700;
-  /* Le mot reste à sa place quand le rouge s'élargit (ci-dessous). */
+
   display: flex;
   justify-content: flex-end;
   align-items: center;
   padding: 0;
-  /* Même rythme que la ligne : en la relâchant, le rouge reste collé à elle. */
+
   transition: width 260ms var(--feuille-courbe);
 }
 
-/* « Retirer » toujours centré dans les 88 px de droite, quelle que soit la largeur du rouge :
-   centré dans tout le bouton, il glissait pendant que le rouge s'élargissait, puis sautait à
-   droite au-delà des trois cinquièmes (vidéo de Sébastien, 25 novembre 2026, 23 h 57). */
 .ligne-note__retirer-mot {
   flex: none;
   width: 88px;
   text-align: center;
 }
 
-/* Caché tant que la ligne n'a pas glissé : sinon son bord rouge dépasse dans la marge du cadre.
-   « --revele » est posé et retiré par app.js (le retrait attend que la ligne soit revenue) :
-   l'ancien délai écrit ici en CSS laissait sur iPhone un filet rouge après la fermeture
-   (vidéo de Sébastien, 25 novembre 2026). */
 .liste-notes:not(.liste-notes--modification) .ligne-note-cadre:not(.ligne-note-cadre--revele) .ligne-note__retirer {
   visibility: hidden;
 }
 
-/* Ouverte, la ligne glisse de la largeur du bouton et s'arrête à son bord. */
 .ligne-note-cadre--ouverte .ligne-note {
   transform: translateX(-88px);
 }
 
-/* « Modifier » : la ligne ne glisse pas, elle se resserre pour laisser la place à « Retirer »,
-   et son texte reste entier ; la flèche s'efface, toucher la ligne n'ouvre plus la leçon. */
 .liste-notes--modification .ligne-note {
-  margin-right: 88px;
+  margin-right: calc(88px + 0.5rem);
 }
 
-.liste-notes--modification .ligne-note .carte-lecon__chevron {
+.liste-notes--modification .ligne-note > .icone {
   display: none;
 }
 
-/* Glissée au-delà des trois cinquièmes : « Retirer » s'étire sous le doigt, comme dans Mail. */
 .ligne-note-cadre--loin .ligne-note__retirer {
   width: 100%;
 }
 
-/* La ligne retirée se replie ; la suivante remonte à sa place. */
 .ligne-note-cadre--retiree {
+  overflow: hidden;
   transition: height 240ms ease-in;
 }
 
@@ -2497,14 +2517,12 @@ a[href^="#/"] {
 .ligne-note__texte {
   display: grid;
   gap: 0.5rem;
-  /* Un mot sans espace (une adresse web) se coupe au lieu de pousser la page vers la droite :
-     « min-width: 0 » laisse la colonne rétrécir, « anywhere » autorise la coupure. */
+
   min-width: 0;
   overflow-wrap: anywhere;
 }
 
 .ligne-note__passage {
-  font-family: var(--police-titres);
   font-size: 1.08rem;
   line-height: 1.45;
 }
@@ -2519,10 +2537,11 @@ a[href^="#/"] {
 .ligne-note::before {
   content: "";
   position: absolute;
-  inset: -1px -0.75rem;
+  inset: 0;
   z-index: -1;
-  border-radius: 12px;
-  background: var(--teinte);
+  border-radius: inherit;
+
+  background: var(--appui-ligne);
   opacity: 0;
   transition: opacity 220ms ease-out;
 }
@@ -2539,15 +2558,12 @@ a[href^="#/"] {
 
 @media (hover: hover) {
   .ligne-note:hover {
-    border-bottom-color: var(--violet);
+    box-shadow: 0 0 0 1px var(--bord-actif), var(--carte-ombre);
   }
 }
 
-/* ---------- Messages ---------- */
-
 .message {
   padding: 1rem;
-  border-radius: var(--rayon);
   background: var(--teinte);
   margin: 1rem 0;
 }
@@ -2561,51 +2577,71 @@ a[href^="#/"] {
   margin: 0 0 1rem;
 }
 
-.a-propos ol {
-  padding-left: 1.4rem;
+.partage {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1rem;
+  align-items: center;
 }
 
-/* ---------- Fenêtre « Partager ce cours » ---------- */
-
-/* Le QR code garde son fond blanc en apparence sombre : un appareil photo lit mal un code clair
-   sur fond foncé. Il est plus petit que sur l'écran d'ordinateur, scanné ici de téléphone à
-   téléphone, à courte distance. */
-.partage__qr {
-  max-width: 240px;
+.partage__agrandir {
+  display: block;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: none;
 }
 
-.partage__adresse {
-  margin-bottom: 1rem;
-  text-align: center;
-}
-
-/* La hauteur est réservée pour que la page ne saute pas quand « Lien copié. » apparaît. */
-.partage__etat {
-  min-height: 1.5em;
-  margin: 0.5rem 0 0;
+.partage__indice {
+  display: block;
+  margin-top: 0.4rem;
   color: var(--texte-doux);
-  text-align: center;
+  font-size: 0.8125rem;
+  text-align: left;
+}
+
+.partage__qr {
+  display: block;
+  width: 120px;
+  height: 120px;
+  padding: 6px;
+  background: #fff;
+  border: 1px solid var(--bord);
+  box-sizing: border-box;
+}
+
+.partage__texte {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.partage__texte .reglage__note,
+.partage__texte .bouton-principal {
+  margin: 0;
+}
+
+.loupe img.loupe__qr {
+  width: min(100%, 360px);
+  padding: 16px;
+  border-radius: 0;
+  image-rendering: pixelated;
+}
+
+.partage__etat {
+  margin: 0;
+  color: var(--texte-doux);
+}
+
+.partage__etat:empty {
+  display: none;
 }
 
 @media (min-width: 600px) {
-  .page-titre {
-    font-size: 2.2rem;
-  }
-
   .lecture {
     font-size: 1.1rem;
   }
 }
 
-/* ---------- Changement d'écran ---------- */
-
-/* En avançant, le nouvel écran, opaque, glisse depuis la droite par-dessus une copie de l'écran
-   quitté (« calque-quitte », posé par app.js), qui recule un peu vers la gauche en pâlissant.
-   Jamais de page blanche, ni de texte vu à travers un autre : le fondu des deux écrans laissait
-   lire la liste sous la leçon (vidéo de Sébastien, 21 novembre 2026, 21 h 03 ; « Glisse
-   par-dessus » choisi sur vidéo face à « En deux temps »). Le geste de retour de l'iPhone fait
-   repartir l'écran vers la droite : même chemin. En revenant, rien ne bouge : l'écran précédent
-   réapparaît tel qu'on l'a laissé. Rien ne joue quand le lecteur a demandé moins de mouvement. */
 .calque-quitte {
   position: fixed;
   left: 0;
@@ -2613,7 +2649,7 @@ a[href^="#/"] {
   z-index: 0;
   max-width: 720px;
   margin: 0 auto;
-  padding: 1rem 1rem 0;
+
   pointer-events: none;
 }
 
@@ -2627,10 +2663,6 @@ main.ecran--attente {
   opacity: 0;
 }
 
-/* Pendant la glissade, l'écran dépasse à droite. Le couper au bord de la page (body) et non
-   seulement de la fenêtre : sinon Chrome sur téléphone élargit la page le temps de la glissade et
-   la barre des onglets déborde (vu le 21 novembre 2026). « clip » ne fait pas de body une zone
-   de défilement à part, contrairement à « hidden ». */
 html:has(main.ecran--entre),
 html:has(main.ecran--entre) body {
   overflow-x: clip;
@@ -2643,12 +2675,6 @@ html:has(main.ecran--entre) body {
     animation: ecran-entre var(--ecran-entree) var(--feuille-courbe) both;
   }
 
-  /* L'ombre de l'écran qui arrive est un élément à part, collé à son bord gauche et de sa
-     hauteur, qui ne s'assombrit que vers la gauche : la façon d'Ionic (ios.transition.ts,
-     « .transition-shadow », version 9.0.13). Elle ne peut ainsi déborder ni au-dessus ni en
-     dessous de l'écran. Posée sur l'écran entier (« box-shadow »), elle débordait de tous côtés,
-     passait sous la barre et s'y voyait en trait gris (vidéos de Sébastien, 23 novembre 2026,
-     11 h 44 et 11 h 56). Même dégradé que l'ancienne ombre, mesurée de -12 px, flou de 32 px. */
   main.ecran--entre::before {
     content: "";
     position: absolute;
@@ -2669,19 +2695,12 @@ html:has(main.ecran--entre) body {
     animation: calque-quitte var(--ecran-entree) var(--feuille-courbe) both;
   }
 
-  /* La ligne quittée revient de son état « enfoncé », celui de la photo que l'iPhone montre
-     pendant le geste de retour. */
-  .carte-lecon.ligne--revient {
+  .ligne-lecon.ligne--revient {
     animation: ligne-revient-forme 600ms 150ms ease-out both;
   }
 
-  /* Au retour, la ligne d'où l'on venait s'allume puis s'éteint doucement (app.js, lignesQuittees). */
-  .carte-lecon.ligne--revient::before {
+  .ligne-lecon.ligne--revient::before {
     animation: ligne-revient 600ms 150ms ease-out both;
-  }
-
-  .annexe.ligne--revient {
-    animation: annexe-revient 600ms 150ms ease-out both;
   }
 
   .ligne-note.ligne--revient {
@@ -2699,15 +2718,6 @@ html:has(main.ecran--entre) body {
   }
   to {
     opacity: 0;
-  }
-}
-
-@keyframes annexe-revient {
-  from {
-    background-color: var(--pression);
-  }
-  to {
-    background-color: transparent;
   }
 }
 

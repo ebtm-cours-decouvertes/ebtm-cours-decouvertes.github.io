@@ -44,12 +44,16 @@ const PAIRES = [
   ["sous-titres magenta sur carte", "magenta", "carte", 4.5],
   ["texte sur teinte", "encre", "teinte", 4.5],
   ["violet sur teinte", "violet", "teinte", 4.5],
-  // Le bandeau des onglets et des choix est en teinte : le compte d'un onglet non choisi s'y
-  // lit en texte adouci, et l'onglet choisi (violet plein) doit s'en détacher à 3 pour 1.
+  // Le bandeau des choix (modes d'un verset, apparence) est en teinte : le compte d'un onglet
+  // non choisi s'y lit en texte adouci, et le choix (violet plein) doit s'en détacher à 3 pour 1.
+  // La rangée des onglets d'une leçon est sur le fond de la barre du bas (presque blanc), mesuré
+  // comme le fond de la page.
+  ["compte d’un onglet sur la rangée", "texte-doux", "fond", 4.5],
+  // Le contour de la bulle du choix actif (mauve pâle, comme la barre du bas) n'est pas mesuré :
+  // écart assumé par Sébastien le 26 novembre 2026, voir « --choix » dans style.css.
   ["compte d’un onglet sur bandeau", "texte-doux", "teinte", 4.5],
-  ["onglet choisi sur bandeau", "violet", "teinte", 3],
-  ["pastille terminée", "ok", "ok-fond", 4.5],
-  ["coche d’une leçon faite", "ok", "carte", 3],
+  // La bulle et la barre du bas sont du verre (blanc translucide) : mesurées sur le fond de page.
+  ["texte de l’onglet choisi", "sur-choix", "fond", 4.5],
   ["avertissement d’effacement", "danger", "carte", 4.5],
   ["avertissement sur fond", "danger", "fond", 4.5],
   ["bordure d’un champ", "bord-actif", "carte", 3],
@@ -67,26 +71,35 @@ const PAIRES = [
   // Les pastilles de couleur des notes (barre des choix, fenêtre, « Mes notes ») : éléments
   // graphiques, 3 pour 1 sur la page, sur le choix enfoncé et sur le fond de leur passage.
   ["pastille « Pas compris » sur page", "point-comprends", "fond", 3],
-  ["pastille « Pas compris » choix enfoncé", "point-comprends", "teinte", 3],
+  ["pastille « Pas compris » choix enfoncé", "point-comprends", "fond", 3],
   ["pastille « Pas compris » sur passage", "point-comprends", "note-comprends", 3],
   ["pastille « Ma question » sur page", "point-question", "fond", 3],
-  ["pastille « Ma question » choix enfoncé", "point-question", "teinte", 3],
+  ["pastille « Ma question » choix enfoncé", "point-question", "fond", 3],
   ["pastille « Ma question » sur passage", "point-question", "note-question", 3],
   ["pastille « À vivre » sur page", "point-vivre", "fond", 3],
-  ["pastille « À vivre » choix enfoncé", "point-vivre", "teinte", 3],
+  ["pastille « À vivre » choix enfoncé", "point-vivre", "fond", 3],
   ["pastille « À vivre » sur passage", "point-vivre", "note-vivre", 3],
   ["pastille « Pour prier » sur page", "point-prier", "fond", 3],
-  ["pastille « Pour prier » choix enfoncé", "point-prier", "teinte", 3],
+  ["pastille « Pour prier » choix enfoncé", "point-prier", "fond", 3],
   ["pastille « Pour prier » sur passage", "point-prier", "note-prier", 3],
   ["pastille « Ça m’encourage » sur page", "point-encourage", "fond", 3],
-  ["pastille « Ça m’encourage » choix enfoncé", "point-encourage", "teinte", 3],
+  ["pastille « Ça m’encourage » choix enfoncé", "point-encourage", "fond", 3],
   ["pastille « Ça m’encourage » sur passage", "point-encourage", "note-encourage", 3],
   // Le petit message du bas : couleurs du texte et du fond inversées.
   ["message du bas", "fond", "encre", 4.5],
-  // Bandeau de l'accueil : le nom et les icônes en blanc, mesurés aux trois points du dégradé.
-  ["nom sur bandeau, à gauche", "sur-bandeau", "bandeau-debut", 4.5],
-  ["nom sur bandeau, au milieu", "sur-bandeau", "bandeau-milieu", 4.5],
-  ["icônes sur bandeau, à droite", "sur-bandeau", "bandeau-fin", 4.5],
+  // Design « Épure » (26 novembre 2026) : bouton principal, filet épais, leçon en cours,
+  // réponse relue, barre de navigation du bas.
+  ["texte du bouton principal", "sur-bouton", "bouton", 4.5],
+  ["filet épais sur la page", "filet-fort", "fond", 3],
+  ["magenta « En cours » sur teinte", "magenta", "teinte", 4.5],
+  // Leçon en cours et invitation à installer : fond gris léger (26 novembre 2026).
+  ["texte sur gris léger", "encre", "gris-leger", 4.5],
+  ["numéro violet sur gris léger", "violet", "gris-leger", 4.5],
+  ["magenta « En cours » sur gris léger", "magenta", "gris-leger", 4.5],
+  ["texte adouci sur gris léger", "texte-doux", "gris-leger", 4.5],
+  ["texte adouci sur teinte", "texte-doux", "teinte", 4.5],
+  ["onglet inactif de la barre du bas", "nav-texte", "fond", 4.5],
+  ["onglet actif de la barre du bas", "nav-icone-active", "fond", 4.5],
 ];
 
 let echecs = 0;

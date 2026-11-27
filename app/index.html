@@ -5,23 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>Cours découvertes</title>
     <meta name="description" content="Suivre le cours découvertes de l’Église Baptiste Toulouse Métropole sur son téléphone : leçons, versets à apprendre, questions de révision." />
-    <!-- Le cours se transmet par QR code, pas par les moteurs de recherche. -->
+
     <meta name="robots" content="noindex, nofollow" />
-    <meta name="theme-color" content="#6e1c70" />
+    <meta name="theme-color" content="#6e1a6e" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <!-- Pas de « apple-mobile-web-app-status-bar-style » : « black-translucent » est abandonné
-         par WebKit (bug 317153) et ignoré sous iOS 27. La couleur sous l'heure vient de la bande
-         fixée en haut de la page (« body::before », style.css). -->
+
     <meta name="apple-mobile-web-app-title" content="Cours découvertes" />
     <link rel="manifest" href="manifest.webmanifest" />
     <link rel="icon" href="icones/icone.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" sizes="180x180" href="icones/icone-180.png" />
-    <!-- Les deux polices sont demandées dès maintenant, avant la lecture du style : le texte
-         s'affiche plus tôt dans sa vraie police (MDN, « rel=preload » ; « crossorigin » est exigé
-         pour une police, même hébergée ici). -->
-    <link rel="preload" href="polices/nunito.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="polices/fraunces.woff2" as="font" type="font/woff2" crossorigin />
+
+    <link rel="preload" href="polices/inter-tight.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="polices/bricolage-grotesque.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
@@ -31,21 +27,10 @@
         <div class="entete__contenu">
           <div id="zone-navigation"></div>
           <p class="marque__titre" id="titre-barre"></p>
-          <!-- Dans un dossier de « Mes notes » seulement : découvre « Retirer » sur chaque note. -->
+
           <button class="bouton-barre bouton-barre--texte" id="modifier-notes" type="button" aria-pressed="false" hidden>Modifier</button>
-          <!-- Affiché sur la liste des leçons seulement ; son dessin est posé par app.js. -->
-          <button class="bouton-barre" id="ouvrir-partage" type="button" aria-label="Partager ce cours" hidden></button>
-          <button class="bouton-barre" id="ouvrir-reglages" type="button" aria-label="Réglages">
-            <!-- Roue en contour, comme l'icône de partage à côté : icône « settings » de Lucide
-                 (lucide-icons/lucide, licence ISC, copie dans icones/LICENCE-lucide-ISC.txt). -->
-            <svg class="icone" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"
-              fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path
-                d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"
-              />
-              <circle cx="12" cy="12" r="3" />
-            </svg>
-          </button>
+
+          <button class="bouton-barre" id="ouvrir-reglages" type="button" aria-label="Affichage : taille du texte et apparence" hidden>Aa</button>
         </div>
       </header>
       <div id="zone-onglets"></div>
@@ -54,6 +39,14 @@
     <main id="principal" tabindex="-1">
       <p class="texte-doux" style="text-align: center; padding: 3rem 0">Chargement…</p>
     </main>
+
+    <nav class="navigation" id="navigation" aria-label="Navigation principale" hidden>
+      <span class="navigation__bulle" aria-hidden="true"></span>
+      <a class="navigation__onglet" href="#/" data-onglet="/">Cours</a>
+      <a class="navigation__onglet" href="#/notes" data-onglet="/notes">Notes</a>
+      <a class="navigation__onglet" href="#/eglise" data-onglet="/eglise">L’église</a>
+      <a class="navigation__onglet" href="#/plus" data-onglet="/plus">Plus</a>
+    </nav>
 
     <noscript>
       <p class="message" style="max-width: 720px; margin: 1rem auto">

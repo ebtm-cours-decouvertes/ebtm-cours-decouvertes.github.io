@@ -1,0 +1,133 @@
+{
+  "source": "Informations reprises du site de l'église, https://ebtm.fr, lu le 26 novembre 2026. À mettre à jour si le site change (horaires, navette, numéros).",
+  "blocs": [
+    {
+      "titre": "Le dimanche",
+      "lignes": [
+        {
+          "type": "texte",
+          "debut": "10 h",
+          "texte": "Café d’accueil."
+        },
+        {
+          "type": "texte",
+          "debut": "10 h 30",
+          "texte": "Culte avec chants, lectures et prédication, environ 1 h 30."
+        },
+        {
+          "type": "texte",
+          "debut": "Enfants",
+          "texte": "Garderie pour les 0-3 ans ; les 4-11 ans rejoignent Envol pendant la prédication."
+        },
+        {
+          "type": "texte",
+          "debut": "Traductions",
+          "texte": "Anglais, arabe, persan, portugais et langue des signes (LSF). Bibles de prêt sur place."
+        }
+      ]
+    },
+    {
+      "titre": "Venir à l’église",
+      "lignes": [
+        {
+          "type": "lien",
+          "icone": "plan",
+          "titre": "195 avenue des États-Unis, Toulouse",
+          "detail": "Dans l’impasse ; parking dans l’impasse ou dans la contre-allée",
+          "adresse": "https://maps.apple.com/?q=195%20avenue%20des%20%C3%89tats-Unis%2C%20Toulouse"
+        },
+        {
+          "type": "texte",
+          "debut": "Métro",
+          "texte": "Navette depuis La Vache le dimanche, de 9 h 50 à 10 h 10, et après le culte."
+        },
+        {
+          "type": "texte",
+          "debut": "Bus",
+          "texte": "Ligne 29, arrêt Dulong."
+        }
+      ]
+    },
+    {
+      "titre": "S’intégrer",
+      "lignes": [
+        {
+          "type": "lien",
+          "titre": "Groupes de maison",
+          "detail": "Chaque semaine, dans les quartiers de la métropole",
+          "adresse": "https://ebtm.fr/groupes-de-maison/"
+        },
+        {
+          "type": "lien",
+          "titre": "Formations",
+          "detail": "Des parcours pour grandir dans la foi",
+          "adresse": "https://ebtm.fr/formations/"
+        },
+        {
+          "type": "lien",
+          "titre": "Équipes de service",
+          "detail": "Accueil, navette, enfance, travaux…",
+          "adresse": "https://ebtm.fr/project/servez-dans-une-equipe/"
+        },
+        {
+          "type": "lien",
+          "titre": "Groupes d’intérêt",
+          "detail": "Sport, randonnée, musique, jeux…",
+          "adresse": "https://ebtm.fr/gp-interet/"
+        },
+        {
+          "type": "lien",
+          "titre": "Jeunesse",
+          "detail": "SMS (collégiens), G2J, Jeunes actifs",
+          "adresse": "https://ebtm.fr/jeunesse/"
+        }
+      ]
+    },
+    {
+      "titre": "Écouter les prédications",
+      "lignes": [
+        {
+          "type": "lien",
+          "titre": "Prédications récentes",
+          "detail": "Sur le site de l’église",
+          "adresse": "https://ebtm.fr/ressources/"
+        },
+        {
+          "type": "lien",
+          "titre": "Chaîne YouTube",
+          "detail": "Cultes en direct et en vidéo",
+          "adresse": "https://www.youtube.com/c/eglisebaptistetoulousemetropole"
+        },
+        {
+          "type": "lien",
+          "titre": "Podcast",
+          "detail": "Apple Podcasts",
+          "adresse": "https://podcasts.apple.com/fr/podcast/eglise-baptiste-toulouse-metropole/id1205912184"
+        }
+      ]
+    },
+    {
+      "titre": "Contacter un pasteur",
+      "lignes": [
+        {
+          "type": "telephone",
+          "nom": "Vincent Bourrel",
+          "role": "Pasteur",
+          "numero": "06 80 10 19 33"
+        },
+        {
+          "type": "telephone",
+          "nom": "Samuel Niblack",
+          "role": "Pasteur",
+          "numero": "06 03 10 14 88"
+        },
+        {
+          "type": "lien",
+          "titre": "Restons en contact",
+          "detail": "Rendez-vous, sujet de prière, groupe de maison",
+          "adresse": "https://ebtm.fr/rec/"
+        }
+      ]
+    }
+  ]
+}

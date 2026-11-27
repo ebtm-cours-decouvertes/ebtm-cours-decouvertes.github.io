@@ -51,6 +51,16 @@ mkdir -p "$travail/.github/workflows"
 rsync -a --delete "$racine/.github/workflows/" "$travail/.github/workflows/"
 cp "$racine/README.md" "$travail/README.md"
 
+# La copie publiée part sans les commentaires de travail (prénoms, dates, remarques), demandé par
+# Sébastien le 27 novembre 2026. Le dossier de travail, lui, les garde. Puis l'outil de test
+# complet tourne sur cette copie : rien ne part si elle ne fonctionne pas comme l'originale.
+node "$racine/scripts/verifier-sans-commentaires.mjs" > /dev/null
+node "$racine/scripts/sans-commentaires.mjs" "$travail/app"
+if ! node "$racine/scripts/tester-application.mjs" --dossier="$travail/app"; then
+  echo "ARRÊT : la copie sans commentaires ne passe pas l'outil de test (voir docs/tests/rapport.md)." >&2
+  exit 1
+fi
+
 # Ceintures et bretelles : on refuse de publier si l'un de ces chemins s'est glissé là.
 for interdit in source docs CLAUDE.md .publication; do
   if [ -e "$travail/$interdit" ]; then
