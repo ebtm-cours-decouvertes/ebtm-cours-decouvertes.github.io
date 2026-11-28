@@ -252,7 +252,7 @@ button {
   box-shadow: var(--barre-ombre-flottante);
 }
 
-.barre:not(.barre--flottante):not(:has(.bouton-retour, .bouton-barre:not([hidden]), .onglets)) {
+.barre:not(:has(.bouton-retour, .bouton-barre:not([hidden]), .onglets)) {
   visibility: hidden;
 }
 

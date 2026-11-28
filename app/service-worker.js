@@ -1,4 +1,4 @@
-const VERSION = "2026-11-27-2";
+const VERSION = "2026-11-28-1";
 const CACHE = `cours-decouvertes-${VERSION}`;
 
 const FICHIERS = [
